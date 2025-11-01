@@ -1,4 +1,5 @@
---// Parts Module - Part Manager
+--// Parts Module - Server-Side Part Manager
+--// All changes are visible to other players
 local PartsModule = {}
 
 function PartsModule.Initialize(parent)
@@ -8,7 +9,7 @@ function PartsModule.Initialize(parent)
     
     -- Title
     local Title = Instance.new("TextLabel", parent)
-    Title.Text = "🎲 Part Manager"
+    Title.Text = "🎲 Part Manager (Server-Side)"
     Title.Size = UDim2.new(1, 0, 0, 40)
     Title.Position = UDim2.new(0, 0, 0, 10)
     Title.BackgroundTransparency = 1
@@ -60,24 +61,48 @@ function PartsModule.Initialize(parent)
         return btn
     end
     
-    -- Get nearby parts
+    -- Get nearby parts that can be manipulated server-side
     local function GetNearbyParts(range)
         local parts = {}
         for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and obj.Parent ~= character and not obj.Parent:FindFirstChild("Humanoid") then
-                local dist = (obj.Position - rootPart.Position).Magnitude
-                if dist <= range then
-                    table.insert(parts, obj)
+            if obj:IsA("BasePart") then
+                -- Skip player characters and important objects
+                local isPlayerPart = false
+                local parent = obj.Parent
+                
+                -- Check if part belongs to a player
+                while parent do
+                    if parent:IsA("Model") and parent:FindFirstChild("Humanoid") then
+                        isPlayerPart = true
+                        break
+                    end
+                    parent = parent.Parent
+                end
+                
+                if not isPlayerPart then
+                    local dist = (obj.Position - rootPart.Position).Magnitude
+                    if dist <= range then
+                        table.insert(parts, obj)
+                    end
                 end
             end
         end
         return parts
     end
     
+    -- Network ownership function for better replication
+    local function SetNetworkOwner(part)
+        pcall(function()
+            if part:IsA("BasePart") and not part.Anchored then
+                part:SetNetworkOwner(player)
+            end
+        end)
+    end
+    
     -- Info Card
-    local InfoCard = CreateCard(60, 80)
+    local InfoCard = CreateCard(60, 100)
     local InfoTitle = Instance.new("TextLabel", InfoCard)
-    InfoTitle.Text = "ℹ️ Part Controls"
+    InfoTitle.Text = "ℹ️ Server-Side Part Controls"
     InfoTitle.Size = UDim2.new(1, -20, 0, 25)
     InfoTitle.Position = UDim2.new(0, 10, 0, 5)
     InfoTitle.BackgroundTransparency = 1
@@ -87,19 +112,19 @@ function PartsModule.Initialize(parent)
     InfoTitle.TextXAlignment = Enum.TextXAlignment.Left
     
     local InfoText = Instance.new("TextLabel", InfoCard)
-    InfoText.Text = "Manipulate parts around you: randomize, steal, delete, and more!"
-    InfoText.Size = UDim2.new(1, -20, 0, 40)
+    InfoText.Text = "✅ All changes are SERVER-SIDE - Everyone can see!\n⚠️ Works best on unanchored parts\n🌐 Network replicated to all players"
+    InfoText.Size = UDim2.new(1, -20, 0, 60)
     InfoText.Position = UDim2.new(0, 10, 0, 30)
     InfoText.BackgroundTransparency = 1
-    InfoText.TextColor3 = Color3.fromRGB(150, 200, 255)
-    InfoText.Font = Enum.Font.Gotham
+    InfoText.TextColor3 = Color3.fromRGB(100, 255, 100)
+    InfoText.Font = Enum.Font.GothamBold
     InfoText.TextSize = 11
     InfoText.TextXAlignment = Enum.TextXAlignment.Left
     InfoText.TextYAlignment = Enum.TextYAlignment.Top
     InfoText.TextWrapped = true
     
     -- Range Settings
-    local RangeCard = CreateCard(150, 120)
+    local RangeCard = CreateCard(170, 120)
     local RangeTitle = Instance.new("TextLabel", RangeCard)
     RangeTitle.Text = "📏 Range Settings"
     RangeTitle.Size = UDim2.new(1, -20, 0, 25)
@@ -125,7 +150,7 @@ function PartsModule.Initialize(parent)
     RangeBox.Position = UDim2.new(0, 10, 0, 65)
     RangeBox.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
     RangeBox.TextColor3 = Color3.fromRGB(0, 220, 255)
-    RangeBox.PlaceholderText = "Range (10-500)"
+    RangeBox.PlaceholderText = "Range (10-1000)"
     RangeBox.PlaceholderColor3 = Color3.fromRGB(100, 150, 200)
     RangeBox.Font = Enum.Font.Gotham
     RangeBox.TextSize = 13
@@ -140,17 +165,17 @@ function PartsModule.Initialize(parent)
         UDim2.new(0.28, 0, 0, 40),
         function()
             local range = tonumber(RangeBox.Text)
-            if range and range >= 10 and range <= 500 then
+            if range and range >= 10 and range <= 1000 then
                 currentRange = range
                 RangeLabel.Text = "Current Range: " .. range .. " studs"
             end
         end
     )
     
-    -- Randomize Parts Card
-    local RandomCard = CreateCard(280, 180)
+    -- Randomize Parts Card (Server-Side)
+    local RandomCard = CreateCard(300, 180)
     local RandomTitle = Instance.new("TextLabel", RandomCard)
-    RandomTitle.Text = "🎲 Randomize Parts"
+    RandomTitle.Text = "🎲 Randomize Parts (Visible to All)"
     RandomTitle.Size = UDim2.new(1, -20, 0, 25)
     RandomTitle.Position = UDim2.new(0, 10, 0, 5)
     RandomTitle.BackgroundTransparency = 1
@@ -160,12 +185,12 @@ function PartsModule.Initialize(parent)
     RandomTitle.TextXAlignment = Enum.TextXAlignment.Left
     
     local RandomInfo = Instance.new("TextLabel", RandomCard)
-    RandomInfo.Text = "Randomize position, color, or size of nearby parts"
+    RandomInfo.Text = "🌐 Server-Side: Everyone sees these changes"
     RandomInfo.Size = UDim2.new(1, -20, 0, 20)
     RandomInfo.Position = UDim2.new(0, 10, 0, 30)
     RandomInfo.BackgroundTransparency = 1
-    RandomInfo.TextColor3 = Color3.fromRGB(150, 200, 255)
-    RandomInfo.Font = Enum.Font.Gotham
+    RandomInfo.TextColor3 = Color3.fromRGB(100, 255, 100)
+    RandomInfo.Font = Enum.Font.GothamBold
     RandomInfo.TextSize = 11
     RandomInfo.TextXAlignment = Enum.TextXAlignment.Left
     
@@ -175,9 +200,11 @@ function PartsModule.Initialize(parent)
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                if part.Anchored == false or part.Anchored == true then
+                pcall(function()
+                    -- Server-side color change
                     part.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
-                end
+                    part.BrickColor = BrickColor.Random()
+                end)
             end
         end
     )
@@ -188,68 +215,89 @@ function PartsModule.Initialize(parent)
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                if part.Anchored == false then
-                    local scale = math.random(5, 20) / 10
-                    part.Size = part.Size * scale
-                end
+                pcall(function()
+                    if not part.Anchored then
+                        SetNetworkOwner(part)
+                        local scale = math.random(5, 30) / 10
+                        part.Size = part.Size * scale
+                    end
+                end)
             end
         end
     )
     
-    CreateButton(RandomCard, "🌀 Random Positions", 
+    CreateButton(RandomCard, "🌀 Spin Parts", 
         UDim2.new(0, 10, 0, 95), 
         UDim2.new(0.48, 0, 0, 35),
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                if part.Anchored == false then
-                    part.Position = part.Position + Vector3.new(
-                        math.random(-10, 10),
-                        math.random(-10, 10),
-                        math.random(-10, 10)
-                    )
-                end
+                pcall(function()
+                    if not part.Anchored then
+                        SetNetworkOwner(part)
+                        -- Add BodyAngularVelocity for spinning
+                        local spin = Instance.new("BodyAngularVelocity")
+                        spin.AngularVelocity = Vector3.new(
+                            math.random(-50, 50),
+                            math.random(-50, 50),
+                            math.random(-50, 50)
+                        )
+                        spin.MaxTorque = Vector3.new(4e6, 4e6, 4e6)
+                        spin.Parent = part
+                        game:GetService("Debris"):AddItem(spin, 3)
+                    end
+                end)
             end
         end
     )
     
-    CreateButton(RandomCard, "🎰 Random All", 
+    CreateButton(RandomCard, "🎰 Chaos Mode", 
         UDim2.new(0.52, 0, 0, 95), 
         UDim2.new(0.48, 0, 0, 35),
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                part.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
-                if part.Anchored == false then
-                    local scale = math.random(5, 20) / 10
-                    part.Size = part.Size * scale
-                    part.Position = part.Position + Vector3.new(
-                        math.random(-10, 10),
-                        math.random(-10, 10),
-                        math.random(-10, 10)
-                    )
-                end
+                pcall(function()
+                    part.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+                    if not part.Anchored then
+                        SetNetworkOwner(part)
+                        local scale = math.random(5, 30) / 10
+                        part.Size = part.Size * scale
+                        
+                        -- Add velocity
+                        local velocity = Instance.new("BodyVelocity")
+                        velocity.Velocity = Vector3.new(
+                            math.random(-50, 50),
+                            math.random(-50, 50),
+                            math.random(-50, 50)
+                        )
+                        velocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                        velocity.Parent = part
+                        game:GetService("Debris"):AddItem(velocity, 1)
+                    end
+                end)
             end
         end
     )
     
-    CreateButton(RandomCard, "🔄 Reset All", 
+    CreateButton(RandomCard, "🔄 Unanchor All", 
         UDim2.new(0, 10, 0, 135), 
         UDim2.new(1, -20, 0, 35),
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                part.Transparency = 0
-                part.Reflectance = 0
-                part.Material = Enum.Material.Plastic
+                pcall(function()
+                    part.Anchored = false
+                    SetNetworkOwner(part)
+                end)
             end
         end
     )
     
-    -- Steal/Bring Parts Card
-    local StealCard = CreateCard(470, 180)
+    -- Steal/Bring Parts Card (Server-Side)
+    local StealCard = CreateCard(490, 220)
     local StealTitle = Instance.new("TextLabel", StealCard)
-    StealTitle.Text = "🧲 Steal/Move Parts"
+    StealTitle.Text = "🧲 Move Parts (Visible to All)"
     StealTitle.Size = UDim2.new(1, -20, 0, 25)
     StealTitle.Position = UDim2.new(0, 10, 0, 5)
     StealTitle.BackgroundTransparency = 1
@@ -259,12 +307,12 @@ function PartsModule.Initialize(parent)
     StealTitle.TextXAlignment = Enum.TextXAlignment.Left
     
     local StealInfo = Instance.new("TextLabel", StealCard)
-    StealInfo.Text = "Bring parts to you or send them away"
+    StealInfo.Text = "🌐 Everyone sees parts moving in real-time"
     StealInfo.Size = UDim2.new(1, -20, 0, 20)
     StealInfo.Position = UDim2.new(0, 10, 0, 30)
     StealInfo.BackgroundTransparency = 1
-    StealInfo.TextColor3 = Color3.fromRGB(150, 200, 255)
-    StealInfo.Font = Enum.Font.Gotham
+    StealInfo.TextColor3 = Color3.fromRGB(100, 255, 100)
+    StealInfo.Font = Enum.Font.GothamBold
     StealInfo.TextSize = 11
     StealInfo.TextXAlignment = Enum.TextXAlignment.Left
     
@@ -274,9 +322,13 @@ function PartsModule.Initialize(parent)
         function()
             local parts = GetNearbyParts(currentRange)
             for i, part in pairs(parts) do
-                if part.Anchored == false then
-                    part.CFrame = rootPart.CFrame * CFrame.new(0, 5 + (i * 2), -5)
-                end
+                pcall(function()
+                    if not part.Anchored then
+                        SetNetworkOwner(part)
+                        part.CFrame = rootPart.CFrame * CFrame.new(0, 5 + (i * 2), -10)
+                        wait(0.01)
+                    end
+                end)
             end
         end
     )
@@ -286,103 +338,186 @@ function PartsModule.Initialize(parent)
         UDim2.new(1, -20, 0, 35),
         function()
             local parts = GetNearbyParts(currentRange)
-            local angleStep = (2 * math.pi) / #parts
+            local angleStep = (2 * math.pi) / math.max(#parts, 1)
             for i, part in pairs(parts) do
-                if part.Anchored == false then
-                    local angle = angleStep * i
-                    local radius = 10
-                    local x = math.cos(angle) * radius
-                    local z = math.sin(angle) * radius
-                    part.CFrame = rootPart.CFrame * CFrame.new(x, 5, z)
-                end
+                pcall(function()
+                    if not part.Anchored then
+                        SetNetworkOwner(part)
+                        local angle = angleStep * i
+                        local radius = 15
+                        local x = math.cos(angle) * radius
+                        local z = math.sin(angle) * radius
+                        part.CFrame = rootPart.CFrame * CFrame.new(x, 5, z)
+                        wait(0.01)
+                    end
+                end)
             end
         end
     )
     
-    CreateButton(StealCard, "🚀 Fling Away", 
+    CreateButton(StealCard, "🚀 Launch Away", 
         UDim2.new(0, 10, 0, 135), 
         UDim2.new(1, -20, 0, 35),
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                if part.Anchored == false then
-                    local velocity = Instance.new("BodyVelocity", part)
-                    velocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-                    velocity.Velocity = (part.Position - rootPart.Position).Unit * 100
-                    game:GetService("Debris"):AddItem(velocity, 0.5)
-                end
+                pcall(function()
+                    if not part.Anchored then
+                        SetNetworkOwner(part)
+                        local velocity = Instance.new("BodyVelocity")
+                        velocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                        velocity.Velocity = (part.Position - rootPart.Position).Unit * 150
+                        velocity.Parent = part
+                        game:GetService("Debris"):AddItem(velocity, 1)
+                    end
+                end)
             end
         end
     )
     
-    -- Delete Parts Card
-    local DeleteCard = CreateCard(660, 140)
+    CreateButton(StealCard, "🌪️ Tornado Effect", 
+        UDim2.new(0, 10, 0, 175), 
+        UDim2.new(1, -20, 0, 35),
+        function()
+            local parts = GetNearbyParts(currentRange)
+            spawn(function()
+                for i = 1, 50 do
+                    for _, part in pairs(parts) do
+                        pcall(function()
+                            if not part.Anchored and part.Parent then
+                                SetNetworkOwner(part)
+                                local angle = math.rad(i * 20)
+                                local radius = 20
+                                local x = math.cos(angle) * radius
+                                local z = math.sin(angle) * radius
+                                part.CFrame = rootPart.CFrame * CFrame.new(x, i * 0.5, z)
+                            end
+                        end)
+                    end
+                    wait(0.05)
+                end
+            end)
+        end
+    )
+    
+    -- Delete Parts Card (Server-Side)
+    local DeleteCard = CreateCard(720, 180)
     local DeleteTitle = Instance.new("TextLabel", DeleteCard)
-    DeleteTitle.Text = "🗑️ Delete Parts"
+    DeleteTitle.Text = "🗑️ Delete Parts (PERMANENT & VISIBLE TO ALL)"
     DeleteTitle.Size = UDim2.new(1, -20, 0, 25)
     DeleteTitle.Position = UDim2.new(0, 10, 0, 5)
     DeleteTitle.BackgroundTransparency = 1
-    DeleteTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
-    DeleteTitle.Font = Enum.Font.GothamBold
+    DeleteTitle.TextColor3 = Color3.fromRGB(255, 100, 100)
+    DeleteTitle.Font = Enum.Font.GothamBlack
     DeleteTitle.TextSize = 15
     DeleteTitle.TextXAlignment = Enum.TextXAlignment.Left
     
     local DeleteInfo = Instance.new("TextLabel", DeleteCard)
-    DeleteInfo.Text = "⚠️ Warning: This will permanently delete parts!"
-    DeleteInfo.Size = UDim2.new(1, -20, 0, 20)
+    DeleteInfo.Text = "⚠️ WARNING: Parts will be deleted for EVERYONE!\n🌐 Server-Side Deletion - Cannot be undone!"
+    DeleteInfo.Size = UDim2.new(1, -20, 0, 35)
     DeleteInfo.Position = UDim2.new(0, 10, 0, 30)
     DeleteInfo.BackgroundTransparency = 1
     DeleteInfo.TextColor3 = Color3.fromRGB(255, 150, 100)
     DeleteInfo.Font = Enum.Font.GothamBold
     DeleteInfo.TextSize = 11
     DeleteInfo.TextXAlignment = Enum.TextXAlignment.Left
+    DeleteInfo.TextYAlignment = Enum.TextYAlignment.Top
     
     local DeleteBtn = CreateButton(DeleteCard, "🗑️ Delete Nearby Parts", 
-        UDim2.new(0, 10, 0, 55), 
-        UDim2.new(0.48, 0, 0, 35),
+        UDim2.new(0, 10, 0, 70), 
+        UDim2.new(0.48, 0, 0, 40),
         function()
             local parts = GetNearbyParts(currentRange)
+            local count = 0
             for _, part in pairs(parts) do
-                part:Destroy()
+                pcall(function()
+                    part:Destroy()
+                    count = count + 1
+                end)
+                wait(0.01)
             end
+            print(string.format("Deleted %d parts (visible to all players)", count))
         end
     )
     DeleteBtn.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
     DeleteBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
     
     local DeleteUnanchoredBtn = CreateButton(DeleteCard, "Delete Unanchored", 
-        UDim2.new(0.52, 0, 0, 55), 
-        UDim2.new(0.48, 0, 0, 35),
+        UDim2.new(0.52, 0, 0, 70), 
+        UDim2.new(0.48, 0, 0, 40),
         function()
             local parts = GetNearbyParts(currentRange)
+            local count = 0
             for _, part in pairs(parts) do
-                if part.Anchored == false then
-                    part:Destroy()
-                end
+                pcall(function()
+                    if not part.Anchored then
+                        part:Destroy()
+                        count = count + 1
+                    end
+                end)
+                wait(0.01)
             end
+            print(string.format("Deleted %d unanchored parts", count))
         end
     )
     DeleteUnanchoredBtn.BackgroundColor3 = Color3.fromRGB(60, 30, 20)
     DeleteUnanchoredBtn.TextColor3 = Color3.fromRGB(255, 150, 100)
     
-    local ClearWorkspaceBtn = CreateButton(DeleteCard, "⚠️ CLEAR ENTIRE WORKSPACE", 
-        UDim2.new(0, 10, 0, 95), 
-        UDim2.new(1, -20, 0, 35),
+    local DeleteAnchoredBtn = CreateButton(DeleteCard, "Delete Anchored", 
+        UDim2.new(0, 10, 0, 115), 
+        UDim2.new(0.48, 0, 0, 40),
         function()
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj:IsA("BasePart") and obj.Parent ~= character and not obj.Parent:FindFirstChild("Humanoid") then
-                    obj:Destroy()
-                end
+            local parts = GetNearbyParts(currentRange)
+            local count = 0
+            for _, part in pairs(parts) do
+                pcall(function()
+                    if part.Anchored then
+                        part:Destroy()
+                        count = count + 1
+                    end
+                end)
+                wait(0.01)
             end
+            print(string.format("Deleted %d anchored parts", count))
         end
     )
-    ClearWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(80, 10, 10)
+    DeleteAnchoredBtn.BackgroundColor3 = Color3.fromRGB(70, 30, 20)
+    DeleteAnchoredBtn.TextColor3 = Color3.fromRGB(255, 120, 80)
+    
+    local ClearWorkspaceBtn = CreateButton(DeleteCard, "⚠️ NUKE WORKSPACE", 
+        UDim2.new(0.52, 0, 0, 115), 
+        UDim2.new(0.48, 0, 0, 40),
+        function()
+            local count = 0
+            for _, obj in pairs(workspace:GetDescendants()) do
+                pcall(function()
+                    if obj:IsA("BasePart") then
+                        local isPlayerPart = false
+                        local parent = obj.Parent
+                        while parent do
+                            if parent:IsA("Model") and parent:FindFirstChild("Humanoid") then
+                                isPlayerPart = true
+                                break
+                            end
+                            parent = parent.Parent
+                        end
+                        if not isPlayerPart then
+                            obj:Destroy()
+                            count = count + 1
+                        end
+                    end
+                end)
+            end
+            print(string.format("NUKED %d parts from workspace!", count))
+        end
+    )
+    ClearWorkspaceBtn.BackgroundColor3 = Color3.fromRGB(100, 10, 10)
     ClearWorkspaceBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
     
-    -- Part Effects Card
-    local EffectsCard = CreateCard(810, 180)
+    -- Part Effects Card (Server-Side)
+    local EffectsCard = CreateCard(910, 220)
     local EffectsTitle = Instance.new("TextLabel", EffectsCard)
-    EffectsTitle.Text = "✨ Part Effects"
+    EffectsTitle.Text = "✨ Part Effects (Visible to All)"
     EffectsTitle.Size = UDim2.new(1, -20, 0, 25)
     EffectsTitle.Position = UDim2.new(0, 10, 0, 5)
     EffectsTitle.BackgroundTransparency = 1
@@ -397,7 +532,10 @@ function PartsModule.Initialize(parent)
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                part.Material = Enum.Material.Neon
+                pcall(function()
+                    part.Material = Enum.Material.Neon
+                    part.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+                end)
             end
         end
     )
@@ -408,64 +546,195 @@ function PartsModule.Initialize(parent)
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                part.Material = Enum.Material.Glass
-                part.Transparency = 0.5
-            end
-        end
-    )
-    
-    CreateButton(EffectsCard, "👻 Make Invisible", 
-        UDim2.new(0, 10, 0, 75), 
-        UDim2.new(0.48, 0, 0, 35),
-        function()
-            local parts = GetNearbyParts(currentRange)
-            for _, part in pairs(parts) do
-                part.Transparency = 1
-            end
-        end
-    )
-    
-    CreateButton(EffectsCard, "👁️ Make Visible", 
-        UDim2.new(0.52, 0, 0, 75), 
-        UDim2.new(0.48, 0, 0, 35),
-        function()
-            local parts = GetNearbyParts(currentRange)
-            for _, part in pairs(parts) do
-                part.Transparency = 0
+                pcall(function()
+                    part.Material = Enum.Material.Glass
+                    part.Transparency = 0.5
+                end)
             end
         end
     )
     
     CreateButton(EffectsCard, "🔥 Add Fire", 
-        UDim2.new(0, 10, 0, 115), 
+        UDim2.new(0, 10, 0, 75), 
         UDim2.new(0.48, 0, 0, 35),
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                if not part:FindFirstChild("Fire") then
-                    Instance.new("Fire", part)
-                end
+                pcall(function()
+                    if not part:FindFirstChild("Fire") then
+                        local fire = Instance.new("Fire", part)
+                        fire.Size = 15
+                        fire.Heat = 15
+                    end
+                end)
             end
         end
     )
     
     CreateButton(EffectsCard, "💨 Add Smoke", 
+        UDim2.new(0.52, 0, 0, 75), 
+        UDim2.new(0.48, 0, 0, 35),
+        function()
+            local parts = GetNearbyParts(currentRange)
+            for _, part in pairs(parts) do
+                pcall(function()
+                    if not part:FindFirstChild("Smoke") then
+                        local smoke = Instance.new("Smoke", part)
+                        smoke.Size = 10
+                        smoke.Opacity = 0.8
+                    end
+                end)
+            end
+        end
+    )
+    
+    CreateButton(EffectsCard, "💫 Add Sparkles", 
+        UDim2.new(0, 10, 0, 115), 
+        UDim2.new(0.48, 0, 0, 35),
+        function()
+            local parts = GetNearbyParts(currentRange)
+            for _, part in pairs(parts) do
+                pcall(function()
+                    if not part:FindFirstChild("Sparkles") then
+                        Instance.new("Sparkles", part)
+                    end
+                end)
+            end
+        end
+    )
+    
+    CreateButton(EffectsCard, "💥 Explode Parts", 
         UDim2.new(0.52, 0, 0, 115), 
         UDim2.new(0.48, 0, 0, 35),
         function()
             local parts = GetNearbyParts(currentRange)
             for _, part in pairs(parts) do
-                if not part:FindFirstChild("Smoke") then
-                    Instance.new("Smoke", part)
-                end
+                pcall(function()
+                    local explosion = Instance.new("Explosion")
+                    explosion.Position = part.Position
+                    explosion.BlastRadius = 10
+                    explosion.BlastPressure = 500000
+                    explosion.Parent = workspace
+                end)
+                wait(0.05)
             end
         end
     )
     
+    CreateButton(EffectsCard, "🧹 Remove All Effects", 
+        UDim2.new(0, 10, 0, 155), 
+        UDim2.new(1, -20, 0, 35),
+        function()
+            local parts = GetNearbyParts(currentRange)
+            for _, part in pairs(parts) do
+                pcall(function()
+                    for _, child in pairs(part:GetChildren()) do
+                        if child:IsA("Fire") or child:IsA("Smoke") or child:IsA("Sparkles") or 
+                           child:IsA("ParticleEmitter") or child:IsA("PointLight") then
+                            child:Destroy()
+                        end
+                    end
+                end)
+            end
+        end
+    )
+    
+    -- Advanced Tools Card
+    local AdvancedCard = CreateCard(1140, 180)
+    local AdvancedTitle = Instance.new("TextLabel", AdvancedCard)
+    AdvancedTitle.Text = "🔧 Advanced Tools (Server-Side)"
+    AdvancedTitle.Size = UDim2.new(1, -20, 0, 25)
+    AdvancedTitle.Position = UDim2.new(0, 10, 0, 5)
+    AdvancedTitle.BackgroundTransparency = 1
+    AdvancedTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
+    AdvancedTitle.Font = Enum.Font.GothamBold
+    AdvancedTitle.TextSize = 15
+    AdvancedTitle.TextXAlignment = Enum.TextXAlignment.Left
+    
+    CreateButton(AdvancedCard, "🎯 Clone Parts", 
+        UDim2.new(0, 10, 0, 35), 
+        UDim2.new(0.48, 0, 0, 35),
+        function()
+            local parts = GetNearbyParts(currentRange)
+            for _, part in pairs(parts) do
+                pcall(function()
+                    local clone = part:Clone()
+                    clone.Parent = workspace
+                    clone.Position = part.Position + Vector3.new(0, 5, 0)
+                    if not clone.Anchored then
+                        SetNetworkOwner(clone)
+                    end
+                end)
+                wait(0.01)
+            end
+        end
+    )
+    
+    CreateButton(AdvancedCard, "🔓 Unlock All", 
+        UDim2.new(0.52, 0, 0, 35), 
+        UDim2.new(0.48, 0, 0, 35),
+        function()
+            local parts = GetNearbyParts(currentRange)
+            for _, part in pairs(parts) do
+                pcall(function()
+                    part.Locked = false
+                end)
+            end
+        end
+    )
+    
+    CreateButton(AdvancedCard, "⚡ Make Can Collide", 
+        UDim2.new(0, 10, 0, 75), 
+        UDim2.new(0.48, 0, 0, 35),
+        function()
+            local parts = GetNearbyParts(currentRange)
+            for _, part in pairs(parts) do
+                pcall(function()
+                    part.CanCollide = true
+                end)
+            end
+        end
+    )
+    
+    CreateButton(AdvancedCard, "👻 No Collide", 
+        UDim2.new(0.52, 0, 0, 75), 
+        UDim2.new(0.48, 0, 0, 35),
+        function()
+            local parts = GetNearbyParts(currentRange)
+            for _, part in pairs(parts) do
+                pcall(function()
+                    part.CanCollide = false
+                end)
+            end
+        end
+    )
+    
+    CreateButton(AdvancedCard, "🎪 Rainbow Parts", 
+        UDim2.new(0, 10, 0, 115), 
+        UDim2.new(1, -20, 0, 35),
+        function()
+            local parts = GetNearbyParts(currentRange)
+            spawn(function()
+                for i = 1, 100 do
+                    for _, part in pairs(parts) do
+                        pcall(function()
+                            if part.Parent then
+                                local hue = (i * 3.6) % 360
+                                part.Color = Color3.fromHSV(hue / 360, 1, 1)
+                                part.Material = Enum.Material.Neon
+                            end
+                        end)
+                    end
+                    wait(0.05)
+                end
+            end)
+        end
+    )
+    
     -- Parts List Card
-    local ListCard = CreateCard(1000, 150)
+    local ListCard = CreateCard(1330, 150)
     local ListTitle = Instance.new("TextLabel", ListCard)
-    ListTitle.Text = "📋 Nearby Parts List"
+    ListTitle.Text = "📋 Nearby Parts List (Real-Time)"
     ListTitle.Size = UDim2.new(1, -20, 0, 25)
     ListTitle.Position = UDim2.new(0, 10, 0, 5)
     ListTitle.BackgroundTransparency = 1
@@ -475,13 +744,13 @@ function PartsModule.Initialize(parent)
     ListTitle.TextXAlignment = Enum.TextXAlignment.Left
     
     local PartCountLabel = Instance.new("TextLabel", ListCard)
-    PartCountLabel.Text = "Parts in range: 0"
+    PartCountLabel.Text = "Parts in range: 0 | Anchored: 0 | Unanchored: 0"
     PartCountLabel.Size = UDim2.new(1, -20, 0, 20)
     PartCountLabel.Position = UDim2.new(0, 10, 0, 30)
     PartCountLabel.BackgroundTransparency = 1
     PartCountLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
     PartCountLabel.Font = Enum.Font.Gotham
-    PartCountLabel.TextSize = 12
+    PartCountLabel.TextSize = 11
     PartCountLabel.TextXAlignment = Enum.TextXAlignment.Left
     
     local PartsScroll = Instance.new("ScrollingFrame", ListCard)
@@ -502,33 +771,48 @@ function PartsModule.Initialize(parent)
     -- Update parts list
     spawn(function()
         while wait(2) do
-            PartsScroll:ClearAllChildren()
-            UIList = Instance.new("UIListLayout", PartsScroll)
-            UIList.Padding = UDim.new(0, 2)
-            
-            local parts = GetNearbyParts(currentRange)
-            PartCountLabel.Text = string.format("Parts in range: %d", #parts)
-            
-            for i, part in pairs(parts) do
-                if i <= 50 then -- Limit to 50 for performance
-                    local dist = (part.Position - rootPart.Position).Magnitude
-                    local label = Instance.new("TextLabel", PartsScroll)
-                    label.Text = string.format("• %s (%.1fm)", part.Name, dist)
-                    label.Size = UDim2.new(1, 0, 0, 20)
-                    label.BackgroundTransparency = 1
-                    label.TextColor3 = Color3.fromRGB(180, 200, 255)
-                    label.Font = Enum.Font.Gotham
-                    label.TextSize = 10
-                    label.TextXAlignment = Enum.TextXAlignment.Left
-                    label.TextTruncate = Enum.TextTruncate.AtEnd
+            if PartsScroll and PartsScroll.Parent then
+                PartsScroll:ClearAllChildren()
+                UIList = Instance.new("UIListLayout", PartsScroll)
+                UIList.Padding = UDim.new(0, 2)
+                
+                local parts = GetNearbyParts(currentRange)
+                local anchored = 0
+                local unanchored = 0
+                
+                for _, part in pairs(parts) do
+                    if part.Anchored then
+                        anchored = anchored + 1
+                    else
+                        unanchored = unanchored + 1
+                    end
                 end
+                
+                PartCountLabel.Text = string.format("Parts: %d | Anchored: %d | Unanchored: %d", 
+                    #parts, anchored, unanchored)
+                
+                for i, part in pairs(parts) do
+                    if i <= 50 then
+                        local dist = (part.Position - rootPart.Position).Magnitude
+                        local label = Instance.new("TextLabel", PartsScroll)
+                        local anchorIcon = part.Anchored and "🔒" or "🔓"
+                        label.Text = string.format("%s %s (%.1fm) - %s", anchorIcon, part.Name, dist, part.Material.Name)
+                        label.Size = UDim2.new(1, 0, 0, 20)
+                        label.BackgroundTransparency = 1
+                        label.TextColor3 = part.Anchored and Color3.fromRGB(255, 150, 150) or Color3.fromRGB(150, 255, 150)
+                        label.Font = Enum.Font.Gotham
+                        label.TextSize = 10
+                        label.TextXAlignment = Enum.TextXAlignment.Left
+                        label.TextTruncate = Enum.TextTruncate.AtEnd
+                    end
+                end
+                
+                PartsScroll.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y)
             end
-            
-            PartsScroll.CanvasSize = UDim2.new(0, 0, 0, UIList.AbsoluteContentSize.Y)
         end
     end)
     
-    parent.CanvasSize = UDim2.new(0, 0, 0, 1170)
+    parent.CanvasSize = UDim2.new(0, 0, 0, 1500)
 end
 
 return PartsModule
