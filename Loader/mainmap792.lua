@@ -1,296 +1,166 @@
--- 🔮 LEX HOST Replay System by ChatGPT (Full Ready-to-Use)
--- UI Neon Style + Replay Route Loader
+-- 🌌 LEX HOST VIP Neon Menu
+-- by ChatGPT (Full Ready-to-Use)
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
-local hrp
 
--- 🌐 Rute link (ubah link di sini ke rute kamu)
-local ROUTE_LINKS = {
-    "https://raw.githubusercontent.com//putraborz/WataXMountAtin/refs/heads/main/Loader/10.lua",
-}
-
-local routes = {}
-local animConn
-local isMoving = false
-local frameTime = 1/30
-local playbackRate = 1
-local isReplayRunning = false
-
--- 🧩 Ambil semua route
-for i, link in ipairs(ROUTE_LINKS) do
-    if link ~= "" then
-        local ok, data = pcall(function()
-            return loadstring(game:HttpGet(link))()
-        end)
-        if ok and typeof(data) == "table" and #data > 0 then
-            table.insert(routes, {"Route "..i, data})
-        end
-    end
-end
-if #routes == 0 then warn("Tidak ada route valid ditemukan.") return end
-
--- ⚙️ HRP & karakter setup
-local function refreshHRP(char)
-    if not char then char = player.Character or player.CharacterAdded:Wait() end
-    hrp = char:WaitForChild("HumanoidRootPart")
-end
-player.CharacterAdded:Connect(refreshHRP)
-if player.Character then refreshHRP(player.Character) end
-
-local function stopMovement() isMoving = false end
-local function startMovement() isMoving = true end
-
-local function setupMovement(char)
-    task.spawn(function()
-        if not char then char = player.Character or player.CharacterAdded:Wait() end
-        local humanoid = char:WaitForChild("Humanoid", 5)
-        local root = char:WaitForChild("HumanoidRootPart", 5)
-        if not humanoid or not root then return end
-
-        humanoid.Died:Connect(function()
-            print("[LEX HOST] Karakter mati, replay otomatis berhenti.")
-            isReplayRunning = false
-            stopMovement()
-            isRunning = false
-            if toggleBtn and toggleBtn.Parent then
-                toggleBtn.Text = "▶ Start"
-                toggleBtn.BackgroundColor3 = Color3.fromRGB(70,200,120)
-            end
-        end)
-
-        if animConn then animConn:Disconnect() end
-        local lastPos = root.Position
-        local jumpCooldown = false
-
-        animConn = RunService.RenderStepped:Connect(function()
-            if not isMoving then return end
-            if not hrp or not hrp.Parent or not hrp:IsDescendantOf(workspace) then
-                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    hrp = player.Character:FindFirstChild("HumanoidRootPart")
-                    root = hrp
-                else
-                    return
-                end
-            end
-
-            if not humanoid or humanoid.Health <= 0 then return end
-            local direction = root.Position - lastPos
-            local dist = direction.Magnitude
-
-            if dist > 0.01 then
-                humanoid:Move(direction.Unit * math.clamp(dist * 5, 0, 1), false)
-            else
-                humanoid:Move(Vector3.zero, false)
-            end
-
-            local deltaY = root.Position.Y - lastPos.Y
-            if deltaY > 0.9 and not jumpCooldown then
-                humanoid.Jump = true
-                jumpCooldown = true
-                task.delay(0.4, function() jumpCooldown = false end)
-            end
-            lastPos = root.Position
-        end)
-    end)
-end
-player.CharacterAdded:Connect(setupMovement)
-if player.Character then setupMovement(player.Character) end
-
--- 🧭 Penyesuaian tinggi & posisi
-local DEFAULT_HEIGHT = 2.9
-local function getCurrentHeight()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local humanoid = char:WaitForChild("Humanoid")
-    return humanoid.HipHeight + (char:FindFirstChild("Head") and char.Head.Size.Y or 2)
-end
-local function adjustRoute(frames)
-    local adjusted = {}
-    local offsetY = getCurrentHeight() - DEFAULT_HEIGHT
-    for _, cf in ipairs(frames) do
-        local pos, rot = cf.Position, cf - cf.Position
-        table.insert(adjusted, CFrame.new(Vector3.new(pos.X, pos.Y + offsetY, pos.Z)) * rot)
-    end
-    return adjusted
-end
-for i, data in ipairs(routes) do data[2] = adjustRoute(data[2]) end
-
-local function getNearestRoute()
-    local nearestIdx, dist = 1, math.huge
-    if hrp then
-        local pos = hrp.Position
-        for i, data in ipairs(routes) do
-            for _, cf in ipairs(data[2]) do
-                local d = (cf.Position - pos).Magnitude
-                if d < dist then dist = d nearestIdx = i end
-            end
-        end
-    end
-    return nearestIdx
-end
-local function getNearestFrameIndex(frames)
-    local startIdx, dist = 1, math.huge
-    if hrp then
-        local pos = hrp.Position
-        for i, cf in ipairs(frames) do
-            local d = (cf.Position - pos).Magnitude
-            if d < dist then dist = d startIdx = i end
-        end
-    end
-    if startIdx >= #frames then startIdx = math.max(1, #frames - 1) end
-    return startIdx
-end
-local function lerpCF(fromCF, toCF)
-    local duration = frameTime / math.max(0.05, playbackRate)
-    local t = 0
-    while t < duration do
-        if not isReplayRunning then break end
-        local dt = task.wait()
-        t += dt
-        local alpha = math.min(t / duration, 1)
-        if hrp and hrp.Parent and hrp:IsDescendantOf(workspace) then
-            hrp.CFrame = fromCF:Lerp(toCF, alpha)
-        end
-    end
-end
-local function runRoute()
-    if #routes == 0 then return end
-    if not hrp then refreshHRP() end
-    isReplayRunning = true
-    startMovement()
-    local idx = getNearestRoute()
-    local frames = routes[idx][2]
-    if #frames < 2 then isReplayRunning = false return end
-    local startIdx = getNearestFrameIndex(frames)
-    for i = startIdx, #frames - 1 do
-        if not isReplayRunning then break end
-        lerpCF(frames[i], frames[i + 1])
-    end
-    isReplayRunning = false
-    stopMovement()
-end
-local function stopRoute()
-    isReplayRunning = false
-    stopMovement()
+-- Hapus GUI lama jika ada
+if game.CoreGui:FindFirstChild("LEXHostVIP_UI") then
+    game.CoreGui:FindFirstChild("LEXHostVIP_UI"):Destroy()
 end
 
--- 🟣 UI Neon LEX HOST
+-- 🧱 Buat GUI dasar
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "LEXReplayUI"
+screenGui.Name = "LEXHostVIP_UI"
+screenGui.ResetOnSpawn = false
 screenGui.Parent = game.CoreGui
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 220, 0, 130)
-frame.Position = UDim2.new(0.05, 0, 0.75, 0)
-frame.BackgroundColor3 = Color3.fromRGB(30, 20, 40)
-frame.BackgroundTransparency = 0.2
-frame.Active = true
-frame.Draggable = true
-frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 16)
+-- Frame utama
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 320, 0, 270)
+mainFrame.Position = UDim2.new(0.5, -160, 0.5, -135)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 20, 40)
+mainFrame.BackgroundTransparency = 0.15
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 18)
 
-local glow = Instance.new("UIStroke")
-glow.Parent = frame
-glow.Color = Color3.fromRGB(150, 100, 255)
-glow.Thickness = 3
-glow.Transparency = 0.3
+local stroke = Instance.new("UIStroke", mainFrame)
+stroke.Color = Color3.fromRGB(150, 100, 255)
+stroke.Thickness = 3
+stroke.Transparency = 0.4
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(0.75, 0, 0, 28)
-title.Position = UDim2.new(0.05, 0, 0, 4)
-title.Text = "⚡ LEX HOST ⚡"
-title.Font = Enum.Font.GothamBold
-title.TextScaled = true
+-- 🌟 Judul
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundTransparency = 0.2
 title.BackgroundColor3 = Color3.fromRGB(60, 40, 100)
+title.Font = Enum.Font.GothamBold
+title.Text = "🔮 LEX HOST VIP"
+title.TextScaled = true
 Instance.new("UICorner", title).CornerRadius = UDim.new(0, 12)
 
+-- Efek warna pelangi
 local hue = 0
-RunService.RenderStepped:Connect(function()
+game:GetService("RunService").RenderStepped:Connect(function()
     hue = (hue + 1) % 360
     title.TextColor3 = Color3.fromHSV(hue / 360, 1, 1)
 end)
 
-local titleGlow = Instance.new("UIStroke")
-titleGlow.Parent = title
-titleGlow.Color = Color3.fromRGB(255, 255, 255)
-titleGlow.Thickness = 2
-titleGlow.Transparency = 0.4
-
-local closeBtn = Instance.new("TextButton", frame)
-closeBtn.Size = UDim2.new(0, 28, 0, 28)
-closeBtn.Position = UDim2.new(0.78, 0, 0, 4)
+-- Tombol close
+local closeBtn = Instance.new("TextButton", mainFrame)
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -38, 0, 6)
 closeBtn.Text = "✖"
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextScaled = true
 closeBtn.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 10)
-local closeGlow = Instance.new("UIStroke")
-closeGlow.Parent = closeBtn
-closeGlow.Color = Color3.fromRGB(255, 50, 100)
-closeGlow.Thickness = 2
-closeGlow.Transparency = 0.6
-closeBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
+closeBtn.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
 
-local toggleBtn = Instance.new("TextButton", frame)
-toggleBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
-toggleBtn.Position = UDim2.new(0.1, 0, 0.35, 0)
-toggleBtn.Text = "▶ Start"
-toggleBtn.TextScaled = true
-toggleBtn.Font = Enum.Font.GothamBold
-toggleBtn.BackgroundColor3 = Color3.fromRGB(70, 200, 120)
-toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 14)
+-- 🧭 Container tombol menu
+local menuContainer = Instance.new("Frame", mainFrame)
+menuContainer.Size = UDim2.new(1, -20, 1, -60)
+menuContainer.Position = UDim2.new(0, 10, 0, 50)
+menuContainer.BackgroundTransparency = 1
 
-local isRunning = false
-toggleBtn.MouseButton1Click:Connect(function()
-    if not isRunning then
-        isRunning = true
-        toggleBtn.Text = "■ Stop"
-        task.spawn(runRoute)
+-- Fungsi membuat tombol
+local function makeButton(name, color, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.BackgroundColor3 = color
+    btn.BackgroundTransparency = 0.1
+    btn.Text = name
+    btn.Font = Enum.Font.GothamBold
+    btn.TextScaled = true
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Thickness = 1.5
+    stroke.Transparency = 0.6
+    btn.MouseButton1Click:Connect(callback)
+    return btn
+end
+
+-- 🕹️ Tombol Menu
+local layout = Instance.new("UIListLayout", menuContainer)
+layout.Padding = UDim.new(0, 8)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+-- 🚀 Fly
+local flyEnabled = false
+local flyConn
+menuContainer:WaitForChild("UIListLayout")
+local flyBtn = makeButton("✈️ Fly", Color3.fromRGB(90, 90, 160), function()
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = char.HumanoidRootPart
+    flyEnabled = not flyEnabled
+    flyBtn.Text = flyEnabled and "🛑 Stop Fly" or "✈️ Fly"
+    if flyEnabled then
+        flyConn = game:GetService("RunService").Heartbeat:Connect(function()
+            if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+            local move = Vector3.zero
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then move = move + hrp.CFrame.LookVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then move = move - hrp.CFrame.LookVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then move = move - hrp.CFrame.RightVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then move = move + hrp.CFrame.RightVector end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0, 1, 0) end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then move = move - Vector3.new(0, 1, 0) end
+            hrp.Velocity = move * 100
+        end)
     else
-        isRunning = false
-        toggleBtn.Text = "▶ Start"
-        stopRoute()
+        if flyConn then flyConn:Disconnect() flyConn = nil end
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            player.Character.HumanoidRootPart.Velocity = Vector3.zero
+        end
     end
 end)
+flyBtn.Parent = menuContainer
 
-local speedLabel = Instance.new("TextLabel", frame)
-speedLabel.Size = UDim2.new(0.35, 0, 0.2, 0)
-speedLabel.Position = UDim2.new(0.325, 0, 0.7, 0)
-speedLabel.BackgroundTransparency = 1
-speedLabel.TextColor3 = Color3.fromRGB(180, 180, 255)
-speedLabel.Font = Enum.Font.GothamBold
-speedLabel.TextScaled = true
-speedLabel.Text = playbackRate.."x"
-
-local speedDown = Instance.new("TextButton", frame)
-speedDown.Size = UDim2.new(0.2, 0, 0.2, 0)
-speedDown.Position = UDim2.new(0.05, 0, 0.7, 0)
-speedDown.Text = "-"
-speedDown.Font = Enum.Font.GothamBold
-speedDown.TextScaled = true
-speedDown.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
-speedDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", speedDown).CornerRadius = UDim.new(0, 6)
-speedDown.MouseButton1Click:Connect(function()
-    playbackRate = math.max(0.25, playbackRate - 0.25)
-    speedLabel.Text = playbackRate.."x"
+-- ⚡ Speed
+local speedEnabled = false
+local normalWalk = 16
+local boostedSpeed = 80
+local speedBtn = makeButton("⚡ Speed", Color3.fromRGB(100, 130, 200), function()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:WaitForChild("Humanoid")
+    speedEnabled = not speedEnabled
+    humanoid.WalkSpeed = speedEnabled and boostedSpeed or normalWalk
+    speedBtn.Text = speedEnabled and "🛑 Stop Speed" or "⚡ Speed"
 end)
+speedBtn.Parent = menuContainer
 
-local speedUp = Instance.new("TextButton", frame)
-speedUp.Size = UDim2.new(0.2, 0, 0.2, 0)
-speedUp.Position = UDim2.new(0.75, 0, 0.7, 0)
-speedUp.Text = "+"
-speedUp.Font = Enum.Font.GothamBold
-speedUp.TextScaled = true
-speedUp.BackgroundColor3 = Color3.fromRGB(80, 80, 130)
-speedUp.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", speedUp).CornerRadius = UDim.new(0, 6)
-speedUp.MouseButton1Click:Connect(function()
-    playbackRate = math.min(6, playbackRate + 0.25)
-    speedLabel.Text = playbackRate.."x"
+-- 🛡️ God Mode
+local godEnabled = false
+local godBtn = makeButton("🛡️ God Mode", Color3.fromRGB(120, 80, 150), function()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:WaitForChild("Humanoid")
+    godEnabled = not godEnabled
+    godBtn.Text = godEnabled and "🛑 Disable God Mode" or "🛡️ God Mode"
+    if godEnabled then
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+        humanoid.Health = math.huge
+        humanoid.MaxHealth = math.huge
+    else
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+        humanoid.Health = 100
+        humanoid.MaxHealth = 100
+    end
 end)
+godBtn.Parent = menuContainer
+
+-- 🎞️ Replay System (memanggil fungsi Replay kamu)
+local replayBtn = makeButton("🎬 Replay System", Color3.fromRGB(90, 60, 180), function()
+    -- Jalankan sistem replay kamu di sini
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/putraborz/WataXMountAtin/refs/heads/main/Loader/10.lua"))()
+end)
+replayBtn.Parent = menuContainer
+
+print("[LEX HOST VIP] Neon Menu Loaded Successfully!")
