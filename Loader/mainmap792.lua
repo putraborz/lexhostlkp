@@ -26,7 +26,7 @@ end
 
 -- MAIN FEATURES (gameplay helpers)
 local LexHost = {}
-LexHost.Version = "3.0-cyber-enhanced" -- Diperbarui
+LexHost.Version = "3.1-mount-transp" -- Diperbarui
 LexHost.Enabled = { Fly=false, Speed=false, Noclip=false, ESP=false, AutoFarm=false, AirWalk=false }
 LexHost.FlySpeed = 45
 LexHost.SpeedMultiplier = 2
@@ -47,7 +47,7 @@ local function getRoot()
     if char then return char:FindFirstChild("HumanoidRootPart") end
 end
 
--- FLY
+-- FLY (Logic not changed)
 do
     local bv, bg, conn
     function LexHost.ToggleFly(state)
@@ -86,7 +86,7 @@ do
     end
 end
 
--- SPEED
+-- SPEED (Logic not changed)
 do
     function LexHost.ToggleSpeed(state)
         state = (state == nil) and not LexHost.Enabled.Speed or state
@@ -107,7 +107,7 @@ do
     end
 end
 
--- NOCLIP
+-- NOCLIP (Logic not changed)
 do
     function LexHost.ToggleNoclip(state)
         state = (state == nil) and not LexHost.Enabled.Noclip or state
@@ -127,7 +127,7 @@ do
     end)
 end
 
--- AIRWALK
+-- AIRWALK (Logic not changed)
 do
     local bv,bg,conn, targetY
     local function setNoclip(bool)
@@ -183,7 +183,7 @@ do
     end
 end
 
--- CLICK TELEPORT
+-- CLICK TELEPORT (Logic not changed)
 function LexHost.ClickTeleport()
     local mouse = LocalPlayer:GetMouse()
     if mouse and mouse.Target and mouse.Hit then
@@ -191,7 +191,7 @@ function LexHost.ClickTeleport()
     end
 end
 
--- ESP (basic)
+-- ESP (Logic not changed)
 do
     local espConnections = {}
     function LexHost.ToggleESP(state)
@@ -232,7 +232,7 @@ do
     end
 end
 
--- FULLBRIGHT
+-- FULLBRIGHT (Logic not changed)
 function LexHost.EnableFullbright()
     pcall(function()
         Lighting.Brightness = 2
@@ -244,7 +244,7 @@ function LexHost.EnableFullbright()
 end
 LexHost.EnableFullbright()
 
--- AUTO FARM (simple touch)
+-- AUTO FARM (Logic not changed)
 do
     RunService.Heartbeat:Connect(function()
         if LexHost.Enabled.AutoFarm then
@@ -268,7 +268,7 @@ do
     end)
 end
 
--- REMOVE PARTS
+-- REMOVE PARTS (Logic not changed)
 function LexHost.RemovePartsByNames(names)
     if type(names) ~= "table" then return end
     for _,obj in pairs(Workspace:GetDescendants()) do
@@ -285,24 +285,41 @@ end
 
 -- END FEATURES ----------------------------------------------------
 
+-- MOUNT LIST (DATA BARU) -------------------------------------------
+local scriptList = { 
+    {name = "ATIN NEW", url = "https://pastebin.com/raw/iw5xHtvD"},
+    {name = "YAHAYUK NEW", url = "https://pastebin.com/raw/UK8nspn0"},
+    {name = "WKSPEDISI ANTARTIKA NEW", url = "https://pastebin.com/raw/mqEjFxVj"},
+    {name = "MOUNT YNTKTS NEW", url = "https://pastebin.com/raw/k0bc5h4m"},
+    {name = "SAKAHAYNG", url = "https://pastebin.com/raw/zishUBsB"},
+    {name = "STECU NEW", url = "https://pastebin.com/raw/VdUnM88V"},
+    {name = "BALI HOT EXPEDITION", url = "https://pastebin.com/raw/e82WGJas"},
+    {name = "MOUNT KOMANG", url = "https://pastebin.com/raw/QYcyGtMR"},
+    {name = "MOUNT PRAMBANAN", url = "https://pastebin.com/raw/GysqQgpx"},
+    {name = "MOUNT MONO", url = "https://pastebin.com/raw/Ha8qwDeB"},
+    {name = "MOUNT SUMBING", url = "https://pastebin.com/raw/FqQwFJLe"},
+    {name = "MOUNT GEMI", url = "https://pastebin.com/raw/516Y0aw1"},
+    {name = "MOUNT KOHARU", url = "https://pastebin.com/raw/Rs6hy7xx"},
+}
+
 -- UI BUILD -------------------------------------------------------
 
--- TWEEN FUNCTION (NEW)
+-- TWEEN FUNCTION (for cool animation)
 local function tweenGui(gui, visible)
     local goal = {
-        Position = visible and UDim2.new(0.5,0,0.5,0) or UDim2.new(0.5,0,1.1,0), -- Pindah dari bawah layar (1.1 agar benar-benar hilang)
-        BackgroundTransparency = visible and 0.1 or 0.5 -- Transparansi saat muncul/hilang
+        Position = visible and UDim2.new(0.5,0,0.5,0) or UDim2.new(0.5,0,1.1,0),
+        BackgroundTransparency = visible and 0.9 or 1 -- Set transparency goal
     }
     
     if visible then 
-        gui.Position = UDim2.new(0.5,0,1.1,0) -- Mulai dari bawah
+        gui.Position = UDim2.new(0.5,0,1.1,0)
         gui.Visible = true
-        gui.BackgroundTransparency = 0.5 -- Set transparansi awal untuk transisi
+        gui.BackgroundTransparency = 1 -- Mulai dari transparan penuh
     end
     
     local info = TweenInfo.new(
-        0.3, -- Waktu transisi 0.3 detik
-        Enum.EasingStyle.Cubic, -- Gaya easing
+        0.3, 
+        Enum.EasingStyle.Cubic, 
         Enum.EasingDirection.Out
     )
     
@@ -347,8 +364,8 @@ local main = new("Frame", {
     Size = UDim2.new(0,560,0,420),
     Position = UDim2.new(0.5,0,0.5,0),
     AnchorPoint = Vector2.new(0.5,0.5),
-    BackgroundColor3 = Color3.fromRGB(6,10,18),
-    BackgroundTransparency = 0.1, -- << DIBUAT TRANSPARAN SEDIKIT
+    BackgroundColor3 = Color3.fromRGB(3, 5, 10), -- Warna dasar lebih gelap
+    BackgroundTransparency = 0.9, -- << SANGAT TRANSPARAN
     BorderSizePixel = 0,
     Visible = false,
     ZIndex = 9999
@@ -374,10 +391,10 @@ local body = new("Frame", {Parent = main, Position = UDim2.new(0,12,0,64), Size 
 
 -- left nav
 local left = new("Frame",{Parent=body, Size=UDim2.new(0,160,1,0), BackgroundTransparency=1})
-new("Frame",{Parent=left, Size=UDim2.new(1,0,1,0), BackgroundColor3=Color3.fromRGB(8,16,30)})
+new("Frame",{Parent=left, Size=UDim2.new(1,0,1,0), BackgroundColor3=Color3.fromRGB(8,16,30), BackgroundTransparency=0.5}) -- Transparency untuk side bar
 new("UICorner",{Parent=left, CornerRadius = UDim.new(0,10)})
 
-local menuKeys = {"Home","Modes","Movement","Utilities","Info"}
+local menuKeys = {"Home","Mount","Movement","Utilities","Info"} -- << DIGANTI: Modes -> Mount
 local menuButtons = {}
 for i,k in ipairs(menuKeys) do
     local btn = new("TextButton", {Parent = left, Size=UDim2.new(1,-24,0,46), Position=UDim2.new(0,12,0,12 + (i-1)*56), BackgroundColor3=Color3.fromRGB(12,26,48), Text=k, Font=Enum.Font.Gotham, TextSize=15, TextColor3=Color3.fromRGB(210,230,255), BorderSizePixel=0})
@@ -396,13 +413,7 @@ local function clearRight()
     end
 end
 
--- persistent modes scroll (Dummy list since no actual scriptList is provided)
-local scriptList = { 
-    {name = "Example Mode 1", url = "https://example.com/script1"},
-    {name = "Example Mode 2", url = "https://example.com/script2"},
-    {name = "Example Mode 3", url = "https://example.com/script3"},
-} -- NOTE: tambahkan daftar script yang sebenarnya di sini.
-
+-- persistent modes scroll
 local function ensureModesScroll()
     local existing = right:FindFirstChild("ModesScroll")
     if existing and existing:IsA("ScrollingFrame") then return existing end
@@ -420,8 +431,8 @@ end
 local function makeModeButton(parent, text, callback)
     local btn = new("TextButton", {Parent = parent, Size = UDim2.new(1,0,0,36), BackgroundColor3 = Color3.fromRGB(28,58,106), Text = text, Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Color3.fromRGB(230,245,255), BorderSizePixel = 0})
     new("UICorner",{Parent=btn, CornerRadius=UDim.new(0,8)})
-    btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(48,98,156) end) -- << Dihapus pcall
-    btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(28,58,106) end) -- << Dihapus pcall
+    btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(48,98,156) end)
+    btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(28,58,106) end)
     btn.MouseButton1Click:Connect(function() pcall(callback) end)
     return btn
 end
@@ -430,17 +441,17 @@ end
 local function showHome()
     clearRight()
     new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Welcome to LEX Host (Cyber Neon)", Font=Enum.Font.GothamBold, TextSize=18, TextColor3=Color3.fromRGB(220,240,255)})
-    new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,42), Size=UDim2.new(1,-16,0,64), BackgroundTransparency=1, Text="Klik 'Modes' untuk melihat daftar Gunung. Semua tombol movement & utilities aktif.", Font=Enum.Font.Gotham, TextSize=13, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
+    new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,42), Size=UDim2.new(1,-16,0,64), BackgroundTransparency=1, Text="Klik 'Mount' untuk melihat daftar gunung. Semua tombol movement & utilities aktif.", Font=Enum.Font.Gotham, TextSize=13, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
 end
 
-local function showModeList()
+local function showMountList() -- << FUNGSI DIGANTI UNTUK MENU MOUNT
     clearRight()
-    new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Modes / Gunung", Font=Enum.Font.GothamBold, TextSize=16, TextColor3=Color3.fromRGB(220,240,255)})
-    new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,36), Size=UDim2.new(1,-16,0,36), BackgroundTransparency=1, Text="Klik salah satu untuk menjalankan skrip.", Font=Enum.Font.Gotham, TextSize=12, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
+    new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Mount List (Gunung)", Font=Enum.Font.GothamBold, TextSize=16, TextColor3=Color3.fromRGB(220,240,255)})
+    new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,36), Size=UDim2.new(1,-16,0,36), BackgroundTransparency=1, Text="Klik salah satu untuk menjalankan skrip mount.", Font=Enum.Font.Gotham, TextSize=12, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
     local scr = ensureModesScroll()
     -- clear existing buttons
     for _,c in pairs(scr:GetChildren()) do if c:IsA("TextButton") then pcall(function() c:Destroy() end) end end
-    -- populate from scriptList
+    -- populate from scriptList (Mounts)
     for _,it in ipairs(scriptList) do
         makeModeButton(scr, it.name, function()
             local ok, err = pcall(function()
@@ -593,7 +604,7 @@ end
 local function showInfo()
     clearRight()
     new("TextLabel",{Parent=right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Info & Credits", Font=Enum.Font.GothamBold, TextSize=16, TextColor3=Color3.fromRGB(220,240,255)})
-    new("TextLabel",{Parent=right, Position=UDim2.new(0,8,0,42), Size=UDim2.new(1,-16,0,120), BackgroundTransparency=1, Text="LEX Host v3 (Cyber Neon Enhanced)\nFeatures: Modes loader, Movement toggles, Utilities, Scrollable list, Stable minimize/restore.\nCreated by: Custom LEX Build & AI Assisted UI/UX", Font=Enum.Font.Gotham, TextSize=13, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
+    new("TextLabel",{Parent=right, Position=UDim2.new(0,8,0,42), Size=UDim2.new(1,-16,0,120), BackgroundTransparency=1, Text="LEX Host v3 (Cyber Neon Enhanced)\nFeatures: Mounts loader, Movement toggles, Utilities, Scrollable list, Stable minimize/restore.\nCreated by: Custom LEX Build & AI Assisted UI/UX", Font=Enum.Font.Gotham, TextSize=13, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
     local exitBtn = new("TextButton",{Parent=right, Position=UDim2.new(0,8,0,170), Size=UDim2.new(1,-16,0,36), BackgroundColor3=Color3.fromRGB(180,60,60), Text="Exit (Destroy GUI)", Font=Enum.Font.GothamBold, TextSize=14, TextColor3=Color3.fromRGB(255,255,255)})
     new("UICorner",{Parent=exitBtn, CornerRadius=UDim.new(0,8)})
     exitBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
@@ -601,7 +612,7 @@ end
 
 -- connect menu events
 menuButtons["Home"].MouseButton1Click:Connect(showHome)
-menuButtons["Modes"].MouseButton1Click:Connect(showModeList)
+menuButtons["Mount"].MouseButton1Click:Connect(showMountList) -- << DIGANTI: showModeList -> showMountList
 menuButtons["Movement"].MouseButton1Click:Connect(showMovement)
 menuButtons["Utilities"].MouseButton1Click:Connect(showUtilities)
 menuButtons["Info"].MouseButton1Click:Connect(showInfo)
@@ -634,7 +645,7 @@ do
     end)
 end
 
--- minimize / close behavior (MODIFIED TO USE TWEEN)
+-- minimize / close behavior
 btnMin.MouseButton1Click:Connect(function()
     tweenGui(main, false)
 end)
@@ -642,12 +653,12 @@ btnClose.MouseButton1Click:Connect(function()
     tweenGui(main, false)
 end)
 
--- LX logo shows/hides main and recenters (MODIFIED TO USE TWEEN)
+-- LX logo shows/hides main and recenters
 lx.MouseButton1Click:Connect(function()
     if main.Visible then
-        tweenGui(main, false) -- Animasi keluar
+        tweenGui(main, false)
     else
-        tweenGui(main, true) -- Animasi masuk
+        tweenGui(main, true)
     end
 end)
 
@@ -657,17 +668,16 @@ do
         local t=0
         while screenGui and screenGui.Parent do
             t = t + 0.03
-            -- local pulse = 0.35 + 0.65 * (0.5 + 0.5*math.sin(t*2)) -- Original pulse logic, now simplified
             pcall(function()
                 mainStroke.Transparency = 0
-                -- Animasi warna neon (hanya Hue)
+                
                 local hue = math.fmod(t/5, 1) 
                 local accentColor = Color3.fromHSV(0.6 + 0.05*math.sin(t), 0.9, 0.7)
                 local strokeColor = Color3.fromHSV(hue, 0.8, 0.8)
 
                 topAccent.BackgroundColor3 = accentColor
                 lxStroke.Color = strokeColor
-                mainStroke.Color = Color3.fromHSV(hue, 0.9, 0.5) -- Stroke utama juga berdenyut warna
+                mainStroke.Color = Color3.fromHSV(hue, 0.9, 0.5)
             end)
             task.wait(0.04)
         end
