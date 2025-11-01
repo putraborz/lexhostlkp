@@ -1,170 +1,133 @@
--- // LEX Host v3 - Cyber Futuristic Blue (Transparent Edition)
--- // Made by LEX Dev (Futuristic Edition)
--- // Fully Functional UI with Scroll & Neon Effects
+--// LEX Host v3 - Cyber Neon Transparent Edition
+--// Made by LEX Dev
+--// Fully Functional & Scrollable Menu
 
-local ScreenGui = Instance.new("ScreenGui")
+local LEXHost = Instance.new("ScreenGui", game.CoreGui)
+LEXHost.Name = "LEXHost"
+
 local MainFrame = Instance.new("Frame")
-local TopBar = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local MinimizeButton = Instance.new("TextButton")
-local CloseButton = Instance.new("TextButton")
-local LXLogo = Instance.new("TextLabel")
-local SideBar = Instance.new("Frame")
-local Buttons = {}
-local ContentFrame = Instance.new("Frame")
-
-ScreenGui.Name = "LEXHost"
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
--- Main Frame
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
+MainFrame.Parent = LEXHost
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.BackgroundTransparency = 0.25
-MainFrame.BorderSizePixel = 0
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-MainFrame.Size = UDim2.new(0, 600, 0, 400)
-
+MainFrame.Size = UDim2.new(0, 620, 0, 400)
+MainFrame.BackgroundColor3 = Color3.fromRGB(5, 10, 25)
+MainFrame.BackgroundTransparency = 0.35
+Instance.new("UICorner", MainFrame)
 local Stroke = Instance.new("UIStroke", MainFrame)
-Stroke.Color = Color3.fromRGB(0, 140, 255)
+Stroke.Color = Color3.fromRGB(0, 180, 255)
 Stroke.Thickness = 2
-Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-local Corner = Instance.new("UICorner", MainFrame)
-Corner.CornerRadius = UDim.new(0, 12)
-
--- Top Bar
-TopBar.Name = "TopBar"
-TopBar.Parent = MainFrame
-TopBar.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
-TopBar.BackgroundTransparency = 0.4
+-- Topbar
+local TopBar = Instance.new("Frame", MainFrame)
 TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(10, 15, 35)
+TopBar.BackgroundTransparency = 0.4
+Instance.new("UICorner", TopBar)
 
-local TopStroke = Instance.new("UIStroke", TopBar)
-TopStroke.Color = Color3.fromRGB(0, 170, 255)
-TopStroke.Thickness = 1
-
-Title.Name = "Title"
-Title.Parent = TopBar
+local Title = Instance.new("TextLabel", TopBar)
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(0.5, 0, 1, 0)
-Title.Position = UDim2.new(0.05, 0, 0, 0)
+Title.Position = UDim2.new(0.03, 0, 0, 0)
+Title.Size = UDim2.new(0.7, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "LEX Host - Cyber Futuristic v3.0"
-Title.TextColor3 = Color3.fromRGB(0, 170, 255)
-Title.TextSize = 15
+Title.Text = "LEX Host v3 - Cyber Neon UI"
+Title.TextColor3 = Color3.fromRGB(0, 190, 255)
+Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
-MinimizeButton.Parent = TopBar
-MinimizeButton.Text = "-"
-MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
-MinimizeButton.Position = UDim2.new(0.9, 0, 0.1, 0)
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
-MinimizeButton.TextColor3 = Color3.fromRGB(0, 200, 255)
-MinimizeButton.Font = Enum.Font.GothamBold
-MinimizeButton.TextSize = 18
+-- Logo
+local LX = Instance.new("TextLabel", LEXHost)
+LX.Text = "LX"
+LX.Font = Enum.Font.GothamBlack
+LX.TextSize = 28
+LX.TextColor3 = Color3.fromRGB(0, 200, 255)
+LX.Position = UDim2.new(0.5, -20, 0.08, 0)
+LX.BackgroundTransparency = 1
 
-CloseButton.Parent = TopBar
-CloseButton.Text = "X"
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.Position = UDim2.new(0.95, 0, 0.1, 0)
-CloseButton.BackgroundColor3 = Color3.fromRGB(60, 10, 10)
-CloseButton.TextColor3 = Color3.fromRGB(255, 80, 80)
-CloseButton.Font = Enum.Font.GothamBold
-CloseButton.TextSize = 18
+-- Minimize & Close
+local MinBtn = Instance.new("TextButton", TopBar)
+MinBtn.Text = "-"
+MinBtn.Size = UDim2.new(0, 30, 0, 30)
+MinBtn.Position = UDim2.new(0.88, 0, 0.1, 0)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 18
+MinBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
+MinBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+Instance.new("UICorner", MinBtn)
 
-LXLogo.Parent = ScreenGui
-LXLogo.Text = "LX"
-LXLogo.Font = Enum.Font.GothamBlack
-LXLogo.TextSize = 24
-LXLogo.TextColor3 = Color3.fromRGB(180, 220, 255)
-LXLogo.Position = UDim2.new(0.5, -25, 0.05, 0)
-LXLogo.Size = UDim2.new(0, 50, 0, 30)
-LXLogo.BackgroundTransparency = 1
+local CloseBtn = Instance.new("TextButton", TopBar)
+CloseBtn.Text = "X"
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(0.94, 0, 0.1, 0)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 20)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+Instance.new("UICorner", CloseBtn)
 
 -- Sidebar
-SideBar.Name = "SideBar"
-SideBar.Parent = MainFrame
-SideBar.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
-SideBar.BackgroundTransparency = 0.4
-SideBar.Size = UDim2.new(0, 130, 1, -40)
-SideBar.Position = UDim2.new(0, 0, 0, 40)
+local Side = Instance.new("Frame", MainFrame)
+Side.Position = UDim2.new(0, 0, 0, 40)
+Side.Size = UDim2.new(0, 140, 1, -40)
+Side.BackgroundColor3 = Color3.fromRGB(8, 15, 35)
+Side.BackgroundTransparency = 0.4
+Instance.new("UICorner", Side)
 
-local sideCorner = Instance.new("UICorner", SideBar)
-sideCorner.CornerRadius = UDim.new(0, 8)
-
-local buttonNames = {"Home", "Modes", "Movement", "Utilities", "Info"}
-for i, name in ipairs(buttonNames) do
-	local btn = Instance.new("TextButton")
-	btn.Parent = SideBar
-	btn.Text = name
-	btn.Size = UDim2.new(1, -10, 0, 40)
-	btn.Position = UDim2.new(0, 5, 0, (i - 1) * 45 + 10)
-	btn.BackgroundColor3 = Color3.fromRGB(15, 20, 40)
-	btn.TextColor3 = Color3.fromRGB(0, 170, 255)
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 14
-	btn.AutoButtonColor = false
-
-	local stroke = Instance.new("UIStroke", btn)
-	stroke.Color = Color3.fromRGB(0, 170, 255)
-	stroke.Thickness = 1
-
-	local corner = Instance.new("UICorner", btn)
-	corner.CornerRadius = UDim.new(0, 6)
-
-	btn.MouseEnter:Connect(function()
-		btn.BackgroundColor3 = Color3.fromRGB(25, 35, 60)
-	end)
-	btn.MouseLeave:Connect(function()
-		btn.BackgroundColor3 = Color3.fromRGB(15, 20, 40)
-	end)
-
-	Buttons[name] = btn
+local Tabs = {"Home","Modes","Movement","Utilities","Info"}
+local Buttons = {}
+for i, v in ipairs(Tabs) do
+	local B = Instance.new("TextButton", Side)
+	B.Text = v
+	B.Size = UDim2.new(1, -10, 0, 40)
+	B.Position = UDim2.new(0, 5, 0, (i - 1) * 45 + 10)
+	B.BackgroundColor3 = Color3.fromRGB(15, 25, 50)
+	B.TextColor3 = Color3.fromRGB(0, 200, 255)
+	B.Font = Enum.Font.GothamBold
+	B.TextSize = 14
+	B.AutoButtonColor = false
+	local s = Instance.new("UIStroke", B)
+	s.Color = Color3.fromRGB(0, 190, 255)
+	s.Thickness = 1
+	Instance.new("UICorner", B)
+	B.MouseEnter:Connect(function() B.BackgroundColor3 = Color3.fromRGB(20,35,70) end)
+	B.MouseLeave:Connect(function() B.BackgroundColor3 = Color3.fromRGB(15,25,50) end)
+	Buttons[v] = B
 end
 
 -- Content Area
-ContentFrame.Parent = MainFrame
-ContentFrame.BackgroundTransparency = 1
-ContentFrame.Position = UDim2.new(0, 140, 0, 50)
-ContentFrame.Size = UDim2.new(1, -150, 1, -60)
+local Content = Instance.new("Frame", MainFrame)
+Content.Position = UDim2.new(0, 150, 0, 50)
+Content.Size = UDim2.new(1, -160, 1, -60)
+Content.BackgroundTransparency = 1
 
--- Scrollable Gunung List
-local ScrollFrame = Instance.new("ScrollingFrame", ContentFrame)
-ScrollFrame.Size = UDim2.new(1, 0, 1, 0)
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
-ScrollFrame.ScrollBarThickness = 6
-ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
-ScrollFrame.Visible = false
+-- Scrollable "Modes" page
+local Scroll = Instance.new("ScrollingFrame", Content)
+Scroll.Size = UDim2.new(1, 0, 1, 0)
+Scroll.CanvasSize = UDim2.new(0, 0, 2, 0)
+Scroll.ScrollBarThickness = 6
+Scroll.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+Scroll.Visible = false
 
-local gunungList = {
-	"ATIN NEW","YAHAYUK NEW","WKSPEDISI ANTARTIKA NEW","MOUNT YNTKTS NEW",
-	"SAKAHAYNG","STECU NEW","BALI HOT EXPEDITION","MOUNT KOMANG",
-	"MOUNT PRAMBANAN","MOUNT MONO","MOUNT SUMBING","MOUNT GEMI","MOUNT KOHARU"
+local Gunung = {
+"ATIN NEW","YAHAYUK NEW","WKSPEDISI ANTARTIKA NEW","MOUNT YNTKTS NEW",
+"SAKAHAYNG","STECU NEW","BALI HOT EXPEDITION","MOUNT KOMANG",
+"MOUNT PRAMBANAN","MOUNT MONO","MOUNT SUMBING","MOUNT GEMI","MOUNT KOHARU"
 }
 
-for i, g in ipairs(gunungList) do
-	local btn = Instance.new("TextButton")
-	btn.Parent = ScrollFrame
+for i, name in ipairs(Gunung) do
+	local btn = Instance.new("TextButton", Scroll)
 	btn.Size = UDim2.new(1, -10, 0, 35)
 	btn.Position = UDim2.new(0, 5, 0, (i - 1) * 40)
 	btn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
-	btn.Text = g
+	btn.Text = name
 	btn.Font = Enum.Font.GothamBold
 	btn.TextSize = 14
-	btn.TextColor3 = Color3.fromRGB(0, 170, 255)
-
+	btn.TextColor3 = Color3.fromRGB(0, 190, 255)
 	local s = Instance.new("UIStroke", btn)
-	s.Color = Color3.fromRGB(0, 140, 255)
+	s.Color = Color3.fromRGB(0, 160, 255)
 	s.Thickness = 1
-
-	local c = Instance.new("UICorner", btn)
-	c.CornerRadius = UDim.new(0, 5)
-
+	Instance.new("UICorner", btn)
 	btn.MouseButton1Click:Connect(function()
-		loadstring(game:HttpGet("https://pastebin.com/raw/"..({
+		local ids = {
 			["ATIN NEW"]="iw5xHtvD",["YAHAYUK NEW"]="UK8nspn0",
 			["WKSPEDISI ANTARTIKA NEW"]="mqEjFxVj",["MOUNT YNTKTS NEW"]="k0bc5h4m",
 			["SAKAHAYNG"]="zishUBsB",["STECU NEW"]="VdUnM88V",
@@ -172,63 +135,57 @@ for i, g in ipairs(gunungList) do
 			["MOUNT PRAMBANAN"]="GysqQgpx",["MOUNT MONO"]="Ha8qwDeB",
 			["MOUNT SUMBING"]="FqQwFJLe",["MOUNT GEMI"]="516Y0aw1",
 			["MOUNT KOHARU"]="Rs6hy7xx"
-		})[g]))()
+		}
+		loadstring(game:HttpGet("https://pastebin.com/raw/"..ids[name]))()
 	end)
 end
 
--- Button Functions
-local function showTab(name)
-	for _, child in pairs(ContentFrame:GetChildren()) do
-		child.Visible = false
-	end
-	if name == "Modes" then
-		ScrollFrame.Visible = true
+-- Tab System
+local function ShowTab(tab)
+	for _, c in pairs(Content:GetChildren()) do c.Visible = false end
+	if tab == "Modes" then
+		Scroll.Visible = true
 	else
-		local t = Instance.new("TextLabel", ContentFrame)
-		t.BackgroundTransparency = 1
-		t.Text = "Menu: "..name.." sedang dikembangkan..."
-		t.TextColor3 = Color3.fromRGB(0, 170, 255)
-		t.Font = Enum.Font.GothamBold
-		t.TextSize = 16
-		t.Size = UDim2.new(1, 0, 1, 0)
+		local T = Instance.new("TextLabel", Content)
+		T.BackgroundTransparency = 1
+		T.Text = tab.." page under construction..."
+		T.TextColor3 = Color3.fromRGB(0, 200, 255)
+		T.Font = Enum.Font.GothamBold
+		T.TextSize = 16
+		T.Size = UDim2.new(1, 0, 1, 0)
 	end
 end
 
-for name, btn in pairs(Buttons) do
-	btn.MouseButton1Click:Connect(function()
-		showTab(name)
-	end)
+for n, b in pairs(Buttons) do
+	b.MouseButton1Click:Connect(function() ShowTab(n) end)
 end
-
--- Minimize & Close
-MinimizeButton.MouseButton1Click:Connect(function()
-	MainFrame.Visible = not MainFrame.Visible
-end)
-CloseButton.MouseButton1Click:Connect(function()
-	ScreenGui:Destroy()
-end)
 
 -- Draggable
 local UIS = game:GetService("UserInputService")
-local dragToggle, dragInput, dragStart, startPos
-
+local dragging, dragInput, startPos, startDrag
 TopBar.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragToggle = true
-		dragStart = input.Position
+		dragging = true
+		startDrag = input.Position
 		startPos = MainFrame.Position
 	end
 end)
-
 TopBar.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragToggle = false
+		dragging = false
+	end
+end)
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - startDrag
+		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 	end
 end)
 
-UIS.InputChanged:Connect(function(input)
-	if dragToggle and input.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = input.Position - dragStart
-		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
+-- Minimize & Close
+MinBtn.MouseButton1Click:Connect(function()
+	MainFrame.Visible = not MainFrame.Visible
+end)
+CloseBtn.MouseButton1Click:Connect(function()
+	LEXHost:Destroy()
 end)
