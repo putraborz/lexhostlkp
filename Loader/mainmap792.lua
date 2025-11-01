@@ -1,174 +1,170 @@
--- 🧠 LEX HOST UI v2.7 Stable
--- Fix Bug + Full Gunung List Sync
--- By: Putra Botz | Style: Classic Stable
+--// LEX Host - Futuristic v2.5.1
+--// Made by ChatGPT (LEX UI Custom)
 
-if game.CoreGui:FindFirstChild("LEXHostUI") then
-	game.CoreGui:FindFirstChild("LEXHostUI"):Destroy()
+local LEX = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TitleBar = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local Close = Instance.new("TextButton")
+local Minimize = Instance.new("TextButton")
+local LeftMenu = Instance.new("Frame")
+local Buttons = {}
+local ContentFrame = Instance.new("Frame")
+local Scroll = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+
+LEX.Name = "LEXHost"
+LEX.Parent = game.CoreGui
+LEX.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+--// Main Frame
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = LEX
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 18, 35)
+MainFrame.Size = UDim2.new(0, 500, 0, 350)
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Visible = true
+MainFrame.BackgroundTransparency = 0.1
+MainFrame.ZIndex = 2
+
+--// Title Bar
+TitleBar.Name = "TitleBar"
+TitleBar.Parent = MainFrame
+TitleBar.Size = UDim2.new(1, 0, 0, 30)
+TitleBar.BackgroundColor3 = Color3.fromRGB(20, 30, 55)
+TitleBar.BorderSizePixel = 0
+
+Title.Name = "Title"
+Title.Parent = TitleBar
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.Size = UDim2.new(0, 250, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "LEX Host"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+Minimize.Name = "Minimize"
+Minimize.Parent = TitleBar
+Minimize.Size = UDim2.new(0, 30, 0, 25)
+Minimize.Position = UDim2.new(1, -60, 0, 2)
+Minimize.Text = "-"
+Minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
+Minimize.Font = Enum.Font.GothamBold
+Minimize.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+Minimize.TextSize = 18
+
+Close.Name = "Close"
+Close.Parent = TitleBar
+Close.Size = UDim2.new(0, 30, 0, 25)
+Close.Position = UDim2.new(1, -30, 0, 2)
+Close.Text = "X"
+Close.TextColor3 = Color3.fromRGB(255, 255, 255)
+Close.Font = Enum.Font.GothamBold
+Close.BackgroundColor3 = Color3.fromRGB(255, 0, 75)
+Close.TextSize = 14
+
+--// Left Menu
+LeftMenu.Name = "LeftMenu"
+LeftMenu.Parent = MainFrame
+LeftMenu.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+LeftMenu.Position = UDim2.new(0, 0, 0, 30)
+LeftMenu.Size = UDim2.new(0, 120, 1, -30)
+
+local menuNames = {"Home", "Modes", "Movement", "Utilities", "Info"}
+
+for i, name in ipairs(menuNames) do
+	local btn = Instance.new("TextButton")
+	btn.Parent = LeftMenu
+	btn.Size = UDim2.new(1, 0, 0, 40)
+	btn.Position = UDim2.new(0, 0, 0, (i - 1) * 42)
+	btn.BackgroundColor3 = Color3.fromRGB(25, 35, 65)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 14
+	btn.Text = name
+	btn.BorderSizePixel = 0
+	Buttons[name] = btn
 end
 
-local UIS = game:GetService("UserInputService")
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "LEXHostUI"
-gui.ResetOnSpawn = false
+--// Content Frame
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Parent = MainFrame
+ContentFrame.Position = UDim2.new(0, 130, 0, 40)
+ContentFrame.Size = UDim2.new(1, -140, 1, -50)
+ContentFrame.BackgroundTransparency = 1
 
--- Tombol Toggle (LX)
-local toggle = Instance.new("TextButton", gui)
-toggle.Size = UDim2.new(0, 60, 0, 60)
-toggle.Position = UDim2.new(1, -80, 1, -80)
-toggle.AnchorPoint = Vector2.new(1, 1)
-toggle.Text = "LX"
-toggle.Font = Enum.Font.GothamBold
-toggle.TextSize = 22
-toggle.TextColor3 = Color3.fromRGB(0, 255, 255)
-toggle.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-toggle.BorderSizePixel = 0
-Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Parent = ContentFrame
+TitleLabel.Size = UDim2.new(1, 0, 0, 30)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "Modes / Gunung"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 16
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- Frame utama
-local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 400, 0, 520)
-main.Position = UDim2.new(0.5, 0, 0.5, 0)
-main.AnchorPoint = Vector2.new(0.5, 0.5)
-main.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-main.Visible = false
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+--// Scroll List
+Scroll.Parent = ContentFrame
+Scroll.Size = UDim2.new(1, 0, 1, -30)
+Scroll.Position = UDim2.new(0, 0, 0, 30)
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 1000)
+Scroll.ScrollBarThickness = 6
+Scroll.BackgroundTransparency = 1
 
-local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, 0, 0, 45)
-title.Text = "LEX HOST"
-title.Font = Enum.Font.GothamBold
-title.TextColor3 = Color3.fromRGB(0, 255, 255)
-title.TextSize = 26
-title.BackgroundTransparency = 1
+UIListLayout.Parent = Scroll
+UIListLayout.Padding = UDim.new(0, 5)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Scroll frame
-local scroll = Instance.new("ScrollingFrame", main)
-scroll.Size = UDim2.new(1, -20, 1, -130)
-scroll.Position = UDim2.new(0, 10, 0, 60)
-scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-scroll.ScrollBarThickness = 5
-scroll.BackgroundTransparency = 1
-local layout = Instance.new("UIListLayout", scroll)
-layout.Padding = UDim.new(0, 6)
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
--- List Gunung (sinkron dengan data terbaru)
-local scripts = {
-	["ATIN NEW"] = "https://pastebin.com/raw/iw5xHtvD",
-	["YAHAYUK NEW"] = "https://pastebin.com/raw/UK8nspn0",
-	["WKSPEDISI ANTARTIKA NEW"] = "https://pastebin.com/raw/mqEjFxVj",
-	["MOUNT YNTKTS NEW"] = "https://pastebin.com/raw/k0bc5h4m",
-	["SAKAHAYNG"] = "https://pastebin.com/raw/zishUBsB",
-	["STECU NEW"] = "https://pastebin.com/raw/VdUnM88V",
-	["BALI HOT EXPEDITION"] = "https://pastebin.com/raw/e82WGJas",
-	["MOUNT KOMANG"] = "https://pastebin.com/raw/QYcyGtMR",
-	["MOUNT PRAMBANAN"] = "https://pastebin.com/raw/GysqQgpx",
-	["MOUNT MONO"] = "https://pastebin.com/raw/Ha8qwDeB",
-	["MOUNT SUMBING"] = "https://pastebin.com/raw/FqQwFJLe",
-	["MOUNT GEMI"] = "https://pastebin.com/raw/516Y0aw1",
-	["MOUNT KOHARU"] = "https://pastebin.com/raw/Rs6hy7xx"
-}
-
--- Buat tombol dari daftar di atas
 local function makeButton(name, link)
-	local b = Instance.new("TextButton", scroll)
-	b.Size = UDim2.new(0.9, 0, 0, 35)
-	b.Text = name
-	b.Font = Enum.Font.GothamBold
-	b.TextSize = 16
-	b.TextColor3 = Color3.fromRGB(0, 255, 255)
-	b.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-	b.AutoButtonColor = false
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-	b.MouseButton1Click:Connect(function()
+	local btn = Instance.new("TextButton")
+	btn.Parent = Scroll
+	btn.Size = UDim2.new(1, 0, 0, 35)
+	btn.BackgroundColor3 = Color3.fromRGB(0, 80, 180)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 14
+	btn.Text = name
+	btn.BorderSizePixel = 0
+	btn.MouseButton1Click:Connect(function()
 		loadstring(game:HttpGet(link))()
 	end)
 end
 
-for n, l in pairs(scripts) do makeButton(n, l) end
+--// Mount list
+local mounts = {
+	{"ATIN NEW", "https://pastebin.com/raw/iw5xHtvD"},
+	{"YAHAYUK NEW", "https://pastebin.com/raw/UK8nspn0"},
+	{"WKSPEDISI ANTARTIKA NEW", "https://pastebin.com/raw/mqEjFxVj"},
+	{"MOUNT YNTKTS NEW", "https://pastebin.com/raw/k0bc5h4m"},
+	{"SAKAHAYNG", "https://pastebin.com/raw/zishUBsB"},
+	{"STECU NEW", "https://pastebin.com/raw/VdUnM88V"},
+	{"BALI HOT EXPEDITION", "https://pastebin.com/raw/e82WGJas"},
+	{"MOUNT KOMANG", "https://pastebin.com/raw/QYcyGtMR"},
+	{"MOUNT PRAMBANAN", "https://pastebin.com/raw/GysqQgpx"},
+	{"MOUNT MONO", "https://pastebin.com/raw/Ha8qwDeB"},
+	{"MOUNT SUMBING", "https://pastebin.com/raw/FqQwFJLe"},
+	{"MOUNT GEMI", "https://pastebin.com/raw/516Y0aw1"},
+	{"MOUNT KOHARU", "https://pastebin.com/raw/Rs6hy7xx"},
+}
 
--- Tombol bawah
-local bottom = Instance.new("Frame", main)
-bottom.Size = UDim2.new(1, -20, 0, 50)
-bottom.Position = UDim2.new(0, 10, 1, -60)
-bottom.BackgroundTransparency = 1
-local layout2 = Instance.new("UIListLayout", bottom)
-layout2.FillDirection = Enum.FillDirection.Horizontal
-layout2.Padding = UDim.new(0, 8)
-layout2.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
-local function makeSmallButton(txt)
-	local b = Instance.new("TextButton", bottom)
-	b.Size = UDim2.new(0.3, 0, 1, 0)
-	b.Text = txt
-	b.Font = Enum.Font.GothamBold
-	b.TextSize = 14
-	b.TextColor3 = Color3.fromRGB(0, 255, 255)
-	b.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 5)
-	return b
+for _, v in pairs(mounts) do
+	makeButton(v[1], v[2])
 end
 
-local refresh = makeSmallButton("🔁 Refresh")
-local exit = makeSmallButton("❌ Exit")
-local info = makeSmallButton("🧠 Info")
-
-refresh.MouseButton1Click:Connect(function()
-	for _, v in pairs(scroll:GetChildren()) do
-		if v:IsA("TextButton") then v:Destroy() end
-	end
-	for n, l in pairs(scripts) do makeButton(n, l) end
+--// Functions
+Close.MouseButton1Click:Connect(function()
+	LEX:Destroy()
 end)
 
-exit.MouseButton1Click:Connect(function()
-	gui:Destroy()
+local minimized = false
+Minimize.MouseButton1Click:Connect(function()
+	minimized = not minimized
+	ContentFrame.Visible = not minimized
+	LeftMenu.Visible = not minimized
 end)
-
-info.MouseButton1Click:Connect(function()
-	game.StarterGui:SetCore("SendNotification", {
-		Title = "LEX HOST UI",
-		Text = "Stable v2.7 | Fixed Drag + Minimize Bug",
-		Duration = 5
-	})
-end)
-
--- Sistem drag
-local dragging, dragInput, dragStart, startPos
-local function update(input)
-	local delta = input.Position - dragStart
-	main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-		startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-
-main.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = main.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then dragging = false end
-		end)
-	end
-end)
-
-main.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then update(input) end
-end)
-
--- Sistem minimize fix
-local open = false
-toggle.MouseButton1Click:Connect(function()
-	open = not open
-	if open then
-		main.Visible = true
-		main.Position = UDim2.new(0.5, 0, 0.5, 0)
-	else
-		main.Visible = false
-	end
-end)
-
-print("✅ LEX Host v2.7 Loaded | Bug Fixed | List Synced")
