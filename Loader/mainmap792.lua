@@ -7,11 +7,14 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
+local Lighting = game:GetService("Service") -- Mengganti getService
 local Workspace = game:GetService("Workspace")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- UI STATE (Baru: Melacak menu yang sedang terbuka)
+local activeMenu = "Home"
 
 -- UTIL
 local function new(class, props)
@@ -26,7 +29,7 @@ end
 
 -- MAIN FEATURES (gameplay helpers)
 local LexHost = {}
-LexHost.Version = "3.1-mount-transp" -- Diperbarui
+LexHost.Version = "3.2-mount-toggle" -- Diperbarui
 LexHost.Enabled = { Fly=false, Speed=false, Noclip=false, ESP=false, AutoFarm=false, AirWalk=false }
 LexHost.FlySpeed = 45
 LexHost.SpeedMultiplier = 2
@@ -285,7 +288,7 @@ end
 
 -- END FEATURES ----------------------------------------------------
 
--- MOUNT LIST (DATA BARU) -------------------------------------------
+-- MOUNT LIST (DATA) -------------------------------------------
 local scriptList = { 
     {name = "ATIN NEW", url = "https://pastebin.com/raw/iw5xHtvD"},
     {name = "YAHAYUK NEW", url = "https://pastebin.com/raw/UK8nspn0"},
@@ -308,13 +311,13 @@ local scriptList = {
 local function tweenGui(gui, visible)
     local goal = {
         Position = visible and UDim2.new(0.5,0,0.5,0) or UDim2.new(0.5,0,1.1,0),
-        BackgroundTransparency = visible and 0.9 or 1 -- Set transparency goal
+        BackgroundTransparency = visible and 0.9 or 1
     }
     
     if visible then 
         gui.Position = UDim2.new(0.5,0,1.1,0)
         gui.Visible = true
-        gui.BackgroundTransparency = 1 -- Mulai dari transparan penuh
+        gui.BackgroundTransparency = 1
     end
     
     local info = TweenInfo.new(
@@ -364,14 +367,14 @@ local main = new("Frame", {
     Size = UDim2.new(0,560,0,420),
     Position = UDim2.new(0.5,0,0.5,0),
     AnchorPoint = Vector2.new(0.5,0.5),
-    BackgroundColor3 = Color3.fromRGB(3, 5, 10), -- Warna dasar lebih gelap
-    BackgroundTransparency = 0.9, -- << SANGAT TRANSPARAN
+    BackgroundColor3 = Color3.fromRGB(3, 5, 10),
+    BackgroundTransparency = 0.9, -- SANGAT TRANSPARAN
     BorderSizePixel = 0,
     Visible = false,
     ZIndex = 9999
 })
 new("UICorner", {Parent = main, CornerRadius = UDim.new(0,14)})
-local mainStroke = new("UIStroke", {Parent = main, Color = Color3.fromRGB(140,70,255), Thickness = 2}) -- neon accent
+local mainStroke = new("UIStroke", {Parent = main, Color = Color3.fromRGB(140,70,255), Thickness = 2})
 local topAccent = new("Frame", {Parent = main, Size = UDim2.new(1,0,0,6), Position = UDim2.new(0,0,0,0), BackgroundColor3 = Color3.fromRGB(40,120,255)})
 topAccent.ZIndex = 10000
 
@@ -391,10 +394,10 @@ local body = new("Frame", {Parent = main, Position = UDim2.new(0,12,0,64), Size 
 
 -- left nav
 local left = new("Frame",{Parent=body, Size=UDim2.new(0,160,1,0), BackgroundTransparency=1})
-new("Frame",{Parent=left, Size=UDim2.new(1,0,1,0), BackgroundColor3=Color3.fromRGB(8,16,30), BackgroundTransparency=0.5}) -- Transparency untuk side bar
+new("Frame",{Parent=left, Size=UDim2.new(1,0,1,0), BackgroundColor3=Color3.fromRGB(8,16,30), BackgroundTransparency=0.5})
 new("UICorner",{Parent=left, CornerRadius = UDim.new(0,10)})
 
-local menuKeys = {"Home","Mount","Movement","Utilities","Info"} -- << DIGANTI: Modes -> Mount
+local menuKeys = {"Home","Mount","Movement","Utilities","Info"}
 local menuButtons = {}
 for i,k in ipairs(menuKeys) do
     local btn = new("TextButton", {Parent = left, Size=UDim2.new(1,-24,0,46), Position=UDim2.new(0,12,0,12 + (i-1)*56), BackgroundColor3=Color3.fromRGB(12,26,48), Text=k, Font=Enum.Font.Gotham, TextSize=15, TextColor3=Color3.fromRGB(210,230,255), BorderSizePixel=0})
@@ -411,6 +414,18 @@ local function clearRight()
     for _,c in pairs(right:GetChildren()) do
         if c.Name ~= "ModesScroll" and not c:IsA("UIListLayout") then pcall(function() c:Destroy() end) end
     end
+end
+
+-- update nav color
+local function updateNavColor(newMenu)
+    for k,btn in pairs(menuButtons) do
+        if k == newMenu then
+            btn.BackgroundColor3 = Color3.fromRGB(40, 140, 220) -- Warna aktif
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(12, 26, 48) -- Warna non-aktif
+        end
+    end
+    activeMenu = newMenu
 end
 
 -- persistent modes scroll
@@ -439,19 +454,26 @@ end
 
 -- build pages
 local function showHome()
+    updateNavColor("Home")
     clearRight()
     new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Welcome to LEX Host (Cyber Neon)", Font=Enum.Font.GothamBold, TextSize=18, TextColor3=Color3.fromRGB(220,240,255)})
     new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,42), Size=UDim2.new(1,-16,0,64), BackgroundTransparency=1, Text="Klik 'Mount' untuk melihat daftar gunung. Semua tombol movement & utilities aktif.", Font=Enum.Font.Gotham, TextSize=13, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
 end
 
-local function showMountList() -- << FUNGSI DIGANTI UNTUK MENU MOUNT
+local function showMountList(isToggle) -- << FUNGSI MOUNT DENGAN TOGGLE
+    if isToggle and activeMenu == "Mount" then
+        showHome() -- Jika sudah terbuka, tutup dengan kembali ke Home
+        return
+    end
+
+    updateNavColor("Mount")
     clearRight()
     new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Mount List (Gunung)", Font=Enum.Font.GothamBold, TextSize=16, TextColor3=Color3.fromRGB(220,240,255)})
     new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,36), Size=UDim2.new(1,-16,0,36), BackgroundTransparency=1, Text="Klik salah satu untuk menjalankan skrip mount.", Font=Enum.Font.Gotham, TextSize=12, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
     local scr = ensureModesScroll()
-    -- clear existing buttons
+    
     for _,c in pairs(scr:GetChildren()) do if c:IsA("TextButton") then pcall(function() c:Destroy() end) end end
-    -- populate from scriptList (Mounts)
+    
     for _,it in ipairs(scriptList) do
         makeModeButton(scr, it.name, function()
             local ok, err = pcall(function()
@@ -460,7 +482,6 @@ local function showMountList() -- << FUNGSI DIGANTI UNTUK MENU MOUNT
                 if type(f) == "function" then f() else error("Invalid loadstring") end
             end)
             if not ok then
-                -- show error for 3s
                 local lbl = new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0, scr.AbsolutePosition.Y + scr.AbsoluteSize.Y + 8), Size = UDim2.new(1,-16,0,20), BackgroundTransparency=1, Text="Gagal run: "..tostring(err), Font=Enum.Font.Gotham, TextSize=12, TextColor3=Color3.fromRGB(255,180,180)})
                 delay(3, function() if lbl and lbl.Parent then lbl:Destroy() end end)
             end
@@ -469,6 +490,7 @@ local function showMountList() -- << FUNGSI DIGANTI UNTUK MENU MOUNT
 end
 
 local function showMovement()
+    updateNavColor("Movement")
     clearRight()
     new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Movement", Font=Enum.Font.GothamBold, TextSize=16, TextColor3=Color3.fromRGB(220,240,255)})
     -- fly toggle
@@ -551,6 +573,7 @@ local function showMovement()
 end
 
 local function showUtilities()
+    updateNavColor("Utilities")
     clearRight()
     new("TextLabel", {Parent = right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Utilities", Font=Enum.Font.GothamBold, TextSize=16, TextColor3=Color3.fromRGB(220,240,255)})
     -- ESP toggle
@@ -602,6 +625,7 @@ local function showUtilities()
 end
 
 local function showInfo()
+    updateNavColor("Info")
     clearRight()
     new("TextLabel",{Parent=right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Info & Credits", Font=Enum.Font.GothamBold, TextSize=16, TextColor3=Color3.fromRGB(220,240,255)})
     new("TextLabel",{Parent=right, Position=UDim2.new(0,8,0,42), Size=UDim2.new(1,-16,0,120), BackgroundTransparency=1, Text="LEX Host v3 (Cyber Neon Enhanced)\nFeatures: Mounts loader, Movement toggles, Utilities, Scrollable list, Stable minimize/restore.\nCreated by: Custom LEX Build & AI Assisted UI/UX", Font=Enum.Font.Gotham, TextSize=13, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
@@ -610,12 +634,16 @@ local function showInfo()
     exitBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
 end
 
--- connect menu events
-menuButtons["Home"].MouseButton1Click:Connect(showHome)
-menuButtons["Mount"].MouseButton1Click:Connect(showMountList) -- << DIGANTI: showModeList -> showMountList
-menuButtons["Movement"].MouseButton1Click:Connect(showMovement)
-menuButtons["Utilities"].MouseButton1Click:Connect(showUtilities)
-menuButtons["Info"].MouseButton1Click:Connect(showInfo)
+-- connect menu events (MODIFIKASI UTAMA DI SINI)
+menuButtons["Home"].MouseButton1Click:Connect(function() showHome() end)
+menuButtons["Movement"].MouseButton1Click:Connect(function() showMovement() end)
+menuButtons["Utilities"].MouseButton1Click:Connect(function() showUtilities() end)
+menuButtons["Info"].MouseButton1Click:Connect(function() showInfo() end)
+
+-- Tombol Mount menggunakan logika toggle
+menuButtons["Mount"].MouseButton1Click:Connect(function()
+    showMountList(true) -- Pass 'true' untuk mengaktifkan logika toggle
+end)
 
 -- default
 showHome()
