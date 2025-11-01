@@ -1,9 +1,9 @@
--- LEX VIP - Ocean Edition (All-in-one)
+-- LEX VIP - Ocean Lite (All-in-one)
 -- Generated: 01/11/2025
 -- Place this LocalScript in StarterGui (or execute in a LocalScript environment)
 -- ⚠️ USE AT YOUR OWN RISK ⚠️
 
--- Services
+-- SERVICES
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -17,21 +17,22 @@ local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- Main table
+-- MAIN TABLE
 local LexHost = {}
-LexHost.Version = "2.5.0"
+LexHost.Version = "2.5.1-lite"
 LexHost.Enabled = {
     Fly = false,
     Speed = false,
     Noclip = false,
     ESP = false,
     AutoFarm = false,
+    AirWalk = false,
 }
 LexHost.FlySpeed = 45
 LexHost.SpeedMultiplier = 2
 LexHost.OriginalSpeed = Humanoid.WalkSpeed
 
--- Utility: quick instance creator
+-- UTILITY: quick instance creator
 local function new(class, props)
     local o = Instance.new(class)
     if props then
@@ -46,61 +47,68 @@ local function new(class, props)
     return o
 end
 
--- ---------- Feature Logic (UI-only control) ----------
+-- Keep references to created controllers so we can clean up
+local controllers = {}
 
--- FLY (uses BodyVelocity + BodyGyro)
+-- ------------- FEATURES --------------
+
+-- FLY (standard free-fly; movement via WASD+Space/Shift when Fly enabled)
 do
     local bodyVelocity, bodyGyro, conn
     function LexHost.ToggleFly(state)
-        -- state = true/false or nil to toggle
         if state == nil then state = not LexHost.Enabled.Fly end
         LexHost.Enabled.Fly = state
         if state then
             -- create controllers
             bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.Name = "LexFly"
+            bodyVelocity.Name = "LEX_FLY_VELOCITY"
             bodyVelocity.MaxForce = Vector3.new(9e9,9e9,9e9)
             bodyVelocity.Velocity = Vector3.new(0,0,0)
             bodyVelocity.Parent = RootPart
+            controllers.FlyBV = bodyVelocity
 
             bodyGyro = Instance.new("BodyGyro")
-            bodyGyro.Name = "LexGyro"
+            bodyGyro.Name = "LEX_FLY_GYRO"
             bodyGyro.MaxTorque = Vector3.new(9e9,9e9,9e9)
             bodyGyro.P = 9e9
             bodyGyro.Parent = RootPart
+            controllers.FlyBG = bodyGyro
 
             conn = RunService.Heartbeat:Connect(function()
                 if not LexHost.Enabled.Fly then return end
                 local cam = Workspace.CurrentCamera
                 if not cam then return end
-                local mv = Vector3.new()
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then mv = mv + cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then mv = mv - cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then mv = mv - cam.CFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then mv = mv + cam.CFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then mv = mv + Vector3.new(0,1,0) end
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then mv = mv - Vector3.new(0,1,0) end
+                local move = Vector3.new()
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + cam.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - cam.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - cam.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + cam.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then move = move - Vector3.new(0,1,0) end
 
-                if RootPart:FindFirstChild("LexFly") then
-                    if mv.Magnitude > 0 then
-                        RootPart.LexFly.Velocity = mv.Unit * LexHost.FlySpeed
+                if RootPart:FindFirstChild("LEX_FLY_VELOCITY") then
+                    if move.Magnitude > 0 then
+                        RootPart.LEX_FLY_VELOCITY.Velocity = move.Unit * LexHost.FlySpeed
                     else
-                        RootPart.LexFly.Velocity = Vector3.new(0,0,0)
+                        RootPart.LEX_FLY_VELOCITY.Velocity = Vector3.new(0,0,0)
                     end
                 end
-                if RootPart:FindFirstChild("LexGyro") and cam then
-                    RootPart.LexGyro.CFrame = cam.CFrame
+                if RootPart:FindFirstChild("LEX_FLY_GYRO") and cam then
+                    RootPart.LEX_FLY_GYRO.CFrame = cam.CFrame
                 end
             end)
+            controllers.FlyConn = conn
         else
-            if conn then conn:Disconnect(); conn = nil end
-            if bodyVelocity and bodyVelocity.Parent then bodyVelocity:Destroy() end
-            if bodyGyro and bodyGyro.Parent then bodyGyro:Destroy() end
+            -- cleanup
+            if controllers.FlyConn then controllers.FlyConn:Disconnect(); controllers.FlyConn = nil end
+            if controllers.FlyBV and controllers.FlyBV.Parent then controllers.FlyBV:Destroy() end
+            if controllers.FlyBG and controllers.FlyBG.Parent then controllers.FlyBG:Destroy() end
+            controllers.FlyBV = nil; controllers.FlyBG = nil
         end
     end
 end
 
--- SPEED (WalkSpeed multiplier)
+-- SPEED (walk speed multiplier)
 do
     function LexHost.ToggleSpeed(state)
         if state == nil then state = not LexHost.Enabled.Speed end
@@ -121,10 +129,10 @@ end
 
 -- NOCLIP
 do
-    LexHost.ToggleNoclip = function(state)
+    function LexHost.ToggleNoclip(state)
         if state == nil then state = not LexHost.Enabled.Noclip end
         LexHost.Enabled.Noclip = state
-        -- behavior enforced in Stepped
+        -- collision removal enforced in Stepped
     end
     RunService.Stepped:Connect(function()
         if LexHost.Enabled.Noclip and Character and Character.Parent then
@@ -137,7 +145,107 @@ do
     end)
 end
 
--- CLICK TELEPORT (teleport to mouse hit)
+-- AIRWALK (jalan di udara; melewati rintangan; berperilaku seperti walk-on-air)
+do
+    local bv, bg, hbConn
+    local targetY = nil
+
+    local function setCharacterNoclip(bool)
+        for _, part in pairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                pcall(function() part.CanCollide = not not (not bool) end) -- set false when bool true
+            end
+        end
+    end
+
+    function LexHost.ToggleAirWalk(state)
+        if state == nil then state = not LexHost.Enabled.AirWalk end
+        LexHost.Enabled.AirWalk = state
+
+        if state then
+            -- set initial hover height as current Y
+            targetY = RootPart.Position.Y
+
+            -- ensure noclip so character can pass through geometry
+            setCharacterNoclip(true)
+
+            -- create BodyVelocity to control horizontal movement; we constrain vertical to hold targetY
+            bv = Instance.new("BodyVelocity")
+            bv.Name = "LEX_AIRWALK_BV"
+            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            bv.Velocity = Vector3.new(0,0,0)
+            bv.Parent = RootPart
+            controllers.AirBV = bv
+
+            -- small BodyGyro to keep orientation stable (match camera)
+            bg = Instance.new("BodyGyro")
+            bg.Name = "LEX_AIRWALK_BG"
+            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.P = 9e8
+            bg.Parent = RootPart
+            controllers.AirBG = bg
+
+            -- heartbeat: compute horizontal movement and maintain Y
+            hbConn = RunService.Heartbeat:Connect(function()
+                if not LexHost.Enabled.AirWalk then return end
+                local cam = Workspace.CurrentCamera
+                if not cam then return end
+
+                -- movement vector parallel to camera (horizontal plane)
+                local move = Vector3.new()
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + cam.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - cam.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - cam.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + cam.CFrame.RightVector end
+
+                -- flatten y component so movement is horizontal
+                move = Vector3.new(move.X, 0, move.Z)
+
+                -- determine horizontal speed (use SpeedMultiplier if Speed enabled)
+                local speed = LexHost.FlySpeed
+                if LexHost.Enabled.Speed then
+                    speed = speed * (LexHost.SpeedMultiplier / 2) -- tuned: speed multiplier interacts nicely
+                end
+
+                if move.Magnitude > 0 then
+                    bv.Velocity = move.Unit * speed + Vector3.new(0, 0, 0)
+                else
+                    bv.Velocity = Vector3.new(0, 0, 0)
+                end
+
+                -- maintain height by nudging up/down if deviated
+                local currentY = RootPart.Position.Y
+                local dy = targetY - currentY
+                -- small smoothing factor
+                local vy = math.clamp(dy * 8, -50, 50)
+                -- apply vertical correction by setting RootPart velocity's Y separately
+                bv.Velocity = Vector3.new(bv.Velocity.X, vy, bv.Velocity.Z)
+
+                -- align orientation with camera for natural feel
+                if bg and Workspace.CurrentCamera then
+                    bg.CFrame = CFrame.new(RootPart.Position, RootPart.Position + Workspace.CurrentCamera.CFrame.LookVector)
+                end
+            end)
+            controllers.AirConn = hbConn
+
+        else
+            -- disable airwalk: restore collisions and cleanup
+            if controllers.AirConn then controllers.AirConn:Disconnect(); controllers.AirConn = nil end
+            if controllers.AirBV and controllers.AirBV.Parent then controllers.AirBV:Destroy() end
+            if controllers.AirBG and controllers.AirBG.Parent then controllers.AirBG:Destroy() end
+            controllers.AirBV = nil; controllers.AirBG = nil
+            -- attempt restore collisions to true (note: if part should be uncollidable originally, this will set true)
+            for _, part in pairs(Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    pcall(function() part.CanCollide = true end)
+                end
+            end
+            targetY = nil
+        end
+    end
+end
+
+-- CLICK TELEPORT
 do
     local mouse = LocalPlayer:GetMouse()
     function LexHost.ClickTeleport()
@@ -151,7 +259,8 @@ end
 
 -- ESP (Billboards + Highlight)
 do
-    local espConnections = {}
+    LexHost.Enabled.ESP = false
+    local espConns = {}
     local function addESPTo(player)
         if player == LocalPlayer then return end
         local function attach(character)
@@ -177,7 +286,7 @@ do
             nameLabel.Text = player.Name
             nameLabel.Font = Enum.Font.GothamBold
             nameLabel.TextScaled = true
-            nameLabel.TextColor3 = Color3.fromRGB(200,240,255)
+            nameLabel.TextColor3 = Color3.fromRGB(190,230,255)
 
             local distLabel = Instance.new("TextLabel", frame)
             distLabel.Size = UDim2.new(1,0,0.5,0)
@@ -185,13 +294,13 @@ do
             distLabel.BackgroundTransparency = 1
             distLabel.Font = Enum.Font.Gotham
             distLabel.TextScaled = true
-            distLabel.TextColor3 = Color3.fromRGB(170,230,220)
+            distLabel.TextColor3 = Color3.fromRGB(160,220,210)
 
             local highlight = Instance.new("Highlight", character)
             highlight.Name = "LEX_HIGHLIGHT"
-            highlight.FillColor = Color3.fromRGB(120,170,255)
-            highlight.OutlineColor = Color3.fromRGB(20,120,255)
-            highlight.FillTransparency = 0.5
+            highlight.FillColor = Color3.fromRGB(120,160,255)
+            highlight.OutlineColor = Color3.fromRGB(30,110,230)
+            highlight.FillTransparency = 0.55
             highlight.OutlineTransparency = 0
 
             local hb = RunService.Heartbeat:Connect(function()
@@ -200,7 +309,7 @@ do
                     distLabel.Text = math.floor(d) .. "m"
                 end
             end)
-            table.insert(espConnections, hb)
+            table.insert(espConns, hb)
         end
 
         if player.Character then attach(player.Character) end
@@ -214,7 +323,6 @@ do
             for _, p in pairs(Players:GetPlayers()) do addESPTo(p) end
             Players.PlayerAdded:Connect(addESPTo)
         else
-            -- cleanup
             for _, p in pairs(Players:GetPlayers()) do
                 if p.Character then
                     for _, v in pairs(p.Character:GetDescendants()) do
@@ -224,15 +332,15 @@ do
                     end
                 end
             end
-            for _, c in pairs(espConnections) do
+            for _, c in pairs(espConns) do
                 if c then c:Disconnect() end
             end
-            espConnections = {}
+            espConns = {}
         end
     end
 end
 
--- FULLBRIGHT & WEATHER
+-- FULLBRIGHT (light environment)
 do
     function LexHost.EnableFullbright()
         Lighting.Brightness = 2
@@ -241,6 +349,7 @@ do
         Lighting.GlobalShadows = false
         Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
     end
+    -- call initially
     LexHost.EnableFullbright()
 end
 
@@ -268,7 +377,7 @@ do
     end)
 end
 
--- INFINITE JUMP
+-- INFINITE JUMP (still available)
 UserInputService.JumpRequest:Connect(function()
     pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
 end)
@@ -295,7 +404,7 @@ do
     end)
 end
 
--- REMOVE PARTS FUNCTION
+-- REMOVE PARTS function
 function LexHost.RemovePartsByNames(names)
     if type(names) ~= "table" then return end
     for _, obj in pairs(Workspace:GetDescendants()) do
@@ -310,39 +419,30 @@ function LexHost.RemovePartsByNames(names)
     end
 end
 
--- ---------- UI (500x400 center, blue ocean theme) ----------
+-- --------------- UI ---------------
 
--- Cleanup any existing UI with same name
+-- Remove existing UI if present
 local existing = PlayerGui:FindFirstChild("LEX_VIP_UI")
 if existing then existing:Destroy() end
-
--- Blur effect in Lighting (shared)
-local blur = Lighting:FindFirstChild("LEX_VIP_Blur")
-if not blur then
-    blur = Instance.new("BlurEffect")
-    blur.Name = "LEX_VIP_Blur"
-    blur.Size = 0
-    blur.Parent = Lighting
-end
 
 -- ScreenGui
 local screenGui = new("ScreenGui", {Parent = PlayerGui, Name = "LEX_VIP_UI", ResetOnSpawn = false})
 screenGui.IgnoreGuiInset = true
 
--- Main frame container
+-- Main frame (500x400-ish, centered)
 local main = new("Frame", {
     Parent = screenGui,
     Name = "Main",
     AnchorPoint = Vector2.new(0.5,0.5),
     Position = UDim2.new(0.5, 0.5, 0.5, 0),
-    Size = UDim2.new(0,500,0,400),
-    BackgroundColor3 = Color3.fromRGB(18, 32, 61), -- deep navy base
+    Size = UDim2.new(0,520,0,400),
+    BackgroundColor3 = Color3.fromRGB(16, 34, 64), -- ocean deep base
     BorderSizePixel = 0,
 })
 new("UICorner", {Parent = main, CornerRadius = UDim.new(0,12)})
-new("UIStroke", {Parent = main, Color = Color3.fromRGB(35,85,160), Thickness = 1})
+new("UIStroke", {Parent = main, Color = Color3.fromRGB(40,110,200), Thickness = 1})
 
--- Top bar (title + buttons)
+-- Top bar
 local topBar = new("Frame", {Parent = main, Size = UDim2.new(1,0,0,56), BackgroundTransparency = 1})
 local title = new("TextLabel", {
     Parent = topBar,
@@ -367,30 +467,30 @@ local subtitle = new("TextLabel", {
     TextXAlignment = Enum.TextXAlignment.Left
 })
 
--- Close & Minimize
+-- Minimize & Close (no blur used)
 local btnClose = new("TextButton", {
     Parent = topBar, Size = UDim2.new(0,36,0,28), Position = UDim2.new(1,-48,0,14),
-    BackgroundColor3 = Color3.fromRGB(220,70,70), Text = "X", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(255,255,255)
+    BackgroundColor3 = Color3.fromRGB(200,70,70), Text = "X", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(255,255,255)
 })
 new("UICorner", {Parent = btnClose, CornerRadius = UDim.new(0,6)})
 local btnMin = new("TextButton", {
     Parent = topBar, Size = UDim2.new(0,36,0,28), Position = UDim2.new(1,-92,0,14),
-    BackgroundColor3 = Color3.fromRGB(45,95,170), Text = "-", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = Color3.fromRGB(255,255,255)
+    BackgroundColor3 = Color3.fromRGB(35,100,200), Text = "-", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = Color3.fromRGB(255,255,255)
 })
 new("UICorner", {Parent = btnMin, CornerRadius = UDim.new(0,6)})
 
--- Body layout
+-- Body
 local body = new("Frame", {Parent = main, Position = UDim2.new(0,12,0,64), Size = UDim2.new(1,-24,1,-76), BackgroundTransparency = 1})
 
--- Left menu
+-- Left menu nav
 local left = new("Frame", {Parent = body, Size = UDim2.new(0,140,1,0), BackgroundTransparency = 1})
 new("Frame", {Parent = left, Size = UDim2.new(1,0,1,0), BackgroundColor3 = Color3.fromRGB(12,24,46), BorderSizePixel = 0})
 new("UICorner", {Parent = left, CornerRadius = UDim.new(0,10)})
 
--- Right content area
+-- Right content
 local right = new("Frame", {Parent = body, Size = UDim2.new(1, -156, 1, 0), Position = UDim2.new(0,150,0,0), BackgroundTransparency = 1})
 
--- Menu buttons (Left)
+-- Left menu buttons
 local menuList = {
     {Key="Home", Label="Home"},
     {Key="Movement", Label="Movement"},
@@ -414,14 +514,13 @@ for i, data in ipairs(menuList) do
     menuButtons[data.Key] = btn
 end
 
--- Helpers to clear right area
+-- helpers
 local function clearRight()
     for _, c in pairs(right:GetChildren()) do
         if not c:IsA("UIListLayout") then pcall(function() c:Destroy() end) end
     end
 end
 
--- Small UI widget constructors
 local function makeToggle(parent, labelText, initial, onChange)
     local cont = new("Frame", {Parent = parent, Size = UDim2.new(1, -12, 0, 44), BackgroundTransparency = 1})
     local lbl = new("TextLabel", {Parent = cont, Size = UDim2.new(0.7,0,1,0), BackgroundTransparency = 1, Text = labelText, Font = Enum.Font.Gotham, TextSize = 15, TextColor3 = Color3.fromRGB(220,240,255), TextXAlignment = Enum.TextXAlignment.Left})
@@ -438,7 +537,6 @@ end
 
 local function makeSlider(parent, labelText, minv, maxv, initial, onChange)
     local cont = new("Frame", {Parent = parent, Size = UDim2.new(1, -12, 0, 62), BackgroundTransparency = 1})
-    new("TextLabel", {Parent = cont, Position = UDim2.new(0,0,0,0), Size = UDim2.new(0.6,0,0,0), BackgroundTransparency = 1})
     local lbl = new("TextLabel", {Parent = cont, Position = UDim2.new(0,0,0,0), Size = UDim2.new(0.6,0,0,22), BackgroundTransparency = 1, Text = labelText, Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(210,230,255), TextXAlignment = Enum.TextXAlignment.Left})
     local valLbl = new("TextLabel", {Parent = cont, Position = UDim2.new(0.6,0,0,0), Size = UDim2.new(0.4,-12,0,22), BackgroundTransparency = 1, Text = tostring(initial), Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(180,210,235), TextXAlignment = Enum.TextXAlignment.Right})
     local bar = new("Frame", {Parent = cont, Position = UDim2.new(0,6,0,28), Size = UDim2.new(1,-12,0,14), BackgroundColor3 = Color3.fromRGB(23,44,76)})
@@ -471,26 +569,33 @@ local function makeSlider(parent, labelText, minv, maxv, initial, onChange)
     return cont
 end
 
--- Build pages
+-- PAGE BUILDS
 local function showHome()
     clearRight()
-    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Welcome to LEX VIP", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = Color3.fromRGB(220,240,255)})
-    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,42), Size = UDim2.new(1,-16,0,48), BackgroundTransparency = 1, Text = "Ocean Edition — centralized control panel for LEX HOST VIP features. Use toggles and sliders to control behavior. Minimize to hide the panel.", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = Color3.fromRGB(170,200,230), TextWrapped = true})
+    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Welcome to LEX VIP (Ocean Lite)", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = Color3.fromRGB(220,240,255)})
+    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,42), Size = UDim2.new(1,-16,0,64), BackgroundTransparency = 1, Text = "Lightweight control panel. Use toggles to enable features. AirWalk lets you walk in the air and pass through obstacles (W/A/S/D to move).", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = Color3.fromRGB(170,200,230), TextWrapped = true})
 end
 
 local function showMovement()
     clearRight()
     new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Movement", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(220,240,255)})
-    local fly = makeToggle(right, "Fly (uses WASD + Space/Shift while Fly enabled)", LexHost.Enabled.Fly, function(state) LexHost.ToggleFly(state) end)
+
+    local fly = makeToggle(right, "Fly (free fly)", LexHost.Enabled.Fly, function(state) LexHost.ToggleFly(state) end)
     fly.Parent = right
-    local noclip = makeToggle(right, "Noclip", LexHost.Enabled.Noclip, function(state) LexHost.ToggleNoclip(state) end)
+
+    local air = makeToggle(right, "AirWalk (walk on air & pass obstacles)", LexHost.Enabled.AirWalk, function(state) LexHost.ToggleAirWalk(state) end)
+    air.Parent = right
+
+    local noclip = makeToggle(right, "Noclip (disable collisions for character)", LexHost.Enabled.Noclip, function(state) LexHost.ToggleNoclip(state) end)
     noclip.Parent = right
-    local speedToggle = makeToggle(right, "Speed Hack", LexHost.Enabled.Speed, function(state) LexHost.ToggleSpeed(state) end)
+
+    local speedToggle = makeToggle(right, "Speed Hack (multiplies walk speed)", LexHost.Enabled.Speed, function(state) LexHost.ToggleSpeed(state) end)
     speedToggle.Parent = right
+
     local speedSlider = makeSlider(right, "Speed Multiplier", 1, 12, LexHost.SpeedMultiplier, function(val) LexHost.SetSpeedMultiplier(val) end)
     speedSlider.Parent = right
 
-    local tpBtn = new("TextButton", {Parent = right, Position = UDim2.new(0,8,0,220), Size = UDim2.new(1,-16,0,40), BackgroundColor3 = Color3.fromRGB(55,110,210), Text = "Click Teleport (use mouse)", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(255,255,255)})
+    local tpBtn = new("TextButton", {Parent = right, Position = UDim2.new(0,8,0,260), Size = UDim2.new(1,-16,0,40), BackgroundColor3 = Color3.fromRGB(45,100,200), Text = "Click Teleport (use mouse)", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(255,255,255)})
     new("UICorner", {Parent = tpBtn, CornerRadius = UDim.new(0,8)})
     tpBtn.MouseButton1Click:Connect(function() LexHost.ClickTeleport() end)
 end
@@ -498,11 +603,14 @@ end
 local function showUtilities()
     clearRight()
     new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Utilities", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(220,240,255)})
+
     local esp = makeToggle(right, "ESP (billboards + highlight)", LexHost.Enabled.ESP, function(state) LexHost.ToggleESP(state) end)
     esp.Parent = right
+
     local full = makeToggle(right, "Fullbright (environment)", true, function(state) if state then LexHost.EnableFullbright() end end)
     full.Parent = right
-    local god = makeToggle(right, "God Mode", true, function(state)
+
+    local god = makeToggle(right, "God Mode (infinite HP)", true, function(state)
         if state then
             Humanoid.MaxHealth = math.huge; Humanoid.Health = math.huge
         else
@@ -510,6 +618,7 @@ local function showUtilities()
         end
     end)
     god.Parent = right
+
     local auto = makeToggle(right, "Auto Farm (collect items automatically)", LexHost.Enabled.AutoFarm, function(state) LexHost.Enabled.AutoFarm = state end)
     auto.Parent = right
 end
@@ -525,7 +634,6 @@ local function showWorld()
     remBtn.MouseButton1Click:Connect(function()
         local text = input.Text or ""
         if text == "" then
-            -- quick feedback
             local tmp = new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,176), Size = UDim2.new(1,-16,0,24), BackgroundTransparency = 1, Text = "Enter names to remove.", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(240,200,200)})
             delay(2, function() if tmp and tmp.Parent then tmp:Destroy() end end)
             return
@@ -544,20 +652,6 @@ end
 local function showMisc()
     clearRight()
     new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Misc", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(220,240,255)})
-    local blurToggle = makeToggle(right, "Background Blur (menu)", false, function(state)
-        if state then
-            -- tween blur in
-            spawn(function()
-                for i = blur.Size, 12, 1 do blur.Size = i; task.wait(0.01) end
-            end)
-        else
-            spawn(function()
-                for i = blur.Size, 0, -1 do blur.Size = i; task.wait(0.01) end
-            end)
-        end
-    end)
-    blurToggle.Parent = right
-
     local hideReplay = makeToggle(right, "Attempt hide 'Replay' GUIs (if any)", false, function(state)
         if state then
             for _, g in pairs(PlayerGui:GetChildren()) do
@@ -567,24 +661,23 @@ local function showMisc()
                 end
             end
         else
-            -- cannot reliably restore unknown third-party GUIs
             print("[LEX VIP] Replay hiding toggled OFF (manual restore may be required).")
         end
     end)
     hideReplay.Parent = right
 end
 
--- Connect menu clicks
+-- connect menus
 menuButtons["Home"].MouseButton1Click:Connect(showHome)
 menuButtons["Movement"].MouseButton1Click:Connect(showMovement)
 menuButtons["Utilities"].MouseButton1Click:Connect(showUtilities)
 menuButtons["World"].MouseButton1Click:Connect(showWorld)
 menuButtons["Misc"].MouseButton1Click:Connect(showMisc)
 
--- Default page
+-- default
 showHome()
 
--- Make main draggable (from topBar)
+-- make draggable from topBar
 do
     local dragging, dragInput, dragStart, startPos
     local function update(input)
@@ -609,30 +702,25 @@ do
     end)
 end
 
--- Minimize / close behavior (with animations)
+-- minimize/close behavior
 local minimized = false
 local stub
 btnClose.MouseButton1Click:Connect(function()
     pcall(function() screenGui:Destroy() end)
-    if blur and blur.Parent then blur.Size = 0 end
 end)
 btnMin.MouseButton1Click:Connect(function()
     if not minimized then
-        -- minimize: animate shrink + hide contents
         local shrink = TweenService:Create(main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 220, 0, 46)})
         shrink:Play()
         for _, child in pairs(main:GetChildren()) do
-            if child ~= topBar then
-                child.Visible = false
-            end
+            if child ~= topBar then child.Visible = false end
         end
         minimized = true
-        -- create stub to restore
         if not stub or not stub.Parent then
-            stub = new("TextButton", {Parent = screenGui, Size = UDim2.new(0,160,0,38), Position = UDim2.new(0.5,-80,0.9,0), AnchorPoint = Vector2.new(0.5,0.5), BackgroundColor3 = Color3.fromRGB(20,40,75), Text = "LEX VIP (Click to restore)", Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(210,230,255)})
+            stub = new("TextButton", {Parent = screenGui, Size = UDim2.new(0,160,0,38), Position = UDim2.new(0.5,-80,0.9,0), AnchorPoint = Vector2.new(0.5,0.5), BackgroundColor3 = Color3.fromRGB(12,28,54), Text = "LEX VIP (restore)", Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(200,230,255)})
             new("UICorner", {Parent = stub, CornerRadius = UDim.new(0,8)})
             stub.MouseButton1Click:Connect(function()
-                local expand = TweenService:Create(main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0,500,0,400)})
+                local expand = TweenService:Create(main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0,520,0,400)})
                 expand:Play()
                 for _, child in pairs(main:GetChildren()) do child.Visible = true end
                 minimized = false
@@ -640,26 +728,21 @@ btnMin.MouseButton1Click:Connect(function()
             end)
         end
     else
-        -- restore
         if stub and stub.Parent then stub:Destroy(); stub = nil end
-        local expand = TweenService:Create(main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0,500,0,400)})
+        local expand = TweenService:Create(main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0,520,0,400)})
         expand:Play()
         for _, child in pairs(main:GetChildren()) do child.Visible = true end
         minimized = false
     end
 end)
 
--- Open animation + blur fade-in
+-- open animation (slide-in)
 do
     main.Position = UDim2.new(0.5, 0, -0.5, 0)
     main.Visible = true
-    local t1 = TweenService:Create(main, TweenInfo.new(0.33, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0.5, 0)})
+    local t1 = TweenService:Create(main, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0.5, 0)})
     t1:Play()
-    -- blur tween
-    spawn(function()
-        for i=0,12,1 do blur.Size = i; task.wait(0.01) end
-    end)
 end
 
--- Final prints
+-- final print
 print("[LEX VIP] UI loaded. Version: "..LexHost.Version)
