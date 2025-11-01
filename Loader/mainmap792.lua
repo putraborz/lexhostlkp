@@ -130,17 +130,17 @@ Side.BackgroundColor3 = Color3.fromRGB(8, 15, 35)
 Side.BackgroundTransparency = 0.3
 Side.BorderSizePixel = 0
 
-local Tabs = {"Home","Mount","Movement","Utilities","Clone","Info"}
+local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Info"}
 local Buttons = {}
 for i, v in ipairs(Tabs) do
 	local B = Instance.new("TextButton", Side)
 	B.Text = v
-	B.Size = UDim2.new(1, -15, 0, 45)
-	B.Position = UDim2.new(0, 7.5, 0, (i - 1) * 52 + 15)
+	B.Size = UDim2.new(1, -15, 0, 42)
+	B.Position = UDim2.new(0, 7.5, 0, (i - 1) * 48 + 12)
 	B.BackgroundColor3 = Color3.fromRGB(15, 25, 50)
 	B.TextColor3 = Color3.fromRGB(0, 200, 255)
 	B.Font = Enum.Font.GothamBold
-	B.TextSize = 15
+	B.TextSize = 14
 	B.AutoButtonColor = false
 	B.BorderSizePixel = 0
 	local s = Instance.new("UIStroke", B)
@@ -178,6 +178,8 @@ local GITHUB_URLS = {
 	Mount = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Modes.lua",
 	Movement = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Movement.lua",
 	Utilities = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Utilities.lua",
+	Clone = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Clone.lua",
+	Parts = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Parts.lua",
 	Info = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Info.lua"
 }
 
@@ -275,6 +277,16 @@ ClonePage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 ClonePage.CanvasSize = UDim2.new(0, 0, 0, 400)
 ClonePage.Visible = false
 
+local PartsPage = Instance.new("ScrollingFrame", Content)
+PartsPage.Name = "Parts"
+PartsPage.Size = UDim2.new(1, 0, 1, 0)
+PartsPage.BackgroundTransparency = 1
+PartsPage.BorderSizePixel = 0
+PartsPage.ScrollBarThickness = 8
+PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
+PartsPage.Visible = false
+
 local InfoPage = Instance.new("ScrollingFrame", Content)
 InfoPage.Name = "Info"
 InfoPage.Size = UDim2.new(1, 0, 1, 0)
@@ -284,124 +296,6 @@ InfoPage.ScrollBarThickness = 8
 InfoPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 InfoPage.CanvasSize = UDim2.new(0, 0, 0, 350)
 InfoPage.Visible = false
-
--- Clone Avatar Page Content
-local function InitializeClonePage()
-	local CloneTitle = Instance.new("TextLabel", ClonePage)
-	CloneTitle.Size = UDim2.new(1, -10, 0, 40)
-	CloneTitle.Position = UDim2.new(0, 5, 0, 10)
-	CloneTitle.BackgroundTransparency = 1
-	CloneTitle.Text = "🎭 Clone Player Avatar"
-	CloneTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
-	CloneTitle.Font = Enum.Font.GothamBold
-	CloneTitle.TextSize = 20
-	CloneTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-	local CloneDesc = Instance.new("TextLabel", ClonePage)
-	CloneDesc.Size = UDim2.new(1, -10, 0, 30)
-	CloneDesc.Position = UDim2.new(0, 5, 0, 55)
-	CloneDesc.BackgroundTransparency = 1
-	CloneDesc.Text = "Copy the appearance of any player in the server"
-	CloneDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
-	CloneDesc.Font = Enum.Font.Gotham
-	CloneDesc.TextSize = 14
-	CloneDesc.TextXAlignment = Enum.TextXAlignment.Left
-
-	local SearchLabel = Instance.new("TextLabel", ClonePage)
-	SearchLabel.Size = UDim2.new(1, -10, 0, 25)
-	SearchLabel.Position = UDim2.new(0, 5, 0, 100)
-	SearchLabel.BackgroundTransparency = 1
-	SearchLabel.Text = "Search Player:"
-	SearchLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-	SearchLabel.Font = Enum.Font.GothamBold
-	SearchLabel.TextSize = 15
-	SearchLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-	local SearchBox = Instance.new("TextBox", ClonePage)
-	SearchBox.Size = UDim2.new(1, -10, 0, 40)
-	SearchBox.Position = UDim2.new(0, 5, 0, 130)
-	SearchBox.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
-	SearchBox.PlaceholderText = "Type player name..."
-	SearchBox.Text = ""
-	SearchBox.Font = Enum.Font.Gotham
-	SearchBox.TextSize = 14
-	SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-	SearchBox.BorderSizePixel = 0
-	local SearchCorner = Instance.new("UICorner", SearchBox)
-	SearchCorner.CornerRadius = UDim.new(0, 8)
-	local SearchStroke = Instance.new("UIStroke", SearchBox)
-	SearchStroke.Color = Color3.fromRGB(0, 160, 255)
-	SearchStroke.Thickness = 2
-
-	local CloneBtn = Instance.new("TextButton", ClonePage)
-	CloneBtn.Size = UDim2.new(1, -10, 0, 45)
-	CloneBtn.Position = UDim2.new(0, 5, 0, 180)
-	CloneBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-	CloneBtn.Text = "🎭 Clone Avatar"
-	CloneBtn.Font = Enum.Font.GothamBold
-	CloneBtn.TextSize = 16
-	CloneBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	CloneBtn.BorderSizePixel = 0
-	local CloneBtnCorner = Instance.new("UICorner", CloneBtn)
-	CloneBtnCorner.CornerRadius = UDim.new(0, 10)
-	CloneBtn.MouseEnter:Connect(function() CloneBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 240) end)
-	CloneBtn.MouseLeave:Connect(function() CloneBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200) end)
-
-	CloneBtn.MouseButton1Click:Connect(function()
-		local targetName = SearchBox.Text
-		for _, v in pairs(game.Players:GetPlayers()) do
-			if v.Name:lower():find(targetName:lower()) and v.Character then
-				local targetChar = v.Character
-				
-				for _, obj in pairs(character:GetChildren()) do
-					if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
-						obj:Destroy()
-					elseif obj:IsA("Accessory") or obj:IsA("Hat") then
-						obj:Destroy()
-					end
-				end
-				
-				for _, obj in pairs(targetChar:GetChildren()) do
-					if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
-						obj:Clone().Parent = character
-					elseif obj:IsA("Accessory") or obj:IsA("Hat") then
-						obj:Clone().Parent = character
-					end
-				end
-				
-				if targetChar:FindFirstChild("Body Colors") then
-					local bc = character:FindFirstChild("Body Colors") or Instance.new("BodyColors", character)
-					local tbc = targetChar["Body Colors"]
-					bc.HeadColor = tbc.HeadColor
-					bc.TorsoColor = tbc.TorsoColor
-					bc.LeftArmColor = tbc.LeftArmColor
-					bc.RightArmColor = tbc.RightArmColor
-					bc.LeftLegColor = tbc.LeftLegColor
-					bc.RightLegColor = tbc.RightLegColor
-				end
-				
-				local head = character:FindFirstChild("Head")
-				if head then
-					local face = head:FindFirstChildOfClass("Decal")
-					local targetHead = targetChar:FindFirstChild("Head")
-					if targetHead then
-						local targetFace = targetHead:FindFirstChildOfClass("Decal")
-						if face and targetFace then
-							face.Texture = targetFace.Texture
-						end
-					end
-				end
-				
-				CloneBtn.Text = "✅ Cloned Successfully!"
-				wait(2)
-				CloneBtn.Text = "🎭 Clone Avatar"
-				break
-			end
-		end
-	end)
-end
-
-InitializeClonePage()
 
 -- Load Modules from GitHub
 spawn(function()
@@ -426,6 +320,16 @@ spawn(function()
 	if UtilitiesModule then UtilitiesModule.Initialize(UtilitiesPage, player, character) end
 	
 	wait(0.3)
+	LoadingDesc.Text = "Loading Clone module..."
+	local CloneModule = LoadModule("Clone")
+	if CloneModule then CloneModule.Initialize(ClonePage, player, character) end
+	
+	wait(0.3)
+	LoadingDesc.Text = "Loading Parts module..."
+	local PartsModule = LoadModule("Parts")
+	if PartsModule then PartsModule.Initialize(PartsPage, player, character) end
+	
+	wait(0.3)
 	LoadingDesc.Text = "Loading Info module..."
 	local InfoModule = LoadModule("Info")
 	if InfoModule then InfoModule.Initialize(InfoPage) end
@@ -441,6 +345,7 @@ local function ShowTab(tab)
 	MovementPage.Visible = false
 	UtilitiesPage.Visible = false
 	ClonePage.Visible = false
+	PartsPage.Visible = false
 	InfoPage.Visible = false
 	LoadingFrame.Visible = false
 	
@@ -454,6 +359,8 @@ local function ShowTab(tab)
 		UtilitiesPage.Visible = true
 	elseif tab == "Clone" then
 		ClonePage.Visible = true
+	elseif tab == "Parts" then
+		PartsPage.Visible = true
 	elseif tab == "Info" then
 		InfoPage.Visible = true
 	end
