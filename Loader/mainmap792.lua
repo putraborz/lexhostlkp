@@ -1,5 +1,5 @@
 -- LEX HOST VIP - Advanced Script Generator
--- Generated: 01/11/2025, 10:55:00
+-- Generated: 01/11/2025, 11:01:06
 -- ⚠️ USE AT YOUR OWN RISK ⚠️
 
 local LexHost = {}
@@ -309,7 +309,7 @@ print("[LEX HOST] Auto Farm: ENABLED")
 -- UI CONFIGURATION
 LexHost.UI = {}
 LexHost.UI.Theme = "Dark"
-LexHost.UI.Position = "Right"
+LexHost.UI.Position = "Center"
 
 print("[LEX HOST] UI Theme: " .. LexHost.UI.Theme)
 print("[LEX HOST] UI Position: " .. LexHost.UI.Position)
