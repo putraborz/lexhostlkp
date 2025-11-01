@@ -1,166 +1,250 @@
--- 🌌 LEX HOST VIP Neon Menu
--- by ChatGPT (Full Ready-to-Use)
+-- 🌌 LEX HOST VIP v3 — Ultimate Neon Edition
+-- Made by ChatGPT ✨
+-- Fly + Speed Slider + God Mode + Neon Animation + Sound FX
 
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 
--- Hapus GUI lama jika ada
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+
+-- Bersihkan GUI lama
 if game.CoreGui:FindFirstChild("LEXHostVIP_UI") then
-    game.CoreGui:FindFirstChild("LEXHostVIP_UI"):Destroy()
+	game.CoreGui:FindFirstChild("LEXHostVIP_UI"):Destroy()
 end
 
--- 🧱 Buat GUI dasar
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "LEXHostVIP_UI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = game.CoreGui
+--------------------------------------------------
+-- 🔊 Sound FX Neon
+--------------------------------------------------
+local clickSound = Instance.new("Sound")
+clickSound.SoundId = "rbxassetid://5869292539" -- Soft neon click
+clickSound.Volume = 1
+clickSound.Parent = SoundService
 
--- Frame utama
+local function playClick()
+	task.spawn(function()
+		clickSound:Play()
+	end)
+end
+
+--------------------------------------------------
+-- 🧱 GUI Utama
+--------------------------------------------------
+local gui = Instance.new("ScreenGui")
+gui.Name = "LEXHostVIP_UI"
+gui.Parent = game.CoreGui
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+
+-- Main frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 320, 0, 270)
-mainFrame.Position = UDim2.new(0.5, -160, 0.5, -135)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 20, 40)
-mainFrame.BackgroundTransparency = 0.15
+mainFrame.Size = UDim2.new(0, 380, 0, 320)
+mainFrame.Position = UDim2.new(0.5, -190, 0.5, -160)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.BackgroundTransparency = 1
 mainFrame.Active = true
 mainFrame.Draggable = true
-mainFrame.Parent = screenGui
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 18)
+mainFrame.Parent = gui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 20)
 
+-- Glow Border
 local stroke = Instance.new("UIStroke", mainFrame)
-stroke.Color = Color3.fromRGB(150, 100, 255)
+stroke.Color = Color3.fromRGB(160, 100, 255)
 stroke.Thickness = 3
 stroke.Transparency = 0.4
 
--- 🌟 Judul
+-- Animasi fade-in + bounce
+mainFrame.Position = UDim2.new(0.5, -190, 1, 0)
+TweenService:Create(mainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+	Position = UDim2.new(0.5, -190, 0.5, -160),
+	BackgroundTransparency = 0.1
+}):Play()
+
+-- Title bar
 local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, 0, 0, 40)
-title.BackgroundTransparency = 0.2
-title.BackgroundColor3 = Color3.fromRGB(60, 40, 100)
-title.Font = Enum.Font.GothamBold
+title.Size = UDim2.new(1, 0, 0, 45)
+title.BackgroundColor3 = Color3.fromRGB(40, 30, 80)
 title.Text = "🔮 LEX HOST VIP"
+title.Font = Enum.Font.GothamBold
 title.TextScaled = true
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", title).CornerRadius = UDim.new(0, 12)
 
--- Efek warna pelangi
 local hue = 0
-game:GetService("RunService").RenderStepped:Connect(function()
-    hue = (hue + 1) % 360
-    title.TextColor3 = Color3.fromHSV(hue / 360, 1, 1)
+RunService.RenderStepped:Connect(function()
+	hue = (hue + 1) % 360
+	title.TextColor3 = Color3.fromHSV(hue / 360, 0.9, 1)
+	stroke.Color = Color3.fromHSV((hue / 360 + 0.2) % 1, 1, 1)
 end)
 
--- Tombol close
+-- Close button
 local closeBtn = Instance.new("TextButton", mainFrame)
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -38, 0, 6)
+closeBtn.Size = UDim2.new(0, 32, 0, 32)
+closeBtn.Position = UDim2.new(1, -42, 0, 6)
 closeBtn.Text = "✖"
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextScaled = true
-closeBtn.BackgroundColor3 = Color3.fromRGB(180, 60, 60)
+closeBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 60)
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
 closeBtn.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
+	playClick()
+	TweenService:Create(mainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+		Position = UDim2.new(0.5, -190, 1.5, 0),
+		BackgroundTransparency = 1
+	}):Play()
+	task.wait(0.5)
+	gui:Destroy()
 end)
 
--- 🧭 Container tombol menu
-local menuContainer = Instance.new("Frame", mainFrame)
-menuContainer.Size = UDim2.new(1, -20, 1, -60)
-menuContainer.Position = UDim2.new(0, 10, 0, 50)
-menuContainer.BackgroundTransparency = 1
+--------------------------------------------------
+-- 📦 Container Menu
+--------------------------------------------------
+local menu = Instance.new("Frame", mainFrame)
+menu.Size = UDim2.new(1, -30, 1, -70)
+menu.Position = UDim2.new(0, 15, 0, 60)
+menu.BackgroundTransparency = 1
 
--- Fungsi membuat tombol
-local function makeButton(name, color, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 40)
-    btn.BackgroundColor3 = color
-    btn.BackgroundTransparency = 0.1
-    btn.Text = name
-    btn.Font = Enum.Font.GothamBold
-    btn.TextScaled = true
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-    local stroke = Instance.new("UIStroke", btn)
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Thickness = 1.5
-    stroke.Transparency = 0.6
-    btn.MouseButton1Click:Connect(callback)
-    return btn
-end
-
--- 🕹️ Tombol Menu
-local layout = Instance.new("UIListLayout", menuContainer)
-layout.Padding = UDim.new(0, 8)
+local layout = Instance.new("UIListLayout", menu)
+layout.Padding = UDim.new(0, 12)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 layout.VerticalAlignment = Enum.VerticalAlignment.Top
 
--- 🚀 Fly
-local flyEnabled = false
+--------------------------------------------------
+-- 🧩 Utility fungsi buat tombol neon
+--------------------------------------------------
+local function makeButton(text, color)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 45)
+	btn.BackgroundColor3 = color
+	btn.BackgroundTransparency = 0.1
+	btn.Text = text
+	btn.Font = Enum.Font.GothamBold
+	btn.TextScaled = true
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.AutoButtonColor = true
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+	local s = Instance.new("UIStroke", btn)
+	s.Color = Color3.fromRGB(255, 255, 255)
+	s.Thickness = 1.4
+	s.Transparency = 0.5
+	btn.MouseEnter:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.05}):Play()
+	end)
+	btn.MouseLeave:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.1}):Play()
+	end)
+	return btn
+end
+
+--------------------------------------------------
+-- ✈️ FLY SYSTEM
+--------------------------------------------------
+local flying = false
 local flyConn
-menuContainer:WaitForChild("UIListLayout")
-local flyBtn = makeButton("✈️ Fly", Color3.fromRGB(90, 90, 160), function()
-    local char = player.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
-    flyEnabled = not flyEnabled
-    flyBtn.Text = flyEnabled and "🛑 Stop Fly" or "✈️ Fly"
-    if flyEnabled then
-        flyConn = game:GetService("RunService").Heartbeat:Connect(function()
-            if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-            local move = Vector3.zero
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then move = move + hrp.CFrame.LookVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then move = move - hrp.CFrame.LookVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then move = move - hrp.CFrame.RightVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then move = move + hrp.CFrame.RightVector end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0, 1, 0) end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then move = move - Vector3.new(0, 1, 0) end
-            hrp.Velocity = move * 100
-        end)
-    else
-        if flyConn then flyConn:Disconnect() flyConn = nil end
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            player.Character.HumanoidRootPart.Velocity = Vector3.zero
-        end
-    end
-end)
-flyBtn.Parent = menuContainer
+local flySpeed = 80
 
--- ⚡ Speed
-local speedEnabled = false
-local normalWalk = 16
-local boostedSpeed = 80
-local speedBtn = makeButton("⚡ Speed", Color3.fromRGB(100, 130, 200), function()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local humanoid = char:WaitForChild("Humanoid")
-    speedEnabled = not speedEnabled
-    humanoid.WalkSpeed = speedEnabled and boostedSpeed or normalWalk
-    speedBtn.Text = speedEnabled and "🛑 Stop Speed" or "⚡ Speed"
+local flyBtn = makeButton("✈️ Fly: OFF", Color3.fromRGB(90, 80, 150))
+flyBtn.Parent = menu
+flyBtn.MouseButton1Click:Connect(function()
+	playClick()
+	flying = not flying
+	flyBtn.Text = flying and "🛫 Fly: ON" or "✈️ Fly: OFF"
+	if flying then
+		local hrp = player.Character:WaitForChild("HumanoidRootPart")
+		flyConn = RunService.Heartbeat:Connect(function()
+			if not flying then return end
+			local move = Vector3.zero
+			if UIS:IsKeyDown(Enum.KeyCode.W) then move += hrp.CFrame.LookVector end
+			if UIS:IsKeyDown(Enum.KeyCode.S) then move -= hrp.CFrame.LookVector end
+			if UIS:IsKeyDown(Enum.KeyCode.A) then move -= hrp.CFrame.RightVector end
+			if UIS:IsKeyDown(Enum.KeyCode.D) then move += hrp.CFrame.RightVector end
+			if UIS:IsKeyDown(Enum.KeyCode.Space) then move += Vector3.new(0, 1, 0) end
+			if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then move -= Vector3.new(0, 1, 0) end
+			hrp.Velocity = move * flySpeed
+		end)
+	else
+		if flyConn then flyConn:Disconnect() flyConn = nil end
+		if player.Character:FindFirstChild("HumanoidRootPart") then
+			player.Character.HumanoidRootPart.Velocity = Vector3.zero
+		end
+	end
 end)
-speedBtn.Parent = menuContainer
 
--- 🛡️ God Mode
-local godEnabled = false
-local godBtn = makeButton("🛡️ God Mode", Color3.fromRGB(120, 80, 150), function()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local humanoid = char:WaitForChild("Humanoid")
-    godEnabled = not godEnabled
-    godBtn.Text = godEnabled and "🛑 Disable God Mode" or "🛡️ God Mode"
-    if godEnabled then
-        humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-        humanoid.Health = math.huge
-        humanoid.MaxHealth = math.huge
-    else
-        humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
-        humanoid.Health = 100
-        humanoid.MaxHealth = 100
-    end
+--------------------------------------------------
+-- ⚡ SPEED SLIDER
+--------------------------------------------------
+local speedFrame = Instance.new("Frame", menu)
+speedFrame.Size = UDim2.new(1, 0, 0, 65)
+speedFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 120)
+speedFrame.BackgroundTransparency = 0.2
+Instance.new("UICorner", speedFrame).CornerRadius = UDim.new(0, 12)
+
+local label = Instance.new("TextLabel", speedFrame)
+label.Size = UDim2.new(1, 0, 0.4, 0)
+label.Position = UDim2.new(0, 0, 0, 4)
+label.Text = "⚡ Speed: 16"
+label.Font = Enum.Font.GothamBold
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.TextScaled = true
+label.BackgroundTransparency = 1
+
+local sliderBg = Instance.new("Frame", speedFrame)
+sliderBg.Size = UDim2.new(0.9, 0, 0.2, 0)
+sliderBg.Position = UDim2.new(0.05, 0, 0.65, 0)
+sliderBg.BackgroundColor3 = Color3.fromRGB(90, 70, 160)
+Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
+
+local fill = Instance.new("Frame", sliderBg)
+fill.BackgroundColor3 = Color3.fromRGB(150, 120, 255)
+fill.Size = UDim2.new(0.15, 0, 1, 0)
+Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+
+local dragging = false
+sliderBg.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		playClick()
+	end
 end)
-godBtn.Parent = menuContainer
-
--- 🎞️ Replay System (memanggil fungsi Replay kamu)
-local replayBtn = makeButton("🎬 Replay System", Color3.fromRGB(90, 60, 180), function()
-    -- Jalankan sistem replay kamu di sini
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/putraborz/WataXMountAtin/refs/heads/main/Loader/10.lua"))()
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
 end)
-replayBtn.Parent = menuContainer
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local pos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+		fill.Size = UDim2.new(pos, 0, 1, 0)
+		local newSpeed = math.floor(16 + pos * (120 - 16))
+		humanoid.WalkSpeed = newSpeed
+		label.Text = "⚡ Speed: " .. newSpeed
+	end
+end)
 
-print("[LEX HOST VIP] Neon Menu Loaded Successfully!")
+--------------------------------------------------
+-- 🛡️ GOD MODE
+--------------------------------------------------
+local god = false
+local godBtn = makeButton("🛡️ God Mode: OFF", Color3.fromRGB(110, 70, 140))
+godBtn.Parent = menu
+godBtn.MouseButton1Click:Connect(function()
+	playClick()
+	god = not god
+	godBtn.Text = god and "🛡️ God Mode: ON" or "🛡️ God Mode: OFF"
+	if god then
+		humanoid.MaxHealth = math.huge
+		humanoid.Health = math.huge
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+	else
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+		humanoid.MaxHealth = 100
+		humanoid.Health = 100
+	end
+end)
+
+--------------------------------------------------
+print("[LEX HOST VIP v3] Ultimate Neon Menu loaded successfully.")
