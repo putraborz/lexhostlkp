@@ -1,10 +1,38 @@
 --// LEX Host v3 - Cyber Neon Transparent Edition
 --// Made by LEX Dev
---// Fully Functional & Scrollable Menu
+--// Fully Functional & Scrollable Menu with Toggle
 
 local LEXHost = Instance.new("ScreenGui", game.CoreGui)
 LEXHost.Name = "LEXHost"
 LEXHost.ResetOnSpawn = false
+
+-- Logo LX Horizontal (Toggle Button)
+local LogoButton = Instance.new("TextButton", LEXHost)
+LogoButton.Text = "LX"
+LogoButton.Font = Enum.Font.GothamBlack
+LogoButton.TextSize = 32
+LogoButton.TextColor3 = Color3.fromRGB(0, 220, 255)
+LogoButton.Position = UDim2.new(0.5, -40, 0.05, 0)
+LogoButton.Size = UDim2.new(0, 80, 0, 50)
+LogoButton.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
+LogoButton.BackgroundTransparency = 0.3
+LogoButton.BorderSizePixel = 0
+LogoButton.AutoButtonColor = false
+local LogoCorner = Instance.new("UICorner", LogoButton)
+LogoCorner.CornerRadius = UDim.new(0, 12)
+local LogoStroke = Instance.new("UIStroke", LogoButton)
+LogoStroke.Color = Color3.fromRGB(0, 200, 255)
+LogoStroke.Thickness = 2.5
+
+-- Glow effect untuk logo
+LogoButton.MouseEnter:Connect(function()
+	LogoButton.TextColor3 = Color3.fromRGB(100, 255, 255)
+	LogoStroke.Thickness = 3
+end)
+LogoButton.MouseLeave:Connect(function()
+	LogoButton.TextColor3 = Color3.fromRGB(0, 220, 255)
+	LogoStroke.Thickness = 2.5
+end)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = LEXHost
@@ -13,6 +41,7 @@ MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.Size = UDim2.new(0, 620, 0, 400)
 MainFrame.BackgroundColor3 = Color3.fromRGB(5, 10, 25)
 MainFrame.BackgroundTransparency = 0.35
+MainFrame.Visible = false -- Mulai hidden
 Instance.new("UICorner", MainFrame)
 local Stroke = Instance.new("UIStroke", MainFrame)
 Stroke.Color = Color3.fromRGB(0, 180, 255)
@@ -25,7 +54,7 @@ TopBar.BackgroundColor3 = Color3.fromRGB(10, 15, 35)
 TopBar.BackgroundTransparency = 0.4
 Instance.new("UICorner", TopBar)
 
--- Logo LX (Fixed - sekarang muncul di TopBar)
+-- Logo LX di TopBar
 local LX = Instance.new("TextLabel", TopBar)
 LX.Text = "LX"
 LX.Font = Enum.Font.GothamBlack
@@ -131,7 +160,7 @@ HomeDesc.BackgroundTransparency = 1
 HomeDesc.Position = UDim2.new(0, 0, 0, 50)
 HomeDesc.Size = UDim2.new(1, 0, 0, 200)
 HomeDesc.Font = Enum.Font.Gotham
-HomeDesc.Text = "Premium Exploit GUI\n\n✓ Multiple Game Modes\n✓ Movement Scripts\n✓ Teleport Features\n✓ Player Utilities\n\nSelect a tab to begin!"
+HomeDesc.Text = "Premium Exploit GUI\n\n✓ Multiple Game Modes\n✓ Movement Scripts\n✓ Teleport Features\n✓ Player Utilities\n✓ Copy Avatar\n\nSelect a tab to begin!"
 HomeDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
 HomeDesc.TextSize = 14
 HomeDesc.TextYAlignment = Enum.TextYAlignment.Top
@@ -249,7 +278,6 @@ local flying = false
 FlyBtn.MouseButton1Click:Connect(function()
 	flying = not flying
 	FlyBtn.Text = flying and "Fly: ON" or "Fly: OFF"
-	-- Basic fly script
 	if flying then
 		local ctrl = {f = 0, b = 0, l = 0, r = 0}
 		local speed = 50
@@ -315,7 +343,7 @@ UtilitiesPage.BackgroundTransparency = 1
 UtilitiesPage.BorderSizePixel = 0
 UtilitiesPage.ScrollBarThickness = 6
 UtilitiesPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
-UtilitiesPage.CanvasSize = UDim2.new(0, 0, 0, 500)
+UtilitiesPage.CanvasSize = UDim2.new(0, 0, 0, 600)
 UtilitiesPage.Visible = false
 
 -- Teleport Section
@@ -360,9 +388,97 @@ TeleportBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- Copy Avatar Section
+local AvatarLabel = Instance.new("TextLabel", UtilitiesPage)
+AvatarLabel.Position = UDim2.new(0, 5, 0, 140)
+AvatarLabel.Size = UDim2.new(1, -10, 0, 30)
+AvatarLabel.BackgroundTransparency = 1
+AvatarLabel.Text = "Copy Avatar"
+AvatarLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+AvatarLabel.Font = Enum.Font.GothamBold
+AvatarLabel.TextSize = 16
+
+local AvatarBox = Instance.new("TextBox", UtilitiesPage)
+AvatarBox.Position = UDim2.new(0, 5, 0, 175)
+AvatarBox.Size = UDim2.new(1, -10, 0, 35)
+AvatarBox.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+AvatarBox.PlaceholderText = "Enter player name to copy..."
+AvatarBox.Text = ""
+AvatarBox.Font = Enum.Font.Gotham
+AvatarBox.TextSize = 14
+AvatarBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", AvatarBox)
+
+local CopyAvatarBtn = Instance.new("TextButton", UtilitiesPage)
+CopyAvatarBtn.Position = UDim2.new(0, 5, 0, 215)
+CopyAvatarBtn.Size = UDim2.new(1, -10, 0, 40)
+CopyAvatarBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+CopyAvatarBtn.Text = "Copy Avatar"
+CopyAvatarBtn.Font = Enum.Font.GothamBold
+CopyAvatarBtn.TextSize = 14
+CopyAvatarBtn.TextColor3 = Color3.fromRGB(0, 190, 255)
+Instance.new("UIStroke", CopyAvatarBtn).Color = Color3.fromRGB(0, 160, 255)
+Instance.new("UICorner", CopyAvatarBtn)
+
+CopyAvatarBtn.MouseButton1Click:Connect(function()
+	local targetName = AvatarBox.Text
+	for _, v in pairs(game.Players:GetPlayers()) do
+		if v.Name:lower():find(targetName:lower()) and v.Character then
+			-- Copy avatar appearance
+			local targetChar = v.Character
+			local targetUserId = v.UserId
+			
+			-- Remove current appearance
+			for _, obj in pairs(character:GetChildren()) do
+				if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+					obj:Destroy()
+				elseif obj:IsA("Accessory") or obj:IsA("Hat") then
+					obj:Destroy()
+				end
+			end
+			
+			-- Copy appearance from target
+			for _, obj in pairs(targetChar:GetChildren()) do
+				if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+					obj:Clone().Parent = character
+				elseif obj:IsA("Accessory") or obj:IsA("Hat") then
+					obj:Clone().Parent = character
+				end
+			end
+			
+			-- Copy body colors
+			if targetChar:FindFirstChild("Body Colors") then
+				local bc = character:FindFirstChild("Body Colors") or Instance.new("BodyColors", character)
+				local tbc = targetChar["Body Colors"]
+				bc.HeadColor = tbc.HeadColor
+				bc.TorsoColor = tbc.TorsoColor
+				bc.LeftArmColor = tbc.LeftArmColor
+				bc.RightArmColor = tbc.RightArmColor
+				bc.LeftLegColor = tbc.LeftLegColor
+				bc.RightLegColor = tbc.RightLegColor
+			end
+			
+			-- Copy face
+			local head = character:FindFirstChild("Head")
+			if head then
+				local face = head:FindFirstChildOfClass("Decal")
+				local targetHead = targetChar:FindFirstChild("Head")
+				if targetHead then
+					local targetFace = targetHead:FindFirstChildOfClass("Decal")
+					if face and targetFace then
+						face.Texture = targetFace.Texture
+					end
+				end
+			end
+			
+			break
+		end
+	end
+end)
+
 -- ESP Button
 local ESPBtn = Instance.new("TextButton", UtilitiesPage)
-ESPBtn.Position = UDim2.new(0, 5, 0, 140)
+ESPBtn.Position = UDim2.new(0, 5, 0, 270)
 ESPBtn.Size = UDim2.new(1, -10, 0, 40)
 ESPBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 ESPBtn.Text = "ESP: OFF"
@@ -376,7 +492,6 @@ local esp = false
 ESPBtn.MouseButton1Click:Connect(function()
 	esp = not esp
 	ESPBtn.Text = esp and "ESP: ON" or "ESP: OFF"
-	-- Basic ESP implementation
 	for _, v in pairs(game.Players:GetPlayers()) do
 		if v ~= player and v.Character then
 			if esp then
@@ -394,7 +509,7 @@ end)
 
 -- FullBright Button
 local BrightBtn = Instance.new("TextButton", UtilitiesPage)
-BrightBtn.Position = UDim2.new(0, 5, 0, 190)
+BrightBtn.Position = UDim2.new(0, 5, 0, 320)
 BrightBtn.Size = UDim2.new(1, -10, 0, 40)
 BrightBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 BrightBtn.Text = "FullBright: OFF"
@@ -430,98 +545,4 @@ InfoPage.Size = UDim2.new(1, 0, 1, 0)
 InfoPage.BackgroundTransparency = 1
 InfoPage.BorderSizePixel = 0
 InfoPage.ScrollBarThickness = 6
-InfoPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
-InfoPage.CanvasSize = UDim2.new(0, 0, 0, 350)
-InfoPage.Visible = false
-
-local InfoTitle = Instance.new("TextLabel", InfoPage)
-InfoTitle.BackgroundTransparency = 1
-InfoTitle.Size = UDim2.new(1, 0, 0, 40)
-InfoTitle.Font = Enum.Font.GothamBold
-InfoTitle.Text = "About LEX Host v3"
-InfoTitle.TextColor3 = Color3.fromRGB(0, 200, 255)
-InfoTitle.TextSize = 20
-
-local InfoText = Instance.new("TextLabel", InfoPage)
-InfoText.BackgroundTransparency = 1
-InfoText.Position = UDim2.new(0, 0, 0, 50)
-InfoText.Size = UDim2.new(1, 0, 0, 250)
-InfoText.Font = Enum.Font.Gotham
-InfoText.Text = [[Version: 3.0
-Made by: LEX Dev
-
-Features:
-• Multiple game modes
-• Advanced movement controls
-• Player teleportation
-• ESP & FullBright
-• Noclip & Fly
-• Customizable speeds
-
-Credits:
-LEX Development Team
-
-Thank you for using LEX Host!]]
-InfoText.TextColor3 = Color3.fromRGB(150, 200, 255)
-InfoText.TextSize = 14
-InfoText.TextYAlignment = Enum.TextYAlignment.Top
-
--- Tab System
-local function ShowTab(tab)
-	HomePage.Visible = false
-	ModesPage.Visible = false
-	MovementPage.Visible = false
-	UtilitiesPage.Visible = false
-	InfoPage.Visible = false
-	
-	if tab == "Home" then
-		HomePage.Visible = true
-	elseif tab == "Modes" then
-		ModesPage.Visible = true
-	elseif tab == "Movement" then
-		MovementPage.Visible = true
-	elseif tab == "Utilities" then
-		UtilitiesPage.Visible = true
-	elseif tab == "Info" then
-		InfoPage.Visible = true
-	end
-end
-
-for n, b in pairs(Buttons) do
-	b.MouseButton1Click:Connect(function() ShowTab(n) end)
-end
-
--- Show Home by default
-ShowTab("Home")
-
--- Draggable
-local UIS = game:GetService("UserInputService")
-local dragging, dragInput, startPos, startDrag
-TopBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		startDrag = input.Position
-		startPos = MainFrame.Position
-	end
-end)
-TopBar.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = false
-	end
-end)
-UIS.InputChanged:Connect(function(input)
-	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = input.Position - startDrag
-		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-end)
-
--- Minimize & Close
-MinBtn.MouseButton1Click:Connect(function()
-	MainFrame.Visible = not MainFrame.Visible
-end)
-CloseBtn.MouseButton1Click:Connect(function()
-	LEXHost:Destroy()
-end)
-
-print("LEX Host v3 loaded successfully!")
+Info
