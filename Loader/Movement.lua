@@ -1,9 +1,12 @@
--- Movement.lua - Enhanced Version with Fly Speed Control & Anti-Fall
+-- Movement.lua - OPTIMIZED VERSION
 local MovementModule = {}
 
 function MovementModule.Initialize(MovementPage, player, character)
 	local humanoid = character:WaitForChild("Humanoid")
 	local hrp = character:WaitForChild("HumanoidRootPart")
+	
+	-- Connection storage for cleanup
+	local connections = {}
 	
 	-- Title
 	local Title = Instance.new("TextLabel", MovementPage)
@@ -58,18 +61,25 @@ function MovementModule.Initialize(MovementPage, player, character)
 	SpeedBtn.MouseEnter:Connect(function() SpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 240) end)
 	SpeedBtn.MouseLeave:Connect(function() SpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200) end)
 	
+	-- Debounced button click
+	local speedDebounce = false
 	SpeedBtn.MouseButton1Click:Connect(function()
+		if speedDebounce then return end
+		speedDebounce = true
+		
 		local speed = tonumber(SpeedBox.Text)
 		if speed and speed >= 0 and speed <= 1000 then
 			humanoid.WalkSpeed = speed
 			SpeedBtn.Text = "✓ Applied!"
-			wait(1)
+			task.wait(0.5)
 			SpeedBtn.Text = "Set Speed"
 		else
 			SpeedBtn.Text = "Invalid!"
-			wait(1)
+			task.wait(0.5)
 			SpeedBtn.Text = "Set Speed"
 		end
+		
+		speedDebounce = false
 	end)
 
 	-- JumpPower Section
@@ -114,18 +124,24 @@ function MovementModule.Initialize(MovementPage, player, character)
 	JumpBtn.MouseEnter:Connect(function() JumpBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 240) end)
 	JumpBtn.MouseLeave:Connect(function() JumpBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200) end)
 	
+	local jumpDebounce = false
 	JumpBtn.MouseButton1Click:Connect(function()
+		if jumpDebounce then return end
+		jumpDebounce = true
+		
 		local jump = tonumber(JumpBox.Text)
 		if jump and jump >= 0 and jump <= 1000 then
 			humanoid.JumpPower = jump
 			JumpBtn.Text = "✓ Applied!"
-			wait(1)
+			task.wait(0.5)
 			JumpBtn.Text = "Set Jump"
 		else
 			JumpBtn.Text = "Invalid!"
-			wait(1)
+			task.wait(0.5)
 			JumpBtn.Text = "Set Jump"
 		end
+		
+		jumpDebounce = false
 	end)
 
 	-- Fly Section
@@ -139,22 +155,11 @@ function MovementModule.Initialize(MovementPage, player, character)
 	FlyLabel.TextSize = 16
 	FlyLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-	-- Fly Speed Control
-	local FlySpeedLabel = Instance.new("TextLabel", MovementPage)
-	FlySpeedLabel.Position = UDim2.new(0, 5, 0, 290)
-	FlySpeedLabel.Size = UDim2.new(1, -10, 0, 25)
-	FlySpeedLabel.BackgroundTransparency = 1
-	FlySpeedLabel.Text = "Fly Speed:"
-	FlySpeedLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
-	FlySpeedLabel.Font = Enum.Font.Gotham
-	FlySpeedLabel.TextSize = 13
-	FlySpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
-
 	local FlySpeedBox = Instance.new("TextBox", MovementPage)
-	FlySpeedBox.Position = UDim2.new(0, 5, 0, 320)
+	FlySpeedBox.Position = UDim2.new(0, 5, 0, 290)
 	FlySpeedBox.Size = UDim2.new(0.6, -10, 0, 40)
 	FlySpeedBox.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
-	FlySpeedBox.PlaceholderText = "Fly speed (10-500)"
+	FlySpeedBox.PlaceholderText = "Fly speed (10-200)"
 	FlySpeedBox.Text = "50"
 	FlySpeedBox.Font = Enum.Font.Gotham
 	FlySpeedBox.TextSize = 15
@@ -167,7 +172,7 @@ function MovementModule.Initialize(MovementPage, player, character)
 	FlySpeedStroke.Thickness = 2
 
 	local SetFlySpeedBtn = Instance.new("TextButton", MovementPage)
-	SetFlySpeedBtn.Position = UDim2.new(0.6, 5, 0, 320)
+	SetFlySpeedBtn.Position = UDim2.new(0.6, 5, 0, 290)
 	SetFlySpeedBtn.Size = UDim2.new(0.4, -10, 0, 40)
 	SetFlySpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
 	SetFlySpeedBtn.Text = "Set Fly Speed"
@@ -185,21 +190,16 @@ function MovementModule.Initialize(MovementPage, player, character)
 
 	SetFlySpeedBtn.MouseButton1Click:Connect(function()
 		local speed = tonumber(FlySpeedBox.Text)
-		if speed and speed >= 1 and speed <= 500 then
+		if speed and speed >= 1 and speed <= 200 then
 			currentFlySpeed = speed
-			SetFlySpeedBtn.Text = "✓ Speed Set!"
-			wait(1)
-			SetFlySpeedBtn.Text = "Set Fly Speed"
-		else
-			SetFlySpeedBtn.Text = "Invalid!"
-			wait(1)
+			SetFlySpeedBtn.Text = "✓ Set!"
+			task.wait(0.5)
 			SetFlySpeedBtn.Text = "Set Fly Speed"
 		end
 	end)
 
-	-- Fly Toggle Button
 	local FlyBtn = Instance.new("TextButton", MovementPage)
-	FlyBtn.Position = UDim2.new(0, 5, 0, 370)
+	FlyBtn.Position = UDim2.new(0, 5, 0, 340)
 	FlyBtn.Size = UDim2.new(1, -10, 0, 45)
 	FlyBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 	FlyBtn.Text = "🚀 Fly: OFF"
@@ -214,72 +214,52 @@ function MovementModule.Initialize(MovementPage, player, character)
 	FlyStroke.Thickness = 2
 
 	local flying = false
-	local flyConnection
 	local BG, BV
 	
 	FlyBtn.MouseButton1Click:Connect(function()
 		flying = not flying
 		if flying then
-			FlyBtn.Text = "🚀 Fly: ON (Speed: " .. currentFlySpeed .. ")"
+			FlyBtn.Text = "🚀 Fly: ON"
 			FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)
 			FlyStroke.Color = Color3.fromRGB(0, 255, 100)
 			
-			-- Create fly components
-			BG = Instance.new("BodyGyro")
+			BG = Instance.new("BodyGyro", hrp)
 			BG.P = 9e4
 			BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-			BG.cframe = hrp.CFrame
-			BG.Parent = hrp
 			
-			BV = Instance.new("BodyVelocity")
+			BV = Instance.new("BodyVelocity", hrp)
 			BV.velocity = Vector3.new(0, 0, 0)
 			BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
-			BV.Parent = hrp
 			
-			-- Disable humanoid states for smoother fly
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+			-- OPTIMIZED: Use RenderStepped with throttle (runs at 60fps max, not unlimited)
+			local lastUpdate = 0
+			local updateRate = 1/60 -- 60fps limit
 			
-			-- Fly loop
-			flyConnection = game:GetService("RunService").Heartbeat:Connect(function()
-				if not flying or not BG or not BV then return end
+			connections.fly = game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
+				if not flying then return end
+				
+				-- Throttle updates
+				lastUpdate = lastUpdate + deltaTime
+				if lastUpdate < updateRate then return end
+				lastUpdate = 0
+				
+				if not BG or not BV or not hrp.Parent then
+					flying = false
+					return
+				end
 				
 				local cam = workspace.CurrentCamera
-				local moveDirection = Vector3.new(0, 0, 0)
+				local moveDirection = Vector3.new()
+				local UIS = game:GetService("UserInputService")
 				
-				-- WASD Controls
-				if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
-					moveDirection = moveDirection + cam.CFrame.LookVector
-				end
-				if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
-					moveDirection = moveDirection - cam.CFrame.LookVector
-				end
-				if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
-					moveDirection = moveDirection - cam.CFrame.RightVector
-				end
-				if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
-					moveDirection = moveDirection + cam.CFrame.RightVector
-				end
+				if UIS:IsKeyDown(Enum.KeyCode.W) then moveDirection = moveDirection + cam.CFrame.LookVector end
+				if UIS:IsKeyDown(Enum.KeyCode.S) then moveDirection = moveDirection - cam.CFrame.LookVector end
+				if UIS:IsKeyDown(Enum.KeyCode.A) then moveDirection = moveDirection - cam.CFrame.RightVector end
+				if UIS:IsKeyDown(Enum.KeyCode.D) then moveDirection = moveDirection + cam.CFrame.RightVector end
+				if UIS:IsKeyDown(Enum.KeyCode.Space) then moveDirection = moveDirection + Vector3.new(0, 1, 0) end
+				if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then moveDirection = moveDirection + Vector3.new(0, -1, 0) end
 				
-				-- Space to go up, Shift to go down
-				if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
-					moveDirection = moveDirection + Vector3.new(0, 1, 0)
-				end
-				if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
-					moveDirection = moveDirection + Vector3.new(0, -1, 0)
-				end
-				
-				-- Apply velocity and rotation
-				if moveDirection.Magnitude > 0 then
-					BV.velocity = moveDirection.Unit * currentFlySpeed
-				else
-					BV.velocity = Vector3.new(0, 0, 0)
-				end
-				
+				BV.velocity = moveDirection.Magnitude > 0 and moveDirection.Unit * currentFlySpeed or Vector3.new(0, 0, 0)
 				BG.cframe = cam.CFrame
 			end)
 		else
@@ -287,29 +267,15 @@ function MovementModule.Initialize(MovementPage, player, character)
 			FlyBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 			FlyStroke.Color = Color3.fromRGB(0, 160, 255)
 			
-			-- Stop flying
-			if flyConnection then
-				flyConnection:Disconnect()
-				flyConnection = nil
-			end
-			
-			-- Remove fly components
+			if connections.fly then connections.fly:Disconnect() connections.fly = nil end
 			if BG then BG:Destroy() BG = nil end
 			if BV then BV:Destroy() BV = nil end
-			
-			-- Re-enable humanoid states
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, true)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, true)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
 		end
 	end)
 
-	-- Anti-Fall / Infinite Platform Section
+	-- Anti-Fall
 	local AntiFallLabel = Instance.new("TextLabel", MovementPage)
-	AntiFallLabel.Position = UDim2.new(0, 5, 0, 435)
+	AntiFallLabel.Position = UDim2.new(0, 5, 0, 405)
 	AntiFallLabel.Size = UDim2.new(1, -10, 0, 30)
 	AntiFallLabel.BackgroundTransparency = 1
 	AntiFallLabel.Text = "🌊 Anti-Fall (Walk on Air)"
@@ -319,7 +285,7 @@ function MovementModule.Initialize(MovementPage, player, character)
 	AntiFallLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 	local AntiFallBtn = Instance.new("TextButton", MovementPage)
-	AntiFallBtn.Position = UDim2.new(0, 5, 0, 470)
+	AntiFallBtn.Position = UDim2.new(0, 5, 0, 440)
 	AntiFallBtn.Size = UDim2.new(1, -10, 0, 45)
 	AntiFallBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 	AntiFallBtn.Text = "🌊 Anti-Fall: OFF"
@@ -335,7 +301,6 @@ function MovementModule.Initialize(MovementPage, player, character)
 
 	local antifallEnabled = false
 	local antifallPart = nil
-	local antifallConnection = nil
 
 	AntiFallBtn.MouseButton1Click:Connect(function()
 		antifallEnabled = not antifallEnabled
@@ -345,20 +310,17 @@ function MovementModule.Initialize(MovementPage, player, character)
 			AntiFallBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)
 			AntiFallStroke.Color = Color3.fromRGB(0, 255, 100)
 			
-			-- Create invisible platform
 			antifallPart = Instance.new("Part")
-			antifallPart.Name = "AntiFallPlatform"
 			antifallPart.Size = Vector3.new(10, 1, 10)
 			antifallPart.Anchored = true
 			antifallPart.Transparency = 1
 			antifallPart.CanCollide = true
-			antifallPart.Material = Enum.Material.ForceField
 			antifallPart.Parent = workspace
 			
-			-- Update platform position
-			antifallConnection = game:GetService("RunService").Heartbeat:Connect(function()
-				if antifallEnabled and antifallPart and hrp then
-					-- Position platform slightly below player
+			-- OPTIMIZED: Update every 0.1 seconds instead of every frame
+			connections.antifall = game:GetService("RunService").Heartbeat:Connect(function()
+				task.wait(0.1) -- Throttle to 10 updates per second
+				if antifallEnabled and antifallPart and hrp and hrp.Parent then
 					antifallPart.CFrame = CFrame.new(hrp.Position.X, hrp.Position.Y - 3.5, hrp.Position.Z)
 				end
 			end)
@@ -367,32 +329,24 @@ function MovementModule.Initialize(MovementPage, player, character)
 			AntiFallBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 			AntiFallStroke.Color = Color3.fromRGB(0, 160, 255)
 			
-			-- Stop anti-fall
-			if antifallConnection then
-				antifallConnection:Disconnect()
-				antifallConnection = nil
-			end
-			
-			if antifallPart then
-				antifallPart:Destroy()
-				antifallPart = nil
-			end
+			if connections.antifall then connections.antifall:Disconnect() connections.antifall = nil end
+			if antifallPart then antifallPart:Destroy() antifallPart = nil end
 		end
 	end)
 
-	-- Noclip Section
+	-- Noclip
 	local NoclipLabel = Instance.new("TextLabel", MovementPage)
-	NoclipLabel.Position = UDim2.new(0, 5, 0, 535)
+	NoclipLabel.Position = UDim2.new(0, 5, 0, 505)
 	NoclipLabel.Size = UDim2.new(1, -10, 0, 30)
 	NoclipLabel.BackgroundTransparency = 1
-	NoclipLabel.Text = "👻 Noclip Mode (Walk Through Walls)"
+	NoclipLabel.Text = "👻 Noclip Mode"
 	NoclipLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
 	NoclipLabel.Font = Enum.Font.GothamBold
 	NoclipLabel.TextSize = 16
 	NoclipLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 	local NoclipBtn = Instance.new("TextButton", MovementPage)
-	NoclipBtn.Position = UDim2.new(0, 5, 0, 570)
+	NoclipBtn.Position = UDim2.new(0, 5, 0, 540)
 	NoclipBtn.Size = UDim2.new(1, -10, 0, 45)
 	NoclipBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 	NoclipBtn.Text = "👻 Noclip: OFF"
@@ -407,7 +361,6 @@ function MovementModule.Initialize(MovementPage, player, character)
 	NoclipStroke.Thickness = 2
 
 	local noclip = false
-	local noclipConnection
 	
 	NoclipBtn.MouseButton1Click:Connect(function()
 		noclip = not noclip
@@ -415,38 +368,28 @@ function MovementModule.Initialize(MovementPage, player, character)
 			NoclipBtn.Text = "👻 Noclip: ON"
 			NoclipBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)
 			NoclipStroke.Color = Color3.fromRGB(0, 255, 100)
-			
-			noclipConnection = game:GetService("RunService").Stepped:Connect(function()
-				if noclip then
-					for _, v in pairs(character:GetDescendants()) do
-						if v:IsA("BasePart") then
-							v.CanCollide = false
-						end
-					end
-				end
-			end)
 		else
 			NoclipBtn.Text = "👻 Noclip: OFF"
 			NoclipBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 			NoclipStroke.Color = Color3.fromRGB(0, 160, 255)
-			
-			if noclipConnection then
-				noclipConnection:Disconnect()
-				noclipConnection = nil
-			end
-			
-			-- Re-enable collision
-			for _, v in pairs(character:GetDescendants()) do
+		end
+	end)
+
+	-- OPTIMIZED: Single Stepped connection for noclip
+	connections.noclip = game:GetService("RunService").Stepped:Connect(function()
+		if noclip and character and character.Parent then
+			-- Only iterate through BaseParts, not all descendants
+			for _, v in pairs(character:GetChildren()) do
 				if v:IsA("BasePart") then
-					v.CanCollide = true
+					v.CanCollide = false
 				end
 			end
 		end
 	end)
 
-	-- Infinite Jump Section
+	-- Infinite Jump
 	local InfJumpLabel = Instance.new("TextLabel", MovementPage)
-	InfJumpLabel.Position = UDim2.new(0, 5, 0, 635)
+	InfJumpLabel.Position = UDim2.new(0, 5, 0, 605)
 	InfJumpLabel.Size = UDim2.new(1, -10, 0, 30)
 	InfJumpLabel.BackgroundTransparency = 1
 	InfJumpLabel.Text = "🌟 Infinite Jump"
@@ -456,7 +399,7 @@ function MovementModule.Initialize(MovementPage, player, character)
 	InfJumpLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 	local InfJumpBtn = Instance.new("TextButton", MovementPage)
-	InfJumpBtn.Position = UDim2.new(0, 5, 0, 670)
+	InfJumpBtn.Position = UDim2.new(0, 5, 0, 640)
 	InfJumpBtn.Size = UDim2.new(1, -10, 0, 45)
 	InfJumpBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 	InfJumpBtn.Text = "🌟 Infinite Jump: OFF"
@@ -471,7 +414,6 @@ function MovementModule.Initialize(MovementPage, player, character)
 	InfJumpStroke.Thickness = 2
 
 	local infJump = false
-	local infJumpConnection
 	
 	InfJumpBtn.MouseButton1Click:Connect(function()
 		infJump = not infJump
@@ -480,8 +422,8 @@ function MovementModule.Initialize(MovementPage, player, character)
 			InfJumpBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)
 			InfJumpStroke.Color = Color3.fromRGB(0, 255, 100)
 			
-			infJumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
-				if infJump and humanoid then
+			connections.infjump = game:GetService("UserInputService").JumpRequest:Connect(function()
+				if infJump and humanoid and humanoid.Parent then
 					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 				end
 			end)
@@ -490,31 +432,23 @@ function MovementModule.Initialize(MovementPage, player, character)
 			InfJumpBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 			InfJumpStroke.Color = Color3.fromRGB(0, 160, 255)
 			
-			if infJumpConnection then
-				infJumpConnection:Disconnect()
-				infJumpConnection = nil
-			end
+			if connections.infjump then connections.infjump:Disconnect() connections.infjump = nil end
 		end
 	end)
 
-	-- Cleanup when character dies
+	-- Cleanup on character death/removal
 	humanoid.Died:Connect(function()
-		if flyConnection then flyConnection:Disconnect() end
+		for name, connection in pairs(connections) do
+			if connection and connection.Connected then
+				connection:Disconnect()
+			end
+		end
 		if BG then BG:Destroy() end
 		if BV then BV:Destroy() end
-		if antifallConnection then antifallConnection:Disconnect() end
 		if antifallPart then antifallPart:Destroy() end
-		if noclipConnection then noclipConnection:Disconnect() end
-		if infJumpConnection then infJumpConnection:Disconnect() end
-		
-		flying = false
-		antifallEnabled = false
-		noclip = false
-		infJump = false
 	end)
 	
-	-- Set canvas size
-	MovementPage.CanvasSize = UDim2.new(0, 0, 0, 730)
+	MovementPage.CanvasSize = UDim2.new(0, 0, 0, 700)
 end
 
 return MovementModule
