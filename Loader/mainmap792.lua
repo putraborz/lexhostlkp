@@ -1,25 +1,20 @@
--- LEX VIP - Ocean Lite (All-in-one)
--- Generated: 01/11/2025
--- Place this LocalScript in StarterGui (or execute in a LocalScript environment)
+-- LEX Host - Futuristik All-in-one
+-- Generated/Modified: 01/11/2025 (versi kustom untuk user)
+-- Place this LocalScript in StarterGui
 -- ⚠️ USE AT YOUR OWN RISK ⚠️
 
 -- SERVICES
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
-local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
-
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local RootPart = Character:WaitForChild("HumanoidRootPart")
+local HttpGet = game.HttpGet or function(self, url) return game:HttpGet(url) end -- compatibility
 
--- MAIN TABLE
+-- MAIN data
 local LexHost = {}
-LexHost.Version = "2.5.1-lite"
+LexHost.Version = "2.5.1-futuristic"
 LexHost.Enabled = {
     Fly = false,
     Speed = false,
@@ -30,9 +25,8 @@ LexHost.Enabled = {
 }
 LexHost.FlySpeed = 45
 LexHost.SpeedMultiplier = 2
-LexHost.OriginalSpeed = Humanoid.WalkSpeed
 
--- UTILITY: quick instance creator
+-- quick instance creator
 local function new(class, props)
     local o = Instance.new(class)
     if props then
@@ -47,427 +41,91 @@ local function new(class, props)
     return o
 end
 
--- Keep references to created controllers so we can clean up
-local controllers = {}
+-- ---------- SCRIPT LIST (sesuaikan sesuai input user) ----------
+local scriptList = {
+    {name = "ATIN NEW", url = "https://pastebin.com/raw/iw5xHtvD"},
+    {name = "YAHAYUK NEW", url = "https://pastebin.com/raw/UK8nspn0"},
+    {name = "WKSPEDISI ANTARTIKA NEW", url = "https://pastebin.com/raw/mqEjFxVj"},
+    {name = "MOUNT YNTKTS NEW", url = "https://pastebin.com/raw/k0bc5h4m"},
+    {name = "SAKAHAYNG", url = "https://pastebin.com/raw/zishUBsB"},
+    {name = "STECU NEW", url = "https://pastebin.com/raw/VdUnM88V"},
+    {name = "BALI HOT EXPEDITION", url = "https://pastebin.com/raw/e82WGJas"},
+    {name = "MOUNT KOMANG", url = "https://pastebin.com/raw/QYcyGtMR"},
+    {name = "MOUNT PRAMBANAN", url = "https://pastebin.com/raw/GysqQgpx"},
+    {name = "MOUNT MONO", url = "https://pastebin.com/raw/Ha8qwDeB"},
+    {name = "MOUNT SUMBING", url = "https://pastebin.com/raw/FqQwFJLe"},
+    {name = "MOUNT GEMI", url = "https://pastebin.com/raw/516Y0aw1"},
+    {name = "MOUNT KOHARU", url = "https://pastebin.com/raw/Rs6hy7xx"},
+}
 
--- ------------- FEATURES --------------
-
--- FLY (standard free-fly; movement via WASD+Space/Shift when Fly enabled)
-do
-    local bodyVelocity, bodyGyro, conn
-    function LexHost.ToggleFly(state)
-        if state == nil then state = not LexHost.Enabled.Fly end
-        LexHost.Enabled.Fly = state
-        if state then
-            -- create controllers
-            bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.Name = "LEX_FLY_VELOCITY"
-            bodyVelocity.MaxForce = Vector3.new(9e9,9e9,9e9)
-            bodyVelocity.Velocity = Vector3.new(0,0,0)
-            bodyVelocity.Parent = RootPart
-            controllers.FlyBV = bodyVelocity
-
-            bodyGyro = Instance.new("BodyGyro")
-            bodyGyro.Name = "LEX_FLY_GYRO"
-            bodyGyro.MaxTorque = Vector3.new(9e9,9e9,9e9)
-            bodyGyro.P = 9e9
-            bodyGyro.Parent = RootPart
-            controllers.FlyBG = bodyGyro
-
-            conn = RunService.Heartbeat:Connect(function()
-                if not LexHost.Enabled.Fly then return end
-                local cam = Workspace.CurrentCamera
-                if not cam then return end
-                local move = Vector3.new()
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - cam.CFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + cam.CFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then move = move - Vector3.new(0,1,0) end
-
-                if RootPart:FindFirstChild("LEX_FLY_VELOCITY") then
-                    if move.Magnitude > 0 then
-                        RootPart.LEX_FLY_VELOCITY.Velocity = move.Unit * LexHost.FlySpeed
-                    else
-                        RootPart.LEX_FLY_VELOCITY.Velocity = Vector3.new(0,0,0)
-                    end
-                end
-                if RootPart:FindFirstChild("LEX_FLY_GYRO") and cam then
-                    RootPart.LEX_FLY_GYRO.CFrame = cam.CFrame
-                end
-            end)
-            controllers.FlyConn = conn
-        else
-            -- cleanup
-            if controllers.FlyConn then controllers.FlyConn:Disconnect(); controllers.FlyConn = nil end
-            if controllers.FlyBV and controllers.FlyBV.Parent then controllers.FlyBV:Destroy() end
-            if controllers.FlyBG and controllers.FlyBG.Parent then controllers.FlyBG:Destroy() end
-            controllers.FlyBV = nil; controllers.FlyBG = nil
-        end
-    end
-end
-
--- SPEED (walk speed multiplier)
-do
-    function LexHost.ToggleSpeed(state)
-        if state == nil then state = not LexHost.Enabled.Speed end
-        LexHost.Enabled.Speed = state
-        if state then
-            Humanoid.WalkSpeed = LexHost.OriginalSpeed * LexHost.SpeedMultiplier
-        else
-            Humanoid.WalkSpeed = LexHost.OriginalSpeed
-        end
-    end
-    function LexHost.SetSpeedMultiplier(val)
-        LexHost.SpeedMultiplier = val
-        if LexHost.Enabled.Speed then
-            Humanoid.WalkSpeed = LexHost.OriginalSpeed * LexHost.SpeedMultiplier
-        end
-    end
-end
-
--- NOCLIP
-do
-    function LexHost.ToggleNoclip(state)
-        if state == nil then state = not LexHost.Enabled.Noclip end
-        LexHost.Enabled.Noclip = state
-        -- collision removal enforced in Stepped
-    end
-    RunService.Stepped:Connect(function()
-        if LexHost.Enabled.Noclip and Character and Character.Parent then
-            for _, part in pairs(Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-    end)
-end
-
--- AIRWALK (jalan di udara; melewati rintangan; berperilaku seperti walk-on-air)
-do
-    local bv, bg, hbConn
-    local targetY = nil
-
-    local function setCharacterNoclip(bool)
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                pcall(function() part.CanCollide = not not (not bool) end) -- set false when bool true
-            end
-        end
-    end
-
-    function LexHost.ToggleAirWalk(state)
-        if state == nil then state = not LexHost.Enabled.AirWalk end
-        LexHost.Enabled.AirWalk = state
-
-        if state then
-            -- set initial hover height as current Y
-            targetY = RootPart.Position.Y
-
-            -- ensure noclip so character can pass through geometry
-            setCharacterNoclip(true)
-
-            -- create BodyVelocity to control horizontal movement; we constrain vertical to hold targetY
-            bv = Instance.new("BodyVelocity")
-            bv.Name = "LEX_AIRWALK_BV"
-            bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            bv.Velocity = Vector3.new(0,0,0)
-            bv.Parent = RootPart
-            controllers.AirBV = bv
-
-            -- small BodyGyro to keep orientation stable (match camera)
-            bg = Instance.new("BodyGyro")
-            bg.Name = "LEX_AIRWALK_BG"
-            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-            bg.P = 9e8
-            bg.Parent = RootPart
-            controllers.AirBG = bg
-
-            -- heartbeat: compute horizontal movement and maintain Y
-            hbConn = RunService.Heartbeat:Connect(function()
-                if not LexHost.Enabled.AirWalk then return end
-                local cam = Workspace.CurrentCamera
-                if not cam then return end
-
-                -- movement vector parallel to camera (horizontal plane)
-                local move = Vector3.new()
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - cam.CFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + cam.CFrame.RightVector end
-
-                -- flatten y component so movement is horizontal
-                move = Vector3.new(move.X, 0, move.Z)
-
-                -- determine horizontal speed (use SpeedMultiplier if Speed enabled)
-                local speed = LexHost.FlySpeed
-                if LexHost.Enabled.Speed then
-                    speed = speed * (LexHost.SpeedMultiplier / 2) -- tuned: speed multiplier interacts nicely
-                end
-
-                if move.Magnitude > 0 then
-                    bv.Velocity = move.Unit * speed + Vector3.new(0, 0, 0)
-                else
-                    bv.Velocity = Vector3.new(0, 0, 0)
-                end
-
-                -- maintain height by nudging up/down if deviated
-                local currentY = RootPart.Position.Y
-                local dy = targetY - currentY
-                -- small smoothing factor
-                local vy = math.clamp(dy * 8, -50, 50)
-                -- apply vertical correction by setting RootPart velocity's Y separately
-                bv.Velocity = Vector3.new(bv.Velocity.X, vy, bv.Velocity.Z)
-
-                -- align orientation with camera for natural feel
-                if bg and Workspace.CurrentCamera then
-                    bg.CFrame = CFrame.new(RootPart.Position, RootPart.Position + Workspace.CurrentCamera.CFrame.LookVector)
-                end
-            end)
-            controllers.AirConn = hbConn
-
-        else
-            -- disable airwalk: restore collisions and cleanup
-            if controllers.AirConn then controllers.AirConn:Disconnect(); controllers.AirConn = nil end
-            if controllers.AirBV and controllers.AirBV.Parent then controllers.AirBV:Destroy() end
-            if controllers.AirBG and controllers.AirBG.Parent then controllers.AirBG:Destroy() end
-            controllers.AirBV = nil; controllers.AirBG = nil
-            -- attempt restore collisions to true (note: if part should be uncollidable originally, this will set true)
-            for _, part in pairs(Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    pcall(function() part.CanCollide = true end)
-                end
-            end
-            targetY = nil
-        end
-    end
-end
-
--- CLICK TELEPORT
-do
-    local mouse = LocalPlayer:GetMouse()
-    function LexHost.ClickTeleport()
-        if mouse and mouse.Target and mouse.Hit then
-            pcall(function()
-                RootPart.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0,3,0))
-            end)
-        end
-    end
-end
-
--- ESP (Billboards + Highlight)
-do
-    LexHost.Enabled.ESP = false
-    local espConns = {}
-    local function addESPTo(player)
-        if player == LocalPlayer then return end
-        local function attach(character)
-            if not character then return end
-            local hrp = character:FindFirstChild("HumanoidRootPart")
-            if not hrp then return end
-            if hrp:FindFirstChild("LEX_ESP_GUI") then return end
-
-            local billboard = Instance.new("BillboardGui")
-            billboard.Name = "LEX_ESP_GUI"
-            billboard.Size = UDim2.new(0,120,0,50)
-            billboard.StudsOffset = Vector3.new(0,3,0)
-            billboard.AlwaysOnTop = true
-            billboard.Parent = hrp
-
-            local frame = Instance.new("Frame", billboard)
-            frame.Size = UDim2.new(1,0,1,0)
-            frame.BackgroundTransparency = 1
-
-            local nameLabel = Instance.new("TextLabel", frame)
-            nameLabel.Size = UDim2.new(1,0,0.5,0)
-            nameLabel.BackgroundTransparency = 1
-            nameLabel.Text = player.Name
-            nameLabel.Font = Enum.Font.GothamBold
-            nameLabel.TextScaled = true
-            nameLabel.TextColor3 = Color3.fromRGB(190,230,255)
-
-            local distLabel = Instance.new("TextLabel", frame)
-            distLabel.Size = UDim2.new(1,0,0.5,0)
-            distLabel.Position = UDim2.new(0,0,0.5,0)
-            distLabel.BackgroundTransparency = 1
-            distLabel.Font = Enum.Font.Gotham
-            distLabel.TextScaled = true
-            distLabel.TextColor3 = Color3.fromRGB(160,220,210)
-
-            local highlight = Instance.new("Highlight", character)
-            highlight.Name = "LEX_HIGHLIGHT"
-            highlight.FillColor = Color3.fromRGB(120,160,255)
-            highlight.OutlineColor = Color3.fromRGB(30,110,230)
-            highlight.FillTransparency = 0.55
-            highlight.OutlineTransparency = 0
-
-            local hb = RunService.Heartbeat:Connect(function()
-                if hrp and RootPart then
-                    local d = (hrp.Position - RootPart.Position).Magnitude
-                    distLabel.Text = math.floor(d) .. "m"
-                end
-            end)
-            table.insert(espConns, hb)
-        end
-
-        if player.Character then attach(player.Character) end
-        player.CharacterAdded:Connect(attach)
-    end
-
-    function LexHost.ToggleESP(state)
-        if state == nil then state = not LexHost.Enabled.ESP end
-        LexHost.Enabled.ESP = state
-        if state then
-            for _, p in pairs(Players:GetPlayers()) do addESPTo(p) end
-            Players.PlayerAdded:Connect(addESPTo)
-        else
-            for _, p in pairs(Players:GetPlayers()) do
-                if p.Character then
-                    for _, v in pairs(p.Character:GetDescendants()) do
-                        if v.Name == "LEX_ESP_GUI" or v.Name == "LEX_HIGHLIGHT" then
-                            pcall(function() v:Destroy() end)
-                        end
-                    end
-                end
-            end
-            for _, c in pairs(espConns) do
-                if c then c:Disconnect() end
-            end
-            espConns = {}
-        end
-    end
-end
-
--- FULLBRIGHT (light environment)
-do
-    function LexHost.EnableFullbright()
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        Lighting.FogEnd = 100000
-        Lighting.GlobalShadows = false
-        Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
-    end
-    -- call initially
-    LexHost.EnableFullbright()
-end
-
--- REMOVE TEXTURES (one-time)
-spawn(function()
-    for _, obj in pairs(Workspace:GetDescendants()) do
-        pcall(function()
-            if obj:IsA("Decal") or obj:IsA("Texture") then obj:Destroy() end
-            if obj:IsA("BasePart") then obj.Material = Enum.Material.SmoothPlastic end
-        end)
-    end
-end)
-
--- GOD MODE
-do
-    local function enableGod()
-        Humanoid.MaxHealth = math.huge
-        Humanoid.Health = math.huge
-    end
-    enableGod()
-    Humanoid.HealthChanged:Connect(function(h)
-        if h < math.huge then
-            Humanoid.Health = math.huge
-        end
-    end)
-end
-
--- INFINITE JUMP (still available)
-UserInputService.JumpRequest:Connect(function()
-    pcall(function() Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
-end)
-
--- AUTO FARM (collect by name)
-do
-    local function autoCollect()
-        for _, obj in pairs(Workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and obj.Name and (string.find(obj.Name:lower(),"coin") or string.find(obj.Name:lower(),"gem") or string.find(obj.Name:lower(),"collect")) then
-                if obj.CanCollide then
-                    pcall(function()
-                        firetouchinterest(RootPart, obj, 0)
-                        task.wait(0.06)
-                        firetouchinterest(RootPart, obj, 1)
-                    end)
-                end
-            end
-        end
-    end
-    RunService.Heartbeat:Connect(function()
-        if LexHost.Enabled.AutoFarm then
-            pcall(autoCollect)
-        end
-    end)
-end
-
--- REMOVE PARTS function
-function LexHost.RemovePartsByNames(names)
-    if type(names) ~= "table" then return end
-    for _, obj in pairs(Workspace:GetDescendants()) do
-        local ok, nm = pcall(function() return obj.Name:lower() end)
-        if ok and nm then
-            for _, target in pairs(names) do
-                if nm == target or string.find(nm, target) then
-                    pcall(function() obj:Destroy() end)
-                end
-            end
-        end
-    end
-end
-
--- --------------- UI ---------------
-
--- Remove existing UI if present
-local existing = PlayerGui:FindFirstChild("LEX_VIP_UI")
+-- CLEAN previous UI
+local existing = PlayerGui:FindFirstChild("LEX_HOST_GUI")
 if existing then existing:Destroy() end
 
--- ScreenGui
-local screenGui = new("ScreenGui", {Parent = PlayerGui, Name = "LEX_VIP_UI", ResetOnSpawn = false})
+-- ROOT ScreenGui
+local screenGui = new("ScreenGui", {Parent = PlayerGui, Name = "LEX_HOST_GUI", ResetOnSpawn = false})
 screenGui.IgnoreGuiInset = true
 
--- Main frame (500x400-ish, centered)
+-- LX LOGO (kotak kecil di pojok kanan bawah) - selalu tampil
+local lxButton = new("TextButton", {
+    Parent = screenGui,
+    Name = "LXButton",
+    Size = UDim2.new(0,52,0,52),
+    Position = UDim2.new(1,-76,1,-96),
+    AnchorPoint = Vector2.new(0,0),
+    BackgroundColor3 = Color3.fromRGB(10,12,20),
+    Text = "LX",
+    Font = Enum.Font.GothamBold,
+    TextSize = 20,
+    TextColor3 = Color3.fromRGB(230,245,255),
+    BorderSizePixel = 0
+})
+new("UICorner", {Parent = lxButton, CornerRadius = UDim.new(0,10)})
+local lxStroke = new("UIStroke", {Parent = lxButton, Thickness = 2, Color = Color3.fromRGB(40,150,255)})
+local lxGlow = new("ImageLabel", {Parent = lxButton, BackgroundTransparency = 1, Size = UDim2.new(1.6,0,1.6,0), Position = UDim2.new(-0.3,-0, -0.3,0), Image = "", ZIndex = 0}) -- placeholder for visual layering
+
+-- MAIN PANEL (hidden initially)
 local main = new("Frame", {
     Parent = screenGui,
-    Name = "Main",
+    Name = "LEXHost_Main",
     AnchorPoint = Vector2.new(0.5,0.5),
-    Position = UDim2.new(0.5, 0.5, 0.5, 0),
-    Size = UDim2.new(0,520,0,400),
-    BackgroundColor3 = Color3.fromRGB(16, 34, 64), -- ocean deep base
+    Position = UDim2.new(0.5,0,0.5,0),
+    Size = UDim2.new(0,540,0,420),
+    BackgroundColor3 = Color3.fromRGB(6,12,20),
     BorderSizePixel = 0,
+    Visible = false
 })
-new("UICorner", {Parent = main, CornerRadius = UDim.new(0,12)})
-new("UIStroke", {Parent = main, Color = Color3.fromRGB(40,110,200), Thickness = 1})
+new("UICorner", {Parent = main, CornerRadius = UDim.new(0,14)})
+local mainStroke = new("UIStroke", {Parent = main, Color = Color3.fromRGB(50,140,255), Thickness = 1.5})
+local mainAccent = new("Frame", {Parent = main, Size = UDim2.new(1,0,0,4), Position = UDim2.new(0,0,0,0), BackgroundColor3 = Color3.fromRGB(50,140,255)})
+mainAccent.ZIndex = 2
 
--- Top bar
+-- TOP BAR (drag area)
 local topBar = new("Frame", {Parent = main, Size = UDim2.new(1,0,0,56), BackgroundTransparency = 1})
 local title = new("TextLabel", {
     Parent = topBar,
-    Position = UDim2.new(0,18,0,12),
-    Size = UDim2.new(0.6,0,0,32),
+    Position = UDim2.new(0,18,0,8),
+    Size = UDim2.new(0.6,0,0,28),
     BackgroundTransparency = 1,
-    Text = "LEX VIP",
+    Text = "LEX Host",
     Font = Enum.Font.GothamBold,
     TextSize = 20,
-    TextColor3 = Color3.fromRGB(200,230,255),
+    TextColor3 = Color3.fromRGB(210,235,255),
     TextXAlignment = Enum.TextXAlignment.Left
 })
 local subtitle = new("TextLabel", {
     Parent = topBar,
-    Position = UDim2.new(0,18,0,30),
-    Size = UDim2.new(0.6,0,0,18),
+    Position = UDim2.new(0,18,0,28),
+    Size = UDim2.new(0.6,0,0,20),
     BackgroundTransparency = 1,
-    Text = "LEX HOST VIP  •  v"..LexHost.Version,
+    Text = "Futuristic • v"..LexHost.Version,
     Font = Enum.Font.Gotham,
     TextSize = 12,
     TextColor3 = Color3.fromRGB(150,190,230),
     TextXAlignment = Enum.TextXAlignment.Left
 })
 
--- Minimize & Close (no blur used)
+-- Right top control buttons
 local btnClose = new("TextButton", {
     Parent = topBar, Size = UDim2.new(0,36,0,28), Position = UDim2.new(1,-48,0,14),
     BackgroundColor3 = Color3.fromRGB(200,70,70), Text = "X", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(255,255,255)
@@ -475,28 +133,24 @@ local btnClose = new("TextButton", {
 new("UICorner", {Parent = btnClose, CornerRadius = UDim.new(0,6)})
 local btnMin = new("TextButton", {
     Parent = topBar, Size = UDim2.new(0,36,0,28), Position = UDim2.new(1,-92,0,14),
-    BackgroundColor3 = Color3.fromRGB(35,100,200), Text = "-", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = Color3.fromRGB(255,255,255)
+    BackgroundColor3 = Color3.fromRGB(20,90,170), Text = "_", Font = Enum.Font.GothamBold, TextSize = 20, TextColor3 = Color3.fromRGB(255,255,255)
 })
 new("UICorner", {Parent = btnMin, CornerRadius = UDim.new(0,6)})
 
--- Body
+-- BODY (left nav + right content)
 local body = new("Frame", {Parent = main, Position = UDim2.new(0,12,0,64), Size = UDim2.new(1,-24,1,-76), BackgroundTransparency = 1})
 
--- Left menu nav
-local left = new("Frame", {Parent = body, Size = UDim2.new(0,140,1,0), BackgroundTransparency = 1})
-new("Frame", {Parent = left, Size = UDim2.new(1,0,1,0), BackgroundColor3 = Color3.fromRGB(12,24,46), BorderSizePixel = 0})
+-- LEFT NAV
+local left = new("Frame", {Parent = body, Size = UDim2.new(0,160,1,0), BackgroundTransparency = 1})
+new("Frame", {Parent = left, Size = UDim2.new(1,0,1,0), BackgroundColor3 = Color3.fromRGB(8,16,30), BorderSizePixel = 0})
 new("UICorner", {Parent = left, CornerRadius = UDim.new(0,10)})
 
--- Right content
-local right = new("Frame", {Parent = body, Size = UDim2.new(1, -156, 1, 0), Position = UDim2.new(0,150,0,0), BackgroundTransparency = 1})
-
--- Left menu buttons
 local menuList = {
     {Key="Home", Label="Home"},
+    {Key="Modes", Label="Modes"},
     {Key="Movement", Label="Movement"},
     {Key="Utilities", Label="Utilities"},
-    {Key="World", Label="World"},
-    {Key="Misc", Label="Misc"},
+    {Key="Info", Label="Info"},
 }
 local menuButtons = {}
 for i, data in ipairs(menuList) do
@@ -504,15 +158,20 @@ for i, data in ipairs(menuList) do
         Parent = left,
         Size = UDim2.new(1, -24, 0, 46),
         Position = UDim2.new(0,12,0, 12 + (i-1)*56),
-        BackgroundColor3 = Color3.fromRGB(18,40,72),
+        BackgroundColor3 = Color3.fromRGB(12,26,48),
         Text = data.Label,
         Font = Enum.Font.Gotham,
         TextSize = 15,
-        TextColor3 = Color3.fromRGB(210,230,255)
+        TextColor3 = Color3.fromRGB(210,230,255),
+        BorderSizePixel = 0
     })
     new("UICorner", {Parent = btn, CornerRadius = UDim.new(0,8)})
     menuButtons[data.Key] = btn
 end
+
+-- RIGHT CONTENT
+local right = new("Frame", {Parent = body, Size = UDim2.new(1, -176, 1, 0), Position = UDim2.new(0,170,0,0), BackgroundTransparency = 1})
+new("UICorner", {Parent = right, CornerRadius = UDim.new(0,8)})
 
 -- helpers
 local function clearRight()
@@ -521,9 +180,18 @@ local function clearRight()
     end
 end
 
+local function makeButton(parent, text, cb)
+    local btn = new("TextButton", {Parent = parent, Size = UDim2.new(1,-16,0,40), Position = UDim2.new(0,8,0,0), BackgroundColor3 = Color3.fromRGB(30,64,110), Text = text, Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Color3.fromRGB(255,255,255)})
+    new("UICorner", {Parent = btn, CornerRadius = UDim.new(0,8)})
+    btn.MouseButton1Click:Connect(function()
+        pcall(cb)
+    end)
+    return btn
+end
+
 local function makeToggle(parent, labelText, initial, onChange)
     local cont = new("Frame", {Parent = parent, Size = UDim2.new(1, -12, 0, 44), BackgroundTransparency = 1})
-    local lbl = new("TextLabel", {Parent = cont, Size = UDim2.new(0.7,0,1,0), BackgroundTransparency = 1, Text = labelText, Font = Enum.Font.Gotham, TextSize = 15, TextColor3 = Color3.fromRGB(220,240,255), TextXAlignment = Enum.TextXAlignment.Left})
+    local lbl = new("TextLabel", {Parent = cont, Size = UDim2.new(0.65,0,1,0), BackgroundTransparency = 1, Text = labelText, Font = Enum.Font.Gotham, TextSize = 15, TextColor3 = Color3.fromRGB(220,240,255), TextXAlignment = Enum.TextXAlignment.Left})
     local btn = new("TextButton", {Parent = cont, Size = UDim2.new(0,70,0,30), Position = UDim2.new(1,-74,0.5,-15), BackgroundColor3 = initial and Color3.fromRGB(70,200,255) or Color3.fromRGB(70,70,90), Text = initial and "ON" or "OFF", Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Color3.fromRGB(10,10,20)})
     new("UICorner", {Parent = btn, CornerRadius = UDim.new(0,8)})
     btn.MouseButton1Click:Connect(function()
@@ -569,115 +237,126 @@ local function makeSlider(parent, labelText, minv, maxv, initial, onChange)
     return cont
 end
 
--- PAGE BUILDS
+-- PAGE BUILDERS
 local function showHome()
     clearRight()
-    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Welcome to LEX VIP (Ocean Lite)", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = Color3.fromRGB(220,240,255)})
-    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,42), Size = UDim2.new(1,-16,0,64), BackgroundTransparency = 1, Text = "Lightweight control panel. Use toggles to enable features. AirWalk lets you walk in the air and pass through obstacles (W/A/S/D to move).", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = Color3.fromRGB(170,200,230), TextWrapped = true})
+    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Welcome to LEX Host (Futuristic)", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = Color3.fromRGB(220,240,255)})
+    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,42), Size = UDim2.new(1,-16,0,64), BackgroundTransparency = 1, Text = "Panel futuristik: klik mode pada tab 'Modes' untuk menjalankan skrip. Gunakan tombol LX di pojok untuk munculkan/ sembunyikan panel kapan saja.", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = Color3.fromRGB(170,200,230), TextWrapped = true})
+    local refresh = makeButton(right, "Refresh Script List", function()
+        -- recreate modes page if open
+        if main.Visible then
+            if menuButtons["Modes"] then menuButtons["Modes"]:CaptureFocus() end
+            -- call refresh action
+            showModeList()
+        end
+    end)
+    refresh.Position = UDim2.new(0,8,0,120)
+end
+
+-- BUILD MODE LIST (dynamically from scriptList)
+function showModeList()
+    clearRight()
+    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Modes / Gunung", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(220,240,255)})
+    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,36), Size = UDim2.new(1,-16,0,40), BackgroundTransparency = 1, Text = "Klik salah satu untuk menjalankan skrip yang bersangkutan.", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(170,200,230), TextWrapped = true})
+    local y = 84
+    for _, item in ipairs(scriptList) do
+        local btn = new("TextButton", {Parent = right, Position = UDim2.new(0,8,0,y), Size = UDim2.new(1,-16,0,36), BackgroundColor3 = Color3.fromRGB(28,58,106), Text = item.name, Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Color3.fromRGB(230,245,255)})
+        new("UICorner", {Parent = btn, CornerRadius = UDim.new(0,8)})
+        btn.MouseButton1Click:Connect(function()
+            -- safety: pcall execute
+            local ok, err = pcall(function()
+                local s = game:HttpGet(item.url)
+                local f = loadstring(s)
+                if type(f) == "function" then
+                    f()
+                else
+                    error("Invalid loadstring for "..item.name)
+                end
+            end)
+            if not ok then
+                -- show small temporary error label
+                local lbl = new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,y+44), Size = UDim2.new(1,-16,0,20), BackgroundTransparency = 1, Text = "Gagal menjalankan: "..tostring(err), Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(255,180,180)})
+                delay(3, function() if lbl and lbl.Parent then lbl:Destroy() end end)
+            end
+        end)
+        y = y + 46
+    end
 end
 
 local function showMovement()
     clearRight()
     new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Movement", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(220,240,255)})
-
-    local fly = makeToggle(right, "Fly (free fly)", LexHost.Enabled.Fly, function(state) LexHost.ToggleFly(state) end)
+    -- placeholders (actual movement functions should be in a separate section if desired)
+    local fly = makeToggle(right, "Fly (enable/disable)", LexHost.Enabled.Fly, function(state) LexHost.Enabled.Fly = state end)
+    fly.Position = UDim2.new(0,0,0,52)
     fly.Parent = right
-
-    local air = makeToggle(right, "AirWalk (walk on air & pass obstacles)", LexHost.Enabled.AirWalk, function(state) LexHost.ToggleAirWalk(state) end)
-    air.Parent = right
-
-    local noclip = makeToggle(right, "Noclip (disable collisions for character)", LexHost.Enabled.Noclip, function(state) LexHost.ToggleNoclip(state) end)
-    noclip.Parent = right
-
-    local speedToggle = makeToggle(right, "Speed Hack (multiplies walk speed)", LexHost.Enabled.Speed, function(state) LexHost.ToggleSpeed(state) end)
-    speedToggle.Parent = right
-
-    local speedSlider = makeSlider(right, "Speed Multiplier", 1, 12, LexHost.SpeedMultiplier, function(val) LexHost.SetSpeedMultiplier(val) end)
+    local speed = makeToggle(right, "Speed Hack", LexHost.Enabled.Speed, function(state) LexHost.Enabled.Speed = state end)
+    speed.Position = UDim2.new(0,0,0,108)
+    speed.Parent = right
+    local speedSlider = makeSlider(right, "Speed Multiplier", 1, 12, LexHost.SpeedMultiplier, function(val) LexHost.SpeedMultiplier = val end)
+    speedSlider.Position = UDim2.new(0,0,0,164)
     speedSlider.Parent = right
-
-    local tpBtn = new("TextButton", {Parent = right, Position = UDim2.new(0,8,0,260), Size = UDim2.new(1,-16,0,40), BackgroundColor3 = Color3.fromRGB(45,100,200), Text = "Click Teleport (use mouse)", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(255,255,255)})
-    new("UICorner", {Parent = tpBtn, CornerRadius = UDim.new(0,8)})
-    tpBtn.MouseButton1Click:Connect(function() LexHost.ClickTeleport() end)
 end
 
 local function showUtilities()
     clearRight()
     new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Utilities", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(220,240,255)})
-
-    local esp = makeToggle(right, "ESP (billboards + highlight)", LexHost.Enabled.ESP, function(state) LexHost.ToggleESP(state) end)
-    esp.Parent = right
-
-    local full = makeToggle(right, "Fullbright (environment)", true, function(state) if state then LexHost.EnableFullbright() end end)
-    full.Parent = right
-
-    local god = makeToggle(right, "God Mode (infinite HP)", true, function(state)
-        if state then
-            Humanoid.MaxHealth = math.huge; Humanoid.Health = math.huge
-        else
-            Humanoid.MaxHealth = 100; Humanoid.Health = 100
-        end
-    end)
-    god.Parent = right
-
-    local auto = makeToggle(right, "Auto Farm (collect items automatically)", LexHost.Enabled.AutoFarm, function(state) LexHost.Enabled.AutoFarm = state end)
-    auto.Parent = right
-end
-
-local function showWorld()
-    clearRight()
-    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "World Tools", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(220,240,255)})
-    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,42), Size = UDim2.new(1,-16,0,36), BackgroundTransparency = 1, Text = "Enter part names (comma-separated). Example: wood,block,ladder", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(170,200,230), TextWrapped = true})
-    local input = new("TextBox", {Parent = right, Position = UDim2.new(0,8,0,86), Size = UDim2.new(1,-16,0,36), BackgroundColor3 = Color3.fromRGB(12,24,46), Text = "", Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(220,240,255)})
-    new("UICorner", {Parent = input, CornerRadius = UDim.new(0,8)})
-    local remBtn = new("TextButton", {Parent = right, Position = UDim2.new(0,8,0,132), Size = UDim2.new(1,-16,0,36), BackgroundColor3 = Color3.fromRGB(180,60,60), Text = "Remove Parts", Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Color3.fromRGB(255,255,255)})
-    new("UICorner", {Parent = remBtn, CornerRadius = UDim.new(0,8)})
-    remBtn.MouseButton1Click:Connect(function()
-        local text = input.Text or ""
-        if text == "" then
-            local tmp = new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,176), Size = UDim2.new(1,-16,0,24), BackgroundTransparency = 1, Text = "Enter names to remove.", Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(240,200,200)})
-            delay(2, function() if tmp and tmp.Parent then tmp:Destroy() end end)
-            return
-        end
-        local parts = {}
-        for s in string.gmatch(text:lower(), "[^,]+") do
-            s = s:match("^%s*(.-)%s*$")
-            if #s > 0 then table.insert(parts, s) end
-        end
-        LexHost.RemovePartsByNames(parts)
-        local ok = new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,176), Size = UDim2.new(1,-16,0,24), BackgroundTransparency = 1, Text = "Requested remove: "..table.concat(parts, ", "), Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(200,240,200)})
-        delay(3, function() if ok and ok.Parent then ok:Destroy() end end)
-    end)
-end
-
-local function showMisc()
-    clearRight()
-    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Misc", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(220,240,255)})
-    local hideReplay = makeToggle(right, "Attempt hide 'Replay' GUIs (if any)", false, function(state)
-        if state then
-            for _, g in pairs(PlayerGui:GetChildren()) do
-                local name = g.Name:lower()
-                if name:find("replay") or name:find("record") then
-                    pcall(function() g.Enabled = false end)
-                end
+    local refreshBtn = makeButton(right, "Refresh Script List (rebuild Modes)", function() showModeList() end)
+    refreshBtn.Position = UDim2.new(0,8,0,48)
+    local remParts = makeButton(right, "Remove Parts by Name (World Tools)", function()
+        -- prompt simple TextBox
+        clearRight()
+        new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Remove Parts (masukkan nama, koma-separate)", Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Color3.fromRGB(220,240,255)})
+        local input = new("TextBox", {Parent = right, Position = UDim2.new(0,8,0,46), Size = UDim2.new(1,-16,0,36), BackgroundColor3 = Color3.fromRGB(12,24,46), Text = "", Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(220,240,255)})
+        new("UICorner", {Parent = input, CornerRadius = UDim.new(0,8)})
+        local remBtn = makeButton(right, "Remove Now", function()
+            local text = input.Text or ""
+            if text == "" then return end
+            local parts = {}
+            for s in string.gmatch(text:lower(), "[^,]+") do
+                s = s:match("^%s*(.-)%s*$")
+                if #s > 0 then table.insert(parts, s) end
             end
-        else
-            print("[LEX VIP] Replay hiding toggled OFF (manual restore may be required).")
-        end
+            for _, obj in pairs(workspace:GetDescendants()) do
+                pcall(function()
+                    local nm = obj.Name:lower()
+                    for _, t in pairs(parts) do
+                        if nm == t or string.find(nm, t) then
+                            pcall(function() obj:Destroy() end)
+                        end
+                    end
+                end)
+            end
+            local ok = new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,140), Size = UDim2.new(1,-16,0,20), BackgroundTransparency = 1, Text = "Remove requested: "..table.concat(parts, ", "), Font = Enum.Font.Gotham, TextSize = 12, TextColor3 = Color3.fromRGB(200,240,200)})
+            delay(3, function() if ok and ok.Parent then ok:Destroy() end end)
+        end)
+        remBtn.Position = UDim2.new(0,8,0,92)
     end)
-    hideReplay.Parent = right
+    remParts.Position = UDim2.new(0,8,0,96)
+    remParts.Parent = right
+end
+
+local function showInfo()
+    clearRight()
+    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,6), Size = UDim2.new(1,-16,0,28), BackgroundTransparency = 1, Text = "Info & Credits", Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(220,240,255)})
+    new("TextLabel", {Parent = right, Position = UDim2.new(0,8,0,42), Size = UDim2.new(1,-16,0,120), BackgroundTransparency = 1, Text = "LEX Host - Futuristic UI\nVersi: "..LexHost.Version.."\n\nFeatures: Modes loader, Movement toggles, Utilities, Remove parts, RGB accent.\n\nDesigner: LEX Host (custom build)\nUse at your own risk.", Font = Enum.Font.Gotham, TextSize = 13, TextColor3 = Color3.fromRGB(170,200,230), TextWrapped = true})
+    local exitBtn = makeButton(right, "Exit (Tutup GUI)", function()
+        if screenGui and screenGui.Parent then screenGui:Destroy() end
+    end)
+    exitBtn.Position = UDim2.new(0,8,0,180)
 end
 
 -- connect menus
 menuButtons["Home"].MouseButton1Click:Connect(showHome)
+menuButtons["Modes"].MouseButton1Click:Connect(function() showModeList() end)
 menuButtons["Movement"].MouseButton1Click:Connect(showMovement)
 menuButtons["Utilities"].MouseButton1Click:Connect(showUtilities)
-menuButtons["World"].MouseButton1Click:Connect(showWorld)
-menuButtons["Misc"].MouseButton1Click:Connect(showMisc)
+menuButtons["Info"].MouseButton1Click:Connect(showInfo)
 
--- default
+-- default page
 showHome()
 
--- make draggable from topBar
+-- DRAGGING MAIN from topBar
 do
     local dragging, dragInput, dragStart, startPos
     local function update(input)
@@ -702,12 +381,8 @@ do
     end)
 end
 
--- minimize/close behavior
+-- MINIMIZE / CLOSE BEHAVIOR (adapted to LX button)
 local minimized = false
-local stub
-btnClose.MouseButton1Click:Connect(function()
-    pcall(function() screenGui:Destroy() end)
-end)
 btnMin.MouseButton1Click:Connect(function()
     if not minimized then
         local shrink = TweenService:Create(main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 220, 0, 46)})
@@ -716,33 +391,57 @@ btnMin.MouseButton1Click:Connect(function()
             if child ~= topBar then child.Visible = false end
         end
         minimized = true
-        if not stub or not stub.Parent then
-            stub = new("TextButton", {Parent = screenGui, Size = UDim2.new(0,160,0,38), Position = UDim2.new(0.5,-80,0.9,0), AnchorPoint = Vector2.new(0.5,0.5), BackgroundColor3 = Color3.fromRGB(12,28,54), Text = "LEX VIP (restore)", Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(200,230,255)})
-            new("UICorner", {Parent = stub, CornerRadius = UDim.new(0,8)})
-            stub.MouseButton1Click:Connect(function()
-                local expand = TweenService:Create(main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0,520,0,400)})
-                expand:Play()
-                for _, child in pairs(main:GetChildren()) do child.Visible = true end
-                minimized = false
-                if stub and stub.Parent then stub:Destroy(); stub = nil end
-            end)
-        end
     else
-        if stub and stub.Parent then stub:Destroy(); stub = nil end
-        local expand = TweenService:Create(main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0,520,0,400)})
+        local expand = TweenService:Create(main, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0,540,0,420)})
         expand:Play()
         for _, child in pairs(main:GetChildren()) do child.Visible = true end
         minimized = false
     end
 end)
 
--- open animation (slide-in)
+-- CHANGE btnClose to HIDE (so LX can restore). If user wants full destroy, Info->Exit available
+btnClose.MouseButton1Click:Connect(function()
+    main.Visible = false
+end)
+
+-- LX Button toggles main visibility (show/hide) and if hidden re-open
+lxButton.MouseButton1Click:Connect(function()
+    if main.Visible then
+        main.Visible = false
+    else
+        main.Visible = true
+        -- ensure main appears centered (or keep last position)
+        -- animate in if first time visible
+        if main.Size.X.Offset == 540 then
+            main.Position = UDim2.new(0.5, 0, -0.5, 0)
+            local t1 = TweenService:Create(main, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0.5, 0)})
+            t1:Play()
+        end
+    end
+end)
+
+-- OPEN animation if user clicked LX for first time
+-- (handled in lxButton connection above)
+
+-- RGB / Glow effect for accents (animate hue)
 do
-    main.Position = UDim2.new(0.5, 0, -0.5, 0)
-    main.Visible = true
-    local t1 = TweenService:Create(main, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0.5, 0)})
-    t1:Play()
+    local t = 0
+    spawn(function()
+        while screenGui and screenGui.Parent do
+            t = t + 0.015
+            local r = (math.sin(t*1.2) * 0.5 + 0.5)
+            local g = (math.sin(t*1.6 + 2) * 0.5 + 0.5)
+            local b = (math.sin(t*1.1 + 4) * 0.5 + 0.5)
+            local col = Color3.new(0.15 + 0.85*r, 0.15 + 0.85*g, 0.25 + 0.75*b)
+            pcall(function()
+                mainAccent.BackgroundColor3 = col
+                mainStroke.Color = col
+                lxStroke.Color = col
+            end)
+            wait(0.03)
+        end
+    end)
 end
 
--- final print
-print("[LEX VIP] UI loaded. Version: "..LexHost.Version)
+-- FINAL print
+print("[LEX Host] UI siap. Versi: "..LexHost.Version)
