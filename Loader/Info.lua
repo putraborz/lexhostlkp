@@ -20,6 +20,7 @@ Made by: LEX Dev
 
 Features:
 - Multiple game modes
+- Auto Walk
 - Advanced movement controls
 - Player teleportation
 - Copy Avatar
