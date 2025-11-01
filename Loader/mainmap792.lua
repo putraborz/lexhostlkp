@@ -1,12 +1,12 @@
---// LEX Host v3 - Enhanced Cyber Neon Edition
+--// LEX Host v3 - Cyber Neon Transparent Edition
 --// Made by LEX Dev
---// Features: Mount, Clone Avatar, Speed Input, Fly, Draggable Logo
+--// Fully Functional & Enhanced Version
 
 local LEXHost = Instance.new("ScreenGui", game.CoreGui)
 LEXHost.Name = "LEXHost"
 LEXHost.ResetOnSpawn = false
 
--- Logo LX (Draggable Toggle Button)
+-- Logo LX Horizontal (Draggable Toggle Button)
 local LogoButton = Instance.new("TextButton", LEXHost)
 LogoButton.Text = "LX"
 LogoButton.Font = Enum.Font.GothamBlack
@@ -19,6 +19,8 @@ LogoButton.BackgroundTransparency = 0.3
 LogoButton.BorderSizePixel = 0
 LogoButton.AutoButtonColor = false
 LogoButton.ZIndex = 10
+LogoButton.Active = true
+LogoButton.Draggable = true
 local LogoCorner = Instance.new("UICorner", LogoButton)
 LogoCorner.CornerRadius = UDim.new(0, 12)
 local LogoStroke = Instance.new("UIStroke", LogoButton)
@@ -28,95 +30,74 @@ LogoStroke.Thickness = 2.5
 -- Glow effect untuk logo
 LogoButton.MouseEnter:Connect(function()
 	LogoButton.TextColor3 = Color3.fromRGB(100, 255, 255)
-	LogoStroke.Thickness = 3
+	LogoStroke.Thickness = 3.5
 end)
 LogoButton.MouseLeave:Connect(function()
 	LogoButton.TextColor3 = Color3.fromRGB(0, 220, 255)
 	LogoStroke.Thickness = 2.5
 end)
 
--- Draggable Logo
-local UIS = game:GetService("UserInputService")
-local draggingLogo, logoStartPos, logoStartDrag
-LogoButton.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		draggingLogo = true
-		logoStartDrag = input.Position
-		logoStartPos = LogoButton.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				draggingLogo = false
-			end
-		end)
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if draggingLogo and input.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = input.Position - logoStartDrag
-		LogoButton.Position = UDim2.new(
-			logoStartPos.X.Scale, 
-			logoStartPos.X.Offset + delta.X, 
-			logoStartPos.Y.Scale, 
-			logoStartPos.Y.Offset + delta.Y
-		)
-	end
-end)
-
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = LEXHost
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-MainFrame.Size = UDim2.new(0, 700, 0, 480)
+MainFrame.Size = UDim2.new(0, 680, 0, 450)
 MainFrame.BackgroundColor3 = Color3.fromRGB(5, 10, 25)
-MainFrame.BackgroundTransparency = 0.25
+MainFrame.BackgroundTransparency = 0.15
 MainFrame.Visible = true
+MainFrame.ClipsDescendants = true
 local MainCorner = Instance.new("UICorner", MainFrame)
 MainCorner.CornerRadius = UDim.new(0, 15)
 local Stroke = Instance.new("UIStroke", MainFrame)
 Stroke.Color = Color3.fromRGB(0, 180, 255)
-Stroke.Thickness = 2.5
+Stroke.Thickness = 3
 
--- Gradient Background
-local Gradient = Instance.new("UIGradient", MainFrame)
-Gradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(5, 10, 25)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 20, 40))
-}
-Gradient.Rotation = 45
+-- Shadow effect
+local Shadow = Instance.new("ImageLabel", MainFrame)
+Shadow.Name = "Shadow"
+Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+Shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+Shadow.Size = UDim2.new(1, 30, 1, 30)
+Shadow.BackgroundTransparency = 1
+Shadow.Image = "rbxassetid://6014261993"
+Shadow.ImageColor3 = Color3.fromRGB(0, 150, 255)
+Shadow.ImageTransparency = 0.7
+Shadow.ZIndex = -1
 
 -- Topbar
 local TopBar = Instance.new("Frame", MainFrame)
-TopBar.Size = UDim2.new(1, 0, 0, 45)
+TopBar.Size = UDim2.new(1, 0, 0, 50)
 TopBar.BackgroundColor3 = Color3.fromRGB(10, 15, 35)
-TopBar.BackgroundTransparency = 0.3
+TopBar.BackgroundTransparency = 0.2
 local TopCorner = Instance.new("UICorner", TopBar)
 TopCorner.CornerRadius = UDim.new(0, 15)
 
+-- Logo LX di TopBar
 local LX = Instance.new("TextLabel", TopBar)
-LX.Text = "⚡ LX"
+LX.Text = "LX"
 LX.Font = Enum.Font.GothamBlack
-LX.TextSize = 26
+LX.TextSize = 28
 LX.TextColor3 = Color3.fromRGB(0, 220, 255)
 LX.Position = UDim2.new(0, 15, 0, 0)
-LX.Size = UDim2.new(0, 60, 1, 0)
+LX.Size = UDim2.new(0, 50, 1, 0)
 LX.BackgroundTransparency = 1
-LX.TextXAlignment = Enum.TextXAlignment.Left
+LX.TextXAlignment = Enum.TextXAlignment.Center
 
 local Title = Instance.new("TextLabel", TopBar)
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 80, 0, 0)
-Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Position = UDim2.new(0, 75, 0, 0)
+Title.Size = UDim2.new(0.5, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "LEX Host v3 - Enhanced Edition"
+Title.Text = "LEX Host v3 - Cyber Edition"
 Title.TextColor3 = Color3.fromRGB(0, 190, 255)
 Title.TextSize = 18
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
+-- Minimize & Close
 local MinBtn = Instance.new("TextButton", TopBar)
-MinBtn.Text = "_"
+MinBtn.Text = "−"
 MinBtn.Size = UDim2.new(0, 35, 0, 35)
-MinBtn.Position = UDim2.new(1, -80, 0.5, -17.5)
+MinBtn.Position = UDim2.new(1, -85, 0.5, -17.5)
 MinBtn.Font = Enum.Font.GothamBold
 MinBtn.TextSize = 20
 MinBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
@@ -124,6 +105,8 @@ MinBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
 MinBtn.BorderSizePixel = 0
 local MinCorner = Instance.new("UICorner", MinBtn)
 MinCorner.CornerRadius = UDim.new(0, 8)
+MinBtn.MouseEnter:Connect(function() MinBtn.BackgroundColor3 = Color3.fromRGB(30, 45, 70) end)
+MinBtn.MouseLeave:Connect(function() MinBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 50) end)
 
 local CloseBtn = Instance.new("TextButton", TopBar)
 CloseBtn.Text = "✕"
@@ -131,32 +114,29 @@ CloseBtn.Size = UDim2.new(0, 35, 0, 35)
 CloseBtn.Position = UDim2.new(1, -40, 0.5, -17.5)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 18
-CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 20)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 20)
 CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
 CloseBtn.BorderSizePixel = 0
 local CloseCorner = Instance.new("UICorner", CloseBtn)
 CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseBtn.MouseEnter:Connect(function() CloseBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30) end)
+CloseBtn.MouseLeave:Connect(function() CloseBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 20) end)
 
 -- Sidebar
 local Side = Instance.new("Frame", MainFrame)
-Side.Position = UDim2.new(0, 0, 0, 45)
-Side.Size = UDim2.new(0, 160, 1, -45)
+Side.Position = UDim2.new(0, 0, 0, 50)
+Side.Size = UDim2.new(0, 160, 1, -50)
 Side.BackgroundColor3 = Color3.fromRGB(8, 15, 35)
 Side.BackgroundTransparency = 0.3
 Side.BorderSizePixel = 0
-local SideCorner = Instance.new("UICorner", Side)
-SideCorner.CornerRadius = UDim.new(0, 15)
 
-local Tabs = {"🏠 Home", "🐎 Mount", "🚀 Movement", "🔧 Utilities", "ℹ️ Info"}
-local TabNames = {"Home", "Mount", "Movement", "Utilities", "Info"}
+local Tabs = {"Home","Mount","Movement","Utilities","Clone","Info"}
 local Buttons = {}
-
 for i, v in ipairs(Tabs) do
 	local B = Instance.new("TextButton", Side)
-	B.Name = TabNames[i]
 	B.Text = v
-	B.Size = UDim2.new(1, -16, 0, 45)
-	B.Position = UDim2.new(0, 8, 0, (i - 1) * 50 + 10)
+	B.Size = UDim2.new(1, -15, 0, 45)
+	B.Position = UDim2.new(0, 7.5, 0, (i - 1) * 52 + 15)
 	B.BackgroundColor3 = Color3.fromRGB(15, 25, 50)
 	B.TextColor3 = Color3.fromRGB(0, 200, 255)
 	B.Font = Enum.Font.GothamBold
@@ -165,343 +145,359 @@ for i, v in ipairs(Tabs) do
 	B.BorderSizePixel = 0
 	local s = Instance.new("UIStroke", B)
 	s.Color = Color3.fromRGB(0, 190, 255)
-	s.Thickness = 1.5
+	s.Thickness = 2
 	s.Transparency = 0.5
-	local bc = Instance.new("UICorner", B)
-	bc.CornerRadius = UDim.new(0, 10)
-	
-	B.MouseEnter:Connect(function()
-		B.BackgroundColor3 = Color3.fromRGB(20, 40, 80)
+	local c = Instance.new("UICorner", B)
+	c.CornerRadius = UDim.new(0, 10)
+	B.MouseEnter:Connect(function() 
+		B.BackgroundColor3 = Color3.fromRGB(25,40,80)
+		s.Thickness = 2.5
 		s.Transparency = 0
 	end)
-	B.MouseLeave:Connect(function()
-		B.BackgroundColor3 = Color3.fromRGB(15, 25, 50)
+	B.MouseLeave:Connect(function() 
+		B.BackgroundColor3 = Color3.fromRGB(15,25,50)
+		s.Thickness = 2
 		s.Transparency = 0.5
 	end)
-	Buttons[TabNames[i]] = B
+	Buttons[v] = B
 end
 
 -- Content Area
 local Content = Instance.new("Frame", MainFrame)
-Content.Position = UDim2.new(0, 170, 0, 55)
-Content.Size = UDim2.new(1, -180, 1, -65)
+Content.Position = UDim2.new(0, 170, 0, 60)
+Content.Size = UDim2.new(1, -180, 1, -70)
 Content.BackgroundTransparency = 1
 
 -- Variables
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- GitHub URLs Configuration
+local GITHUB_URLS = {
+	Home = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Home.lua",
+	Mount = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Modes.lua",
+	Movement = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Movement.lua",
+	Utilities = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Utilities.lua",
+	Info = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Info.lua"
+}
+
+-- Function to load from GitHub
+local function LoadModule(moduleName)
+	local url = GITHUB_URLS[moduleName]
+	if not url then
+		warn("Module " .. moduleName .. " not found in configuration")
+		return nil
+	end
+	
+	local success, result = pcall(function()
+		return loadstring(game:HttpGet(url))()
+	end)
+	if success then
+		return result
+	else
+		warn("Failed to load " .. moduleName .. ": " .. tostring(result))
+		return nil
+	end
+end
+
+-- Loading Screen
+local LoadingFrame = Instance.new("Frame", Content)
+LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
+LoadingFrame.BackgroundTransparency = 1
+LoadingFrame.Visible = true
+
+local LoadingText = Instance.new("TextLabel", LoadingFrame)
+LoadingText.Size = UDim2.new(1, 0, 0.3, 0)
+LoadingText.Position = UDim2.new(0, 0, 0.35, 0)
+LoadingText.BackgroundTransparency = 1
+LoadingText.Text = "⚡ Loading LEX Host v3..."
+LoadingText.TextColor3 = Color3.fromRGB(0, 220, 255)
+LoadingText.Font = Enum.Font.GothamBold
+LoadingText.TextSize = 20
+
+local LoadingDesc = Instance.new("TextLabel", LoadingFrame)
+LoadingDesc.Size = UDim2.new(1, 0, 0.2, 0)
+LoadingDesc.Position = UDim2.new(0, 0, 0.5, 0)
+LoadingDesc.BackgroundTransparency = 1
+LoadingDesc.Text = "Connecting to GitHub servers..."
+LoadingDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
+LoadingDesc.Font = Enum.Font.Gotham
+LoadingDesc.TextSize = 14
 
 -- Create Pages
-local function CreatePage(name)
-	local Page = Instance.new("ScrollingFrame", Content)
-	Page.Name = name
-	Page.Size = UDim2.new(1, 0, 1, 0)
-	Page.BackgroundTransparency = 1
-	Page.BorderSizePixel = 0
-	Page.ScrollBarThickness = 8
-	Page.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
-	Page.CanvasSize = UDim2.new(0, 0, 0, 0)
-	Page.Visible = false
-	Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	return Page
-end
+local HomePage = Instance.new("ScrollingFrame", Content)
+HomePage.Name = "Home"
+HomePage.Size = UDim2.new(1, 0, 1, 0)
+HomePage.BackgroundTransparency = 1
+HomePage.BorderSizePixel = 0
+HomePage.ScrollBarThickness = 8
+HomePage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+HomePage.CanvasSize = UDim2.new(0, 0, 0, 300)
+HomePage.Visible = false
 
-local HomePage = CreatePage("Home")
-local MountPage = CreatePage("Mount")
-local MovementPage = CreatePage("Movement")
-local UtilitiesPage = CreatePage("Utilities")
-local InfoPage = CreatePage("Info")
+local MountPage = Instance.new("ScrollingFrame", Content)
+MountPage.Name = "Mount"
+MountPage.Size = UDim2.new(1, 0, 1, 0)
+MountPage.CanvasSize = UDim2.new(0, 0, 2, 0)
+MountPage.ScrollBarThickness = 8
+MountPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+MountPage.BackgroundTransparency = 1
+MountPage.BorderSizePixel = 0
+MountPage.Visible = false
 
--- Helper Functions
-local function CreateButton(parent, text, position, callback)
-	local btn = Instance.new("TextButton", parent)
-	btn.Text = text
-	btn.Size = UDim2.new(0, 200, 0, 40)
-	btn.Position = position
-	btn.BackgroundColor3 = Color3.fromRGB(15, 30, 60)
-	btn.TextColor3 = Color3.fromRGB(0, 220, 255)
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 14
-	btn.BorderSizePixel = 0
-	local corner = Instance.new("UICorner", btn)
-	corner.CornerRadius = UDim.new(0, 10)
-	local stroke = Instance.new("UIStroke", btn)
-	stroke.Color = Color3.fromRGB(0, 200, 255)
-	stroke.Thickness = 2
-	
-	btn.MouseEnter:Connect(function()
-		btn.BackgroundColor3 = Color3.fromRGB(25, 50, 90)
+local MovementPage = Instance.new("ScrollingFrame", Content)
+MovementPage.Name = "Movement"
+MovementPage.Size = UDim2.new(1, 0, 1, 0)
+MovementPage.BackgroundTransparency = 1
+MovementPage.BorderSizePixel = 0
+MovementPage.ScrollBarThickness = 8
+MovementPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+MovementPage.CanvasSize = UDim2.new(0, 0, 0, 500)
+MovementPage.Visible = false
+
+local UtilitiesPage = Instance.new("ScrollingFrame", Content)
+UtilitiesPage.Name = "Utilities"
+UtilitiesPage.Size = UDim2.new(1, 0, 1, 0)
+UtilitiesPage.BackgroundTransparency = 1
+UtilitiesPage.BorderSizePixel = 0
+UtilitiesPage.ScrollBarThickness = 8
+UtilitiesPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+UtilitiesPage.CanvasSize = UDim2.new(0, 0, 0, 600)
+UtilitiesPage.Visible = false
+
+local ClonePage = Instance.new("ScrollingFrame", Content)
+ClonePage.Name = "Clone"
+ClonePage.Size = UDim2.new(1, 0, 1, 0)
+ClonePage.BackgroundTransparency = 1
+ClonePage.BorderSizePixel = 0
+ClonePage.ScrollBarThickness = 8
+ClonePage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+ClonePage.CanvasSize = UDim2.new(0, 0, 0, 400)
+ClonePage.Visible = false
+
+local InfoPage = Instance.new("ScrollingFrame", Content)
+InfoPage.Name = "Info"
+InfoPage.Size = UDim2.new(1, 0, 1, 0)
+InfoPage.BackgroundTransparency = 1
+InfoPage.BorderSizePixel = 0
+InfoPage.ScrollBarThickness = 8
+InfoPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+InfoPage.CanvasSize = UDim2.new(0, 0, 0, 350)
+InfoPage.Visible = false
+
+-- Clone Avatar Page Content
+local function InitializeClonePage()
+	local CloneTitle = Instance.new("TextLabel", ClonePage)
+	CloneTitle.Size = UDim2.new(1, -10, 0, 40)
+	CloneTitle.Position = UDim2.new(0, 5, 0, 10)
+	CloneTitle.BackgroundTransparency = 1
+	CloneTitle.Text = "🎭 Clone Player Avatar"
+	CloneTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
+	CloneTitle.Font = Enum.Font.GothamBold
+	CloneTitle.TextSize = 20
+	CloneTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+	local CloneDesc = Instance.new("TextLabel", ClonePage)
+	CloneDesc.Size = UDim2.new(1, -10, 0, 30)
+	CloneDesc.Position = UDim2.new(0, 5, 0, 55)
+	CloneDesc.BackgroundTransparency = 1
+	CloneDesc.Text = "Copy the appearance of any player in the server"
+	CloneDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
+	CloneDesc.Font = Enum.Font.Gotham
+	CloneDesc.TextSize = 14
+	CloneDesc.TextXAlignment = Enum.TextXAlignment.Left
+
+	local SearchLabel = Instance.new("TextLabel", ClonePage)
+	SearchLabel.Size = UDim2.new(1, -10, 0, 25)
+	SearchLabel.Position = UDim2.new(0, 5, 0, 100)
+	SearchLabel.BackgroundTransparency = 1
+	SearchLabel.Text = "Search Player:"
+	SearchLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+	SearchLabel.Font = Enum.Font.GothamBold
+	SearchLabel.TextSize = 15
+	SearchLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	local SearchBox = Instance.new("TextBox", ClonePage)
+	SearchBox.Size = UDim2.new(1, -10, 0, 40)
+	SearchBox.Position = UDim2.new(0, 5, 0, 130)
+	SearchBox.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+	SearchBox.PlaceholderText = "Type player name..."
+	SearchBox.Text = ""
+	SearchBox.Font = Enum.Font.Gotham
+	SearchBox.TextSize = 14
+	SearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+	SearchBox.BorderSizePixel = 0
+	local SearchCorner = Instance.new("UICorner", SearchBox)
+	SearchCorner.CornerRadius = UDim.new(0, 8)
+	local SearchStroke = Instance.new("UIStroke", SearchBox)
+	SearchStroke.Color = Color3.fromRGB(0, 160, 255)
+	SearchStroke.Thickness = 2
+
+	local CloneBtn = Instance.new("TextButton", ClonePage)
+	CloneBtn.Size = UDim2.new(1, -10, 0, 45)
+	CloneBtn.Position = UDim2.new(0, 5, 0, 180)
+	CloneBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+	CloneBtn.Text = "🎭 Clone Avatar"
+	CloneBtn.Font = Enum.Font.GothamBold
+	CloneBtn.TextSize = 16
+	CloneBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	CloneBtn.BorderSizePixel = 0
+	local CloneBtnCorner = Instance.new("UICorner", CloneBtn)
+	CloneBtnCorner.CornerRadius = UDim.new(0, 10)
+	CloneBtn.MouseEnter:Connect(function() CloneBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 240) end)
+	CloneBtn.MouseLeave:Connect(function() CloneBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200) end)
+
+	CloneBtn.MouseButton1Click:Connect(function()
+		local targetName = SearchBox.Text
+		for _, v in pairs(game.Players:GetPlayers()) do
+			if v.Name:lower():find(targetName:lower()) and v.Character then
+				local targetChar = v.Character
+				
+				for _, obj in pairs(character:GetChildren()) do
+					if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+						obj:Destroy()
+					elseif obj:IsA("Accessory") or obj:IsA("Hat") then
+						obj:Destroy()
+					end
+				end
+				
+				for _, obj in pairs(targetChar:GetChildren()) do
+					if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+						obj:Clone().Parent = character
+					elseif obj:IsA("Accessory") or obj:IsA("Hat") then
+						obj:Clone().Parent = character
+					end
+				end
+				
+				if targetChar:FindFirstChild("Body Colors") then
+					local bc = character:FindFirstChild("Body Colors") or Instance.new("BodyColors", character)
+					local tbc = targetChar["Body Colors"]
+					bc.HeadColor = tbc.HeadColor
+					bc.TorsoColor = tbc.TorsoColor
+					bc.LeftArmColor = tbc.LeftArmColor
+					bc.RightArmColor = tbc.RightArmColor
+					bc.LeftLegColor = tbc.LeftLegColor
+					bc.RightLegColor = tbc.RightLegColor
+				end
+				
+				local head = character:FindFirstChild("Head")
+				if head then
+					local face = head:FindFirstChildOfClass("Decal")
+					local targetHead = targetChar:FindFirstChild("Head")
+					if targetHead then
+						local targetFace = targetHead:FindFirstChildOfClass("Decal")
+						if face and targetFace then
+							face.Texture = targetFace.Texture
+						end
+					end
+				end
+				
+				CloneBtn.Text = "✅ Cloned Successfully!"
+				wait(2)
+				CloneBtn.Text = "🎭 Clone Avatar"
+				break
+			end
+		end
 	end)
-	btn.MouseLeave:Connect(function()
-		btn.BackgroundColor3 = Color3.fromRGB(15, 30, 60)
-	end)
-	
-	if callback then
-		btn.MouseButton1Click:Connect(callback)
-	end
-	
-	return btn
 end
 
-local function CreateToggle(parent, text, position, callback)
-	local frame = Instance.new("Frame", parent)
-	frame.Size = UDim2.new(0, 250, 0, 50)
-	frame.Position = position
-	frame.BackgroundColor3 = Color3.fromRGB(15, 25, 50)
-	frame.BorderSizePixel = 0
-	local corner = Instance.new("UICorner", frame)
-	corner.CornerRadius = UDim.new(0, 10)
+InitializeClonePage()
+
+-- Load Modules from GitHub
+spawn(function()
+	wait(0.5)
+	LoadingDesc.Text = "Loading Home module..."
+	local HomeModule = LoadModule("Home")
+	if HomeModule then HomeModule.Initialize(HomePage) end
 	
-	local label = Instance.new("TextLabel", frame)
-	label.Text = text
-	label.Size = UDim2.new(0.7, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.fromRGB(200, 220, 255)
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = 14
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Position = UDim2.new(0, 10, 0, 0)
+	wait(0.3)
+	LoadingDesc.Text = "Loading Mount module..."
+	local MountModule = LoadModule("Mount")
+	if MountModule then MountModule.Initialize(MountPage) end
 	
-	local toggle = Instance.new("TextButton", frame)
-	toggle.Size = UDim2.new(0, 60, 0, 30)
-	toggle.Position = UDim2.new(1, -70, 0.5, -15)
-	toggle.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
-	toggle.Text = "OFF"
-	toggle.TextColor3 = Color3.fromRGB(255, 100, 100)
-	toggle.Font = Enum.Font.GothamBold
-	toggle.TextSize = 12
-	toggle.BorderSizePixel = 0
-	local toggleCorner = Instance.new("UICorner", toggle)
-	toggleCorner.CornerRadius = UDim.new(0, 8)
+	wait(0.3)
+	LoadingDesc.Text = "Loading Movement module..."
+	local MovementModule = LoadModule("Movement")
+	if MovementModule then MovementModule.Initialize(MovementPage, player, character) end
 	
-	local enabled = false
-	toggle.MouseButton1Click:Connect(function()
-		enabled = not enabled
-		if enabled then
-			toggle.BackgroundColor3 = Color3.fromRGB(20, 60, 20)
-			toggle.Text = "ON"
-			toggle.TextColor3 = Color3.fromRGB(100, 255, 100)
-		else
-			toggle.BackgroundColor3 = Color3.fromRGB(60, 20, 20)
-			toggle.Text = "OFF"
-			toggle.TextColor3 = Color3.fromRGB(255, 100, 100)
-		end
-		if callback then callback(enabled) end
-	end)
+	wait(0.3)
+	LoadingDesc.Text = "Loading Utilities module..."
+	local UtilitiesModule = LoadModule("Utilities")
+	if UtilitiesModule then UtilitiesModule.Initialize(UtilitiesPage, player, character) end
 	
-	return toggle, frame
+	wait(0.3)
+	LoadingDesc.Text = "Loading Info module..."
+	local InfoModule = LoadModule("Info")
+	if InfoModule then InfoModule.Initialize(InfoPage) end
+	
+	LoadingFrame.Visible = false
+	HomePage.Visible = true
+end)
+
+-- Tab System
+local function ShowTab(tab)
+	HomePage.Visible = false
+	MountPage.Visible = false
+	MovementPage.Visible = false
+	UtilitiesPage.Visible = false
+	ClonePage.Visible = false
+	InfoPage.Visible = false
+	LoadingFrame.Visible = false
+	
+	if tab == "Home" then
+		HomePage.Visible = true
+	elseif tab == "Mount" then
+		MountPage.Visible = true
+	elseif tab == "Movement" then
+		MovementPage.Visible = true
+	elseif tab == "Utilities" then
+		UtilitiesPage.Visible = true
+	elseif tab == "Clone" then
+		ClonePage.Visible = true
+	elseif tab == "Info" then
+		InfoPage.Visible = true
+	end
 end
 
-local function CreateTextBox(parent, placeholder, position)
-	local box = Instance.new("TextBox", parent)
-	box.Size = UDim2.new(0, 200, 0, 40)
-	box.Position = position
-	box.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
-	box.TextColor3 = Color3.fromRGB(0, 220, 255)
-	box.PlaceholderText = placeholder
-	box.PlaceholderColor3 = Color3.fromRGB(100, 150, 200)
-	box.Font = Enum.Font.Gotham
-	box.TextSize = 14
-	box.Text = ""
-	box.BorderSizePixel = 0
-	local corner = Instance.new("UICorner", box)
-	corner.CornerRadius = UDim.new(0, 10)
-	local stroke = Instance.new("UIStroke", box)
-	stroke.Color = Color3.fromRGB(0, 150, 200)
-	stroke.Thickness = 1.5
-	return box
+for n, b in pairs(Buttons) do
+	b.MouseButton1Click:Connect(function() ShowTab(n) end)
 end
 
--- HOME PAGE
-local HomeTitle = Instance.new("TextLabel", HomePage)
-HomeTitle.Text = "✨ Welcome to LEX Host v3 ✨"
-HomeTitle.Size = UDim2.new(1, 0, 0, 50)
-HomeTitle.Position = UDim2.new(0, 0, 0, 10)
-HomeTitle.BackgroundTransparency = 1
-HomeTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
-HomeTitle.Font = Enum.Font.GothamBlack
-HomeTitle.TextSize = 24
+-- Logo Button Toggle
+LogoButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = not MainFrame.Visible
+end)
 
-local HomeDesc = Instance.new("TextLabel", HomePage)
-HomeDesc.Text = "Enhanced Cyber Edition with Advanced Features\n\n🐎 Mount System\n🚀 Custom Speed & Fly\n👤 Clone Avatar\n🔧 Advanced Utilities"
-HomeDesc.Size = UDim2.new(1, -20, 0, 150)
-HomeDesc.Position = UDim2.new(0, 10, 0, 70)
-HomeDesc.BackgroundTransparency = 1
-HomeDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
-HomeDesc.Font = Enum.Font.Gotham
-HomeDesc.TextSize = 14
-HomeDesc.TextWrapped = true
-HomeDesc.TextYAlignment = Enum.TextYAlignment.Top
+-- Minimize
+MinBtn.MouseButton1Click:Connect(function()
+	MainFrame.Visible = false
+end)
 
--- MOUNT PAGE
-local MountTitle = Instance.new("TextLabel", MountPage)
-MountTitle.Text = "🐎 Mount System"
-MountTitle.Size = UDim2.new(1, 0, 0, 40)
-MountTitle.BackgroundTransparency = 1
-MountTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
-MountTitle.Font = Enum.Font.GothamBold
-MountTitle.TextSize = 20
+-- Close
+CloseBtn.MouseButton1Click:Connect(function()
+	LEXHost:Destroy()
+end)
 
-local MountInfo = Instance.new("TextLabel", MountPage)
-MountInfo.Text = "Ride other players as mounts!"
-MountInfo.Size = UDim2.new(1, 0, 0, 30)
-MountInfo.Position = UDim2.new(0, 0, 0, 45)
-MountInfo.BackgroundTransparency = 1
-MountInfo.TextColor3 = Color3.fromRGB(150, 200, 255)
-MountInfo.Font = Enum.Font.Gotham
-MountInfo.TextSize = 12
-
-local MountPlayerBox = CreateTextBox(MountPage, "Enter Player Name", UDim2.new(0, 10, 0, 85))
-local MountPlayerBtn = CreateButton(MountPage, "🐎 Mount Player", UDim2.new(0, 220, 0, 85), function()
-	local targetName = MountPlayerBox.Text
-	for _, v in pairs(game.Players:GetPlayers()) do
-		if v.Name:lower():find(targetName:lower()) and v.Character then
-			local targetRoot = v.Character:FindFirstChild("HumanoidRootPart")
-			if targetRoot then
-				rootPart.CFrame = targetRoot.CFrame + Vector3.new(0, 2, 0)
-				wait(0.1)
-				-- Weld to player
-				local weld = Instance.new("Weld")
-				weld.Part0 = rootPart
-				weld.Part1 = targetRoot
-				weld.C0 = CFrame.new(0, 2, 0)
-				weld.Parent = rootPart
-			end
-			break
-		end
+-- Draggable MainFrame
+local UIS = game:GetService("UserInputService")
+local dragging, dragInput, startPos, startDrag
+TopBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		startDrag = input.Position
+		startPos = MainFrame.Position
+	end
+end)
+TopBar.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - startDrag
+		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 	end
 end)
 
-local UnmountBtn = CreateButton(MountPage, "Unmount", UDim2.new(0, 10, 0, 140), function()
-	for _, v in pairs(rootPart:GetChildren()) do
-		if v:IsA("Weld") then
-			v:Destroy()
-		end
-	end
-end)
-
--- MOVEMENT PAGE  
-local MovTitle = Instance.new("TextLabel", MovementPage)
-MovTitle.Text = "🚀 Movement Controls"
-MovTitle.Size = UDim2.new(1, 0, 0, 40)
-MovTitle.BackgroundTransparency = 1
-MovTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
-MovTitle.Font = Enum.Font.GothamBold
-MovTitle.TextSize = 20
-
--- Speed Control
-local SpeedLabel = Instance.new("TextLabel", MovementPage)
-SpeedLabel.Text = "⚡ Custom Speed"
-SpeedLabel.Size = UDim2.new(0, 150, 0, 40)
-SpeedLabel.Position = UDim2.new(0, 10, 0, 50)
-SpeedLabel.BackgroundTransparency = 1
-SpeedLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
-SpeedLabel.Font = Enum.Font.GothamBold
-SpeedLabel.TextSize = 14
-SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local SpeedBox = CreateTextBox(MovementPage, "Speed (16-500)", UDim2.new(0, 10, 0, 90))
-local SetSpeedBtn = CreateButton(MovementPage, "Set Speed", UDim2.new(0, 220, 0, 90), function()
-	local speed = tonumber(SpeedBox.Text)
-	if speed then
-		humanoid.WalkSpeed = speed
-	end
-end)
-
-local ResetSpeedBtn = CreateButton(MovementPage, "Reset Speed", UDim2.new(0, 10, 0, 145), function()
-	humanoid.WalkSpeed = 16
-	SpeedBox.Text = ""
-end)
-
--- Fly Control
-local flyEnabled = false
-local flySpeed = 50
-local flyConnection
-
-local FlyToggle, FlyFrame = CreateToggle(MovementPage, "✈️ Fly Mode", UDim2.new(0, 10, 0, 200), function(enabled)
-	flyEnabled = enabled
-	if enabled then
-		local bodyVelocity = Instance.new("BodyVelocity")
-		bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-		bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-		bodyVelocity.Parent = rootPart
-		
-		local bodyGyro = Instance.new("BodyGyro")
-		bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-		bodyGyro.Parent = rootPart
-		
-		flyConnection = game:GetService("RunService").RenderStepped:Connect(function()
-			local cam = workspace.CurrentCamera
-			local moveDirection = Vector3.new(0, 0, 0)
-			
-			if UIS:IsKeyDown(Enum.KeyCode.W) then
-				moveDirection = moveDirection + (cam.CFrame.LookVector)
-			end
-			if UIS:IsKeyDown(Enum.KeyCode.S) then
-				moveDirection = moveDirection - (cam.CFrame.LookVector)
-			end
-			if UIS:IsKeyDown(Enum.KeyCode.A) then
-				moveDirection = moveDirection - (cam.CFrame.RightVector)
-			end
-			if UIS:IsKeyDown(Enum.KeyCode.D) then
-				moveDirection = moveDirection + (cam.CFrame.RightVector)
-			end
-			if UIS:IsKeyDown(Enum.KeyCode.Space) then
-				moveDirection = moveDirection + Vector3.new(0, 1, 0)
-			end
-			if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
-				moveDirection = moveDirection - Vector3.new(0, 1, 0)
-			end
-			
-			bodyVelocity.Velocity = moveDirection * flySpeed
-			bodyGyro.CFrame = cam.CFrame
-		end)
-	else
-		if flyConnection then
-			flyConnection:Disconnect()
-		end
-		for _, v in pairs(rootPart:GetChildren()) do
-			if v:IsA("BodyVelocity") or v:IsA("BodyGyro") then
-				v:Destroy()
-			end
-		end
-	end
-end)
-
-local FlySpeedBox = CreateTextBox(MovementPage, "Fly Speed (10-200)", UDim2.new(0, 10, 0, 260))
-local SetFlySpeedBtn = CreateButton(MovementPage, "Set Fly Speed", UDim2.new(0, 220, 0, 260), function()
-	local speed = tonumber(FlySpeedBox.Text)
-	if speed then
-		flySpeed = speed
-	end
-end)
-
--- UTILITIES PAGE
-local UtilTitle = Instance.new("TextLabel", UtilitiesPage)
-UtilTitle.Text = "🔧 Utilities & Tools"
-UtilTitle.Size = UDim2.new(1, 0, 0, 40)
-UtilTitle.BackgroundTransparency = 1
-UtilTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
-UtilTitle.Font = Enum.Font.GothamBold
-UtilTitle.TextSize = 20
-
--- Clone Avatar
-local CloneLabel = Instance.new("TextLabel", UtilitiesPage)
-CloneLabel.Text = "👤 Clone Player Avatar"
-CloneLabel.Size = UDim2.new(1, 0, 0, 30)
-CloneLabel.Position = UDim2.new(0, 10, 0, 50)
-CloneLabel.BackgroundTransparency = 1
-CloneLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
-CloneLabel.Font = Enum.Font.GothamBold
-CloneLabel.TextSize = 14
-CloneLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local ClonePlayerBox = CreateTextBox(UtilitiesPage, "Enter Player Name to Clone", UDim2.new(0, 10, 0, 85))
-local CloneBtn = CreateButton(UtilitiesPage, "👤 Clone Avatar", UDim2.new(0, 220, 0, 85), function()
-	local targetName = ClonePlayerBox.Text
-	for _, v in pairs(game.Players:GetPlayers()) do
-		if v.Name:lower():find(targetName:lower()) and v.Character then
-			local userId = v.UserId
-			
+print("✅ LEX Host v3 loaded successfully!")
