@@ -6,7 +6,7 @@ function HomeModule.Initialize(HomePage)
 	HomeTitle.BackgroundTransparency = 1
 	HomeTitle.Size = UDim2.new(1, 0, 0, 40)
 	HomeTitle.Font = Enum.Font.GothamBold
-	HomeTitle.Text = "Welcome to LEX Host v3"
+	HomeTitle.Text = "Welcome to LEX Host v3 Vip Edition"
 	HomeTitle.TextColor3 = Color3.fromRGB(0, 200, 255)
 	HomeTitle.TextSize = 20
 
