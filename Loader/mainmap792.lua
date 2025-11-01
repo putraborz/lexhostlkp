@@ -1,4 +1,4 @@
--- LEX Host v3 - Cyber Neon Blue (Full functional)
+-- LEX Host v3 - Cyber Neon Blue (Full functional) - UI/UX Enhanced
 -- Put this LocalScript into StarterGui
 -- Use at your own risk.
 
@@ -26,7 +26,7 @@ end
 
 -- MAIN FEATURES (gameplay helpers)
 local LexHost = {}
-LexHost.Version = "3.0-cyber"
+LexHost.Version = "3.0-cyber-enhanced" -- Diperbarui
 LexHost.Enabled = { Fly=false, Speed=false, Noclip=false, ESP=false, AutoFarm=false, AirWalk=false }
 LexHost.FlySpeed = 45
 LexHost.SpeedMultiplier = 2
@@ -286,6 +286,34 @@ end
 -- END FEATURES ----------------------------------------------------
 
 -- UI BUILD -------------------------------------------------------
+
+-- TWEEN FUNCTION (NEW)
+local function tweenGui(gui, visible)
+    local goal = {
+        Position = visible and UDim2.new(0.5,0,0.5,0) or UDim2.new(0.5,0,1.1,0), -- Pindah dari bawah layar (1.1 agar benar-benar hilang)
+        BackgroundTransparency = visible and 0.1 or 0.5 -- Transparansi saat muncul/hilang
+    }
+    
+    if visible then 
+        gui.Position = UDim2.new(0.5,0,1.1,0) -- Mulai dari bawah
+        gui.Visible = true
+        gui.BackgroundTransparency = 0.5 -- Set transparansi awal untuk transisi
+    end
+    
+    local info = TweenInfo.new(
+        0.3, -- Waktu transisi 0.3 detik
+        Enum.EasingStyle.Cubic, -- Gaya easing
+        Enum.EasingDirection.Out
+    )
+    
+    local tween = TweenService:Create(gui, info, goal)
+    tween:Play()
+    if not visible then
+        tween.Completed:Wait()
+        gui.Visible = false
+    end
+end
+
 -- cleanup previous
 local old = PlayerGui:FindFirstChild("LEX_HOST_GUI")
 if old then old:Destroy() end
@@ -320,6 +348,7 @@ local main = new("Frame", {
     Position = UDim2.new(0.5,0,0.5,0),
     AnchorPoint = Vector2.new(0.5,0.5),
     BackgroundColor3 = Color3.fromRGB(6,10,18),
+    BackgroundTransparency = 0.1, -- << DIBUAT TRANSPARAN SEDIKIT
     BorderSizePixel = 0,
     Visible = false,
     ZIndex = 9999
@@ -367,7 +396,13 @@ local function clearRight()
     end
 end
 
--- persistent modes scroll
+-- persistent modes scroll (Dummy list since no actual scriptList is provided)
+local scriptList = { 
+    {name = "Example Mode 1", url = "https://example.com/script1"},
+    {name = "Example Mode 2", url = "https://example.com/script2"},
+    {name = "Example Mode 3", url = "https://example.com/script3"},
+} -- NOTE: tambahkan daftar script yang sebenarnya di sini.
+
 local function ensureModesScroll()
     local existing = right:FindFirstChild("ModesScroll")
     if existing and existing:IsA("ScrollingFrame") then return existing end
@@ -385,8 +420,8 @@ end
 local function makeModeButton(parent, text, callback)
     local btn = new("TextButton", {Parent = parent, Size = UDim2.new(1,0,0,36), BackgroundColor3 = Color3.fromRGB(28,58,106), Text = text, Font = Enum.Font.GothamBold, TextSize = 14, TextColor3 = Color3.fromRGB(230,245,255), BorderSizePixel = 0})
     new("UICorner",{Parent=btn, CornerRadius=UDim.new(0,8)})
-    btn.MouseEnter:Connect(function() pcall(function() btn.BackgroundColor3 = Color3.fromRGB(48,98,156) end) end)
-    btn.MouseLeave:Connect(function() pcall(function() btn.BackgroundColor3 = Color3.fromRGB(28,58,106) end) end)
+    btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(48,98,156) end) -- << Dihapus pcall
+    btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(28,58,106) end) -- << Dihapus pcall
     btn.MouseButton1Click:Connect(function() pcall(callback) end)
     return btn
 end
@@ -428,18 +463,26 @@ local function showMovement()
     -- fly toggle
     local flyToggle = new("TextButton", {Parent = right, Position=UDim2.new(0,8,0,48), Size=UDim2.new(0.45,-12,0,36), Text="Fly: OFF", Font=Enum.Font.GothamBold, TextSize=14, BackgroundColor3=Color3.fromRGB(30,60,90), TextColor3=Color3.fromRGB(230,245,255)})
     new("UICorner",{Parent=flyToggle, CornerRadius=UDim.new(0,8)})
-    flyToggle.MouseButton1Click:Connect(function()
-        LexHost.ToggleFly()
+    local function updateFlyText()
         flyToggle.Text = "Fly: "..(LexHost.Enabled.Fly and "ON" or "OFF")
         flyToggle.BackgroundColor3 = LexHost.Enabled.Fly and Color3.fromRGB(40,140,220) or Color3.fromRGB(30,60,90)
+    end
+    updateFlyText()
+    flyToggle.MouseButton1Click:Connect(function()
+        LexHost.ToggleFly()
+        updateFlyText()
     end)
     -- speed toggle & slider
     local speedToggle = new("TextButton", {Parent = right, Position=UDim2.new(0.55,0,0,48), Size=UDim2.new(0.45,-12,0,36), Text="Speed: OFF", Font=Enum.Font.GothamBold, TextSize=14, BackgroundColor3=Color3.fromRGB(30,60,90), TextColor3=Color3.fromRGB(230,245,255)})
     new("UICorner",{Parent=speedToggle, CornerRadius=UDim.new(0,8)})
-    speedToggle.MouseButton1Click:Connect(function()
-        LexHost.ToggleSpeed()
+    local function updateSpeedText()
         speedToggle.Text = "Speed: "..(LexHost.Enabled.Speed and "ON" or "OFF")
         speedToggle.BackgroundColor3 = LexHost.Enabled.Speed and Color3.fromRGB(40,140,220) or Color3.fromRGB(30,60,90)
+    end
+    updateSpeedText()
+    speedToggle.MouseButton1Click:Connect(function()
+        LexHost.ToggleSpeed()
+        updateSpeedText()
     end)
     local sliderBar = new("Frame", {Parent= right, Position = UDim2.new(0,8,0,100), Size = UDim2.new(1,-16,0,18), BackgroundColor3 = Color3.fromRGB(15,30,60)})
     new("UICorner",{Parent=sliderBar, CornerRadius=UDim.new(0,8)})
@@ -468,18 +511,26 @@ local function showMovement()
     -- noclip and airwalk toggles
     local noclipBtn = new("TextButton",{Parent=right, Position=UDim2.new(0,8,0,132), Size=UDim2.new(0.45,-12,0,36), Text="Noclip: OFF", Font=Enum.Font.GothamBold, TextSize=14, BackgroundColor3=Color3.fromRGB(30,60,90), TextColor3=Color3.fromRGB(230,245,255)})
     new("UICorner",{Parent=noclipBtn, CornerRadius=UDim.new(0,8)})
-    noclipBtn.MouseButton1Click:Connect(function()
-        LexHost.ToggleNoclip()
+    local function updateNoclipText()
         noclipBtn.Text = "Noclip: "..(LexHost.Enabled.Noclip and "ON" or "OFF")
         noclipBtn.BackgroundColor3 = LexHost.Enabled.Noclip and Color3.fromRGB(40,140,220) or Color3.fromRGB(30,60,90)
+    end
+    updateNoclipText()
+    noclipBtn.MouseButton1Click:Connect(function()
+        LexHost.ToggleNoclip()
+        updateNoclipText()
     end)
 
     local airBtn = new("TextButton",{Parent=right, Position=UDim2.new(0.55,0,0,132), Size=UDim2.new(0.45,-12,0,36), Text="AirWalk: OFF", Font=Enum.Font.GothamBold, TextSize=14, BackgroundColor3=Color3.fromRGB(30,60,90), TextColor3=Color3.fromRGB(230,245,255)})
     new("UICorner",{Parent=airBtn, CornerRadius=UDim.new(0,8)})
-    airBtn.MouseButton1Click:Connect(function()
-        LexHost.ToggleAirWalk()
+    local function updateAirwalkText()
         airBtn.Text = "AirWalk: "..(LexHost.Enabled.AirWalk and "ON" or "OFF")
         airBtn.BackgroundColor3 = LexHost.Enabled.AirWalk and Color3.fromRGB(40,140,220) or Color3.fromRGB(30,60,90)
+    end
+    updateAirwalkText()
+    airBtn.MouseButton1Click:Connect(function()
+        LexHost.ToggleAirWalk()
+        updateAirwalkText()
     end)
 
     -- click teleport button
@@ -494,10 +545,14 @@ local function showUtilities()
     -- ESP toggle
     local espBtn = new("TextButton",{Parent=right, Position=UDim2.new(0,8,0,48), Size=UDim2.new(1,-16,0,36), Text="ESP: OFF", Font=Enum.Font.GothamBold, TextSize=14, BackgroundColor3=Color3.fromRGB(30,60,90), TextColor3=Color3.fromRGB(230,245,255)})
     new("UICorner",{Parent=espBtn, CornerRadius=UDim.new(0,8)})
-    espBtn.MouseButton1Click:Connect(function()
-        LexHost.ToggleESP()
+    local function updateESPText()
         espBtn.Text = "ESP: "..(LexHost.Enabled.ESP and "ON" or "OFF")
         espBtn.BackgroundColor3 = LexHost.Enabled.ESP and Color3.fromRGB(40,140,220) or Color3.fromRGB(30,60,90)
+    end
+    updateESPText()
+    espBtn.MouseButton1Click:Connect(function()
+        LexHost.ToggleESP()
+        updateESPText()
     end)
     -- Fullbright
     local fbBtn = new("TextButton",{Parent=right, Position=UDim2.new(0,8,0,92), Size=UDim2.new(1,-16,0,36), Text="Fullbright", Font=Enum.Font.GothamBold, TextSize=14, BackgroundColor3=Color3.fromRGB(25,100,160), TextColor3=Color3.fromRGB(230,245,255)})
@@ -506,10 +561,14 @@ local function showUtilities()
     -- AutoFarm
     local afBtn = new("TextButton",{Parent=right, Position=UDim2.new(0,8,0,136), Size=UDim2.new(1,-16,0,36), Text="AutoFarm: OFF", Font=Enum.Font.GothamBold, TextSize=14, BackgroundColor3=Color3.fromRGB(30,60,90), TextColor3=Color3.fromRGB(230,245,255)})
     new("UICorner",{Parent=afBtn, CornerRadius=UDim.new(0,8)})
-    afBtn.MouseButton1Click:Connect(function()
-        LexHost.Enabled.AutoFarm = not LexHost.Enabled.AutoFarm
+    local function updateAFText()
         afBtn.Text = "AutoFarm: "..(LexHost.Enabled.AutoFarm and "ON" or "OFF")
         afBtn.BackgroundColor3 = LexHost.Enabled.AutoFarm and Color3.fromRGB(40,140,220) or Color3.fromRGB(30,60,90)
+    end
+    updateAFText()
+    afBtn.MouseButton1Click:Connect(function()
+        LexHost.Enabled.AutoFarm = not LexHost.Enabled.AutoFarm
+        updateAFText()
     end)
     -- Remove parts prompt
     local remLabel = new("TextLabel",{Parent=right, Position=UDim2.new(0,8,0,184), Size=UDim2.new(1,-16,0,20), BackgroundTransparency=1, Text="Hapus parts (koma-separate):", Font=Enum.Font.Gotham, TextSize=12, TextColor3=Color3.fromRGB(200,220,230)})
@@ -534,7 +593,7 @@ end
 local function showInfo()
     clearRight()
     new("TextLabel",{Parent=right, Position=UDim2.new(0,8,0,6), Size=UDim2.new(1,-16,0,28), BackgroundTransparency=1, Text="Info & Credits", Font=Enum.Font.GothamBold, TextSize=16, TextColor3=Color3.fromRGB(220,240,255)})
-    new("TextLabel",{Parent=right, Position=UDim2.new(0,8,0,42), Size=UDim2.new(1,-16,0,120), BackgroundTransparency=1, Text="LEX Host v3 (Cyber Neon)\nFeatures: Modes loader, Movement toggles, Utilities, Scrollable list, Stable minimize/restore.\nCreated by: Custom LEX Build", Font=Enum.Font.Gotham, TextSize=13, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
+    new("TextLabel",{Parent=right, Position=UDim2.new(0,8,0,42), Size=UDim2.new(1,-16,0,120), BackgroundTransparency=1, Text="LEX Host v3 (Cyber Neon Enhanced)\nFeatures: Modes loader, Movement toggles, Utilities, Scrollable list, Stable minimize/restore.\nCreated by: Custom LEX Build & AI Assisted UI/UX", Font=Enum.Font.Gotham, TextSize=13, TextColor3=Color3.fromRGB(170,200,230), TextWrapped=true})
     local exitBtn = new("TextButton",{Parent=right, Position=UDim2.new(0,8,0,170), Size=UDim2.new(1,-16,0,36), BackgroundColor3=Color3.fromRGB(180,60,60), Text="Exit (Destroy GUI)", Font=Enum.Font.GothamBold, TextSize=14, TextColor3=Color3.fromRGB(255,255,255)})
     new("UICorner",{Parent=exitBtn, CornerRadius=UDim.new(0,8)})
     exitBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
@@ -575,21 +634,20 @@ do
     end)
 end
 
--- minimize / close behavior
+-- minimize / close behavior (MODIFIED TO USE TWEEN)
 btnMin.MouseButton1Click:Connect(function()
-    main.Visible = false
+    tweenGui(main, false)
 end)
 btnClose.MouseButton1Click:Connect(function()
-    main.Visible = false
+    tweenGui(main, false)
 end)
 
--- LX logo shows/hides main and recenters
+-- LX logo shows/hides main and recenters (MODIFIED TO USE TWEEN)
 lx.MouseButton1Click:Connect(function()
     if main.Visible then
-        main.Visible = false
+        tweenGui(main, false) -- Animasi keluar
     else
-        main.Visible = true
-        main.Position = UDim2.new(0.5,0,0.5,0)
+        tweenGui(main, true) -- Animasi masuk
     end
 end)
 
@@ -599,15 +657,21 @@ do
         local t=0
         while screenGui and screenGui.Parent do
             t = t + 0.03
-            local pulse = 0.35 + 0.65 * (0.5 + 0.5*math.sin(t*2))
+            -- local pulse = 0.35 + 0.65 * (0.5 + 0.5*math.sin(t*2)) -- Original pulse logic, now simplified
             pcall(function()
                 mainStroke.Transparency = 0
-                topAccent.BackgroundColor3 = Color3.fromHSV(0.6 + 0.05*math.sin(t), 0.9, 0.6 + 0.15*math.sin(t))
-                lxStroke.Color = Color3.fromHSV(0.6 + 0.05*math.sin(t), 0.9, 0.7)
+                -- Animasi warna neon (hanya Hue)
+                local hue = math.fmod(t/5, 1) 
+                local accentColor = Color3.fromHSV(0.6 + 0.05*math.sin(t), 0.9, 0.7)
+                local strokeColor = Color3.fromHSV(hue, 0.8, 0.8)
+
+                topAccent.BackgroundColor3 = accentColor
+                lxStroke.Color = strokeColor
+                mainStroke.Color = Color3.fromHSV(hue, 0.9, 0.5) -- Stroke utama juga berdenyut warna
             end)
             task.wait(0.04)
         end
     end)
 end
 
-print("[LEX Host v3] UI loaded — Cyber Neon. Versi: "..LexHost.Version)
+print("[LEX Host v3] UI loaded — Cyber Neon Enhanced. Versi: "..LexHost.Version)
