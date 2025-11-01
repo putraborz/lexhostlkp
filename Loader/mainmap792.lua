@@ -18,6 +18,7 @@ LogoButton.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
 LogoButton.BackgroundTransparency = 0.3
 LogoButton.BorderSizePixel = 0
 LogoButton.AutoButtonColor = false
+LogoButton.ZIndex = 10
 local LogoCorner = Instance.new("UICorner", LogoButton)
 LogoCorner.CornerRadius = UDim.new(0, 12)
 local LogoStroke = Instance.new("UIStroke", LogoButton)
@@ -41,7 +42,7 @@ MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 MainFrame.Size = UDim2.new(0, 620, 0, 400)
 MainFrame.BackgroundColor3 = Color3.fromRGB(5, 10, 25)
 MainFrame.BackgroundTransparency = 0.35
-MainFrame.Visible = false -- Mulai hidden
+MainFrame.Visible = true -- Mulai visible
 Instance.new("UICorner", MainFrame)
 local Stroke = Instance.new("UIStroke", MainFrame)
 Stroke.Color = Color3.fromRGB(0, 180, 255)
@@ -145,7 +146,7 @@ HomePage.BorderSizePixel = 0
 HomePage.ScrollBarThickness = 6
 HomePage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 HomePage.CanvasSize = UDim2.new(0, 0, 0, 300)
-HomePage.Visible = false
+HomePage.Visible = true
 
 local HomeTitle = Instance.new("TextLabel", HomePage)
 HomeTitle.BackgroundTransparency = 1
@@ -234,7 +235,7 @@ local SpeedSlider = Instance.new("Frame", MovementPage)
 SpeedSlider.Position = UDim2.new(0, 5, 0, 45)
 SpeedSlider.Size = UDim2.new(1, -10, 0, 20)
 SpeedSlider.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
-local SpeedCorner = Instance.new("UICorner", SpeedSlider)
+Instance.new("UICorner", SpeedSlider)
 
 local SpeedFill = Instance.new("Frame", SpeedSlider)
 SpeedFill.Size = UDim2.new(0.5, 0, 1, 0)
@@ -278,33 +279,6 @@ local flying = false
 FlyBtn.MouseButton1Click:Connect(function()
 	flying = not flying
 	FlyBtn.Text = flying and "Fly: ON" or "Fly: OFF"
-	if flying then
-		local ctrl = {f = 0, b = 0, l = 0, r = 0}
-		local speed = 50
-		
-		local function fly()
-			local bg = Instance.new("BodyGyro", character.HumanoidRootPart)
-			bg.P = 9e4
-			bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-			bg.cframe = character.HumanoidRootPart.CFrame
-			local bv = Instance.new("BodyVelocity", character.HumanoidRootPart)
-			bv.velocity = Vector3.new(0, 0.1, 0)
-			bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
-			
-			repeat wait()
-				if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
-					bv.velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f + ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l + ctrl.r, (ctrl.f + ctrl.b) * 0.2, 0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p)) * speed
-				else
-					bv.velocity = Vector3.new(0, 0.1, 0)
-				end
-				bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame
-			until not flying
-			
-			bg:Destroy()
-			bv:Destroy()
-		end
-		fly()
-	end
 end)
 
 -- Noclip Button
@@ -424,9 +398,7 @@ CopyAvatarBtn.MouseButton1Click:Connect(function()
 	local targetName = AvatarBox.Text
 	for _, v in pairs(game.Players:GetPlayers()) do
 		if v.Name:lower():find(targetName:lower()) and v.Character then
-			-- Copy avatar appearance
 			local targetChar = v.Character
-			local targetUserId = v.UserId
 			
 			-- Remove current appearance
 			for _, obj in pairs(character:GetChildren()) do
@@ -470,7 +442,6 @@ CopyAvatarBtn.MouseButton1Click:Connect(function()
 					end
 				end
 			end
-			
 			break
 		end
 	end
@@ -495,9 +466,11 @@ ESPBtn.MouseButton1Click:Connect(function()
 	for _, v in pairs(game.Players:GetPlayers()) do
 		if v ~= player and v.Character then
 			if esp then
-				local highlight = Instance.new("Highlight", v.Character)
-				highlight.FillColor = Color3.fromRGB(0, 200, 255)
-				highlight.OutlineColor = Color3.fromRGB(0, 150, 255)
+				if not v.Character:FindFirstChild("Highlight") then
+					local highlight = Instance.new("Highlight", v.Character)
+					highlight.FillColor = Color3.fromRGB(0, 200, 255)
+					highlight.OutlineColor = Color3.fromRGB(0, 150, 255)
+				end
 			else
 				if v.Character:FindFirstChild("Highlight") then
 					v.Character.Highlight:Destroy()
@@ -545,4 +518,43 @@ InfoPage.Size = UDim2.new(1, 0, 1, 0)
 InfoPage.BackgroundTransparency = 1
 InfoPage.BorderSizePixel = 0
 InfoPage.ScrollBarThickness = 6
-Info
+InfoPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+InfoPage.CanvasSize = UDim2.new(0, 0, 0, 350)
+InfoPage.Visible = false
+
+local InfoTitle = Instance.new("TextLabel", InfoPage)
+InfoTitle.BackgroundTransparency = 1
+InfoTitle.Size = UDim2.new(1, 0, 0, 40)
+InfoTitle.Font = Enum.Font.GothamBold
+InfoTitle.Text = "About LEX Host v3"
+InfoTitle.TextColor3 = Color3.fromRGB(0, 200, 255)
+InfoTitle.TextSize = 20
+
+local InfoText = Instance.new("TextLabel", InfoPage)
+InfoText.BackgroundTransparency = 1
+InfoText.Position = UDim2.new(0, 0, 0, 50)
+InfoText.Size = UDim2.new(1, 0, 0, 250)
+InfoText.Font = Enum.Font.Gotham
+InfoText.Text = [[Version: 3.0
+Made by: LEX Dev
+
+Features:
+• Multiple game modes
+• Advanced movement controls
+• Player teleportation
+• Copy Avatar
+• ESP & FullBright
+• Noclip & Fly
+• Customizable speeds
+
+Credits:
+LEX Development Team
+
+Thank you for using LEX Host!]]
+InfoText.TextColor3 = Color3.fromRGB(150, 200, 255)
+InfoText.TextSize = 14
+InfoText.TextYAlignment = Enum.TextYAlignment.Top
+
+-- Tab System
+local function ShowTab(tab)
+	HomePage.Visible = false
