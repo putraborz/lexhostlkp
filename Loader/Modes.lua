@@ -1,11 +1,14 @@
 -- Modes.lua
+-- Upload file ini ke GitHub repository kamu
+
 local ModesModule = {}
 
 function ModesModule.Initialize(ModesPage)
 	local Gunung = {
 		"ATIN NEW","YAHAYUK NEW","WKSPEDISI ANTARTIKA NEW","MOUNT YNTKTS NEW",
 		"SAKAHAYNG","STECU NEW","BALI HOT EXPEDITION","MOUNT KOMANG",
-		"MOUNT PRAMBANAN","MOUNT MONO","MOUNT SUMBING","MOUNT GEMI","MOUNT KOHARU"
+		"MOUNT PRAMBANAN","MOUNT MONO","MOUNT SUMBING","MOUNT GEMI","MOUNT KOHARU",
+		"MOUNT GATAULAH","MOUNT YAREU"
 	}
 
 	for i, name in ipairs(Gunung) do
@@ -30,7 +33,9 @@ function ModesModule.Initialize(ModesPage)
 				["BALI HOT EXPEDITION"]="e82WGJas",["MOUNT KOMANG"]="QYcyGtMR",
 				["MOUNT PRAMBANAN"]="GysqQgpx",["MOUNT MONO"]="Ha8qwDeB",
 				["MOUNT SUMBING"]="FqQwFJLe",["MOUNT GEMI"]="516Y0aw1",
-				["MOUNT KOHARU"]="Rs6hy7xx"
+				["MOUNT KOHARU"]="Rs6hy7xx",
+				["MOUNT GATAULAH"]="mHKk8MWt",
+				["MOUNT YAREU"]="9UQvZUD0"
 			}
 			loadstring(game:HttpGet("https://pastebin.com/raw/"..ids[name]))()
 		end)
