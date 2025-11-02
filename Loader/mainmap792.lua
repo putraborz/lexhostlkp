@@ -179,8 +179,8 @@ local GITHUB_URLS = {
 	Movement = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Movement.lua",
 	Utilities = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Utilities.lua",
 	Clone = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Clone.lua",
-	Server = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Server.lua",
 	Parts = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Parts.lua",
+	Server = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Server.lua",
 	Info = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Info.lua"
 }
 
@@ -288,6 +288,16 @@ PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 PartsPage.Visible = false
 
+local ServerPage = Instance.new("ScrollingFrame", Content)
+ServerPage.Name = "Server"
+ServerPage.Size = UDim2.new(1, 0, 1, 0)
+ServerPage.BackgroundTransparency = 1
+ServerPage.BorderSizePixel = 0
+ServerPage.ScrollBarThickness = 8
+ServerPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+ServerPage.CanvasSize = UDim2.new(0, 0, 0, 500)
+ServerPage.Visible = false
+
 local InfoPage = Instance.new("ScrollingFrame", Content)
 InfoPage.Name = "Info"
 InfoPage.Size = UDim2.new(1, 0, 1, 0)
@@ -331,6 +341,11 @@ spawn(function()
 	if PartsModule then PartsModule.Initialize(PartsPage, player, character) end
 	
 	wait(0.3)
+	LoadingDesc.Text = "Loading Server module..."
+	local ServerModule = LoadModule("Server")
+	if ServerModule then ServerModule.Initialize(ServerPage, player) end
+	
+	wait(0.3)
 	LoadingDesc.Text = "Loading Info module..."
 	local InfoModule = LoadModule("Info")
 	if InfoModule then InfoModule.Initialize(InfoPage) end
@@ -347,6 +362,7 @@ local function ShowTab(tab)
 	UtilitiesPage.Visible = false
 	ClonePage.Visible = false
 	PartsPage.Visible = false
+	ServerPage.Visible = false
 	InfoPage.Visible = false
 	LoadingFrame.Visible = false
 	
@@ -362,6 +378,8 @@ local function ShowTab(tab)
 		ClonePage.Visible = true
 	elseif tab == "Parts" then
 		PartsPage.Visible = true
+	elseif tab == "Server" then
+		ServerPage.Visible = true
 	elseif tab == "Info" then
 		InfoPage.Visible = true
 	end
