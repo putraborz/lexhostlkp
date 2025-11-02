@@ -1,4 +1,4 @@
--- Clone.lua - Enhanced Avatar Cloning Module
+-- Clone.lua - Enhanced with Player List
 local CloneModule = {}
 
 function CloneModule.Initialize(ClonePage, player, character)
@@ -17,7 +17,7 @@ function CloneModule.Initialize(ClonePage, player, character)
 	CloneDesc.Size = UDim2.new(1, -10, 0, 30)
 	CloneDesc.Position = UDim2.new(0, 5, 0, 55)
 	CloneDesc.BackgroundTransparency = 1
-	CloneDesc.Text = "Clone appearance by Username or DisplayName (Advanced Method)"
+	CloneDesc.Text = "Select player from list or search by username"
 	CloneDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
 	CloneDesc.Font = Enum.Font.Gotham
 	CloneDesc.TextSize = 14
@@ -30,10 +30,9 @@ function CloneModule.Initialize(ClonePage, player, character)
 		local hrp = character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
 		if not humanoid then return false, "Humanoid not found" end
 		
-		-- Simpan state anchor sementara
 		local anchoredParts = {}
 		if hrp and hrp:IsA("BasePart") then
-			anchoredParts[#anchoredParts+1] = hrp
+			table.insert(anchoredParts, hrp)
 			hrp.Anchored = true
 		end
 		
@@ -44,7 +43,7 @@ function CloneModule.Initialize(ClonePage, player, character)
 			humanoid:ApplyDescription(humanoidDescription)
 		end)
 		
-		wait(0.15)
+		wait(0.2)
 		humanoid.PlatformStand = prevPlatformStand
 		
 		for _, part in ipairs(anchoredParts) do
@@ -66,7 +65,7 @@ function CloneModule.Initialize(ClonePage, player, character)
 		end)
 		
 		if not success or not targetId then
-			return false, "User not found: " .. tostring(targetUsername)
+			return false, "User not found"
 		end
 		
 		local humanoidDescription
@@ -75,7 +74,7 @@ function CloneModule.Initialize(ClonePage, player, character)
 		end)
 		
 		if not ok or not humanoidDescription then
-			return false, "Failed to get description: " .. tostring(err)
+			return false, "Failed to get description"
 		end
 		
 		local char = player.Character
@@ -83,30 +82,134 @@ function CloneModule.Initialize(ClonePage, player, character)
 			return false, "Character not spawned"
 		end
 		
-		local applied, reason = safeApplyDescriptionToCharacter(char, humanoidDescription)
-		if not applied then
-			return false, reason
+		return safeApplyDescriptionToCharacter(char, humanoidDescription)
+	end
+
+	-- Player List Section
+	local PlayerListLabel = Instance.new("TextLabel", ClonePage)
+	PlayerListLabel.Size = UDim2.new(1, -10, 0, 25)
+	PlayerListLabel.Position = UDim2.new(0, 5, 0, 100)
+	PlayerListLabel.BackgroundTransparency = 1
+	PlayerListLabel.Text = "👥 Players in Server (Click to Clone)"
+	PlayerListLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+	PlayerListLabel.Font = Enum.Font.GothamBold
+	PlayerListLabel.TextSize = 15
+	PlayerListLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	local PlayerListFrame = Instance.new("ScrollingFrame", ClonePage)
+	PlayerListFrame.Size = UDim2.new(1, -10, 0, 200)
+	PlayerListFrame.Position = UDim2.new(0, 5, 0, 130)
+	PlayerListFrame.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+	PlayerListFrame.BorderSizePixel = 0
+	PlayerListFrame.ScrollBarThickness = 6
+	PlayerListFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+	PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+	local PlayerListCorner = Instance.new("UICorner", PlayerListFrame)
+	PlayerListCorner.CornerRadius = UDim.new(0, 8)
+	local PlayerListStroke = Instance.new("UIStroke", PlayerListFrame)
+	PlayerListStroke.Color = Color3.fromRGB(0, 160, 255)
+	PlayerListStroke.Thickness = 2
+	
+	local PlayerListLayout = Instance.new("UIListLayout", PlayerListFrame)
+	PlayerListLayout.SortOrder = Enum.SortOrder.Name
+	PlayerListLayout.Padding = UDim.new(0, 2)
+
+	local playerButtons = {}
+
+	local function updatePlayerList()
+		-- Clear existing buttons
+		for _, btn in pairs(playerButtons) do
+			if btn and btn.Parent then
+				btn:Destroy()
+			end
+		end
+		playerButtons = {}
+
+		local totalHeight = 0
+		for _, plr in pairs(game.Players:GetPlayers()) do
+			if plr ~= player then
+				local playerBtn = Instance.new("TextButton", PlayerListFrame)
+				playerBtn.Size = UDim2.new(1, -10, 0, 35)
+				playerBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 60)
+				playerBtn.BorderSizePixel = 0
+				
+				local displayText = plr.DisplayName
+				if plr.DisplayName ~= plr.Name then
+					displayText = plr.DisplayName .. " (@" .. plr.Name .. ")"
+				end
+				playerBtn.Text = displayText
+				
+				playerBtn.Font = Enum.Font.Gotham
+				playerBtn.TextSize = 13
+				playerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+				playerBtn.TextXAlignment = Enum.TextXAlignment.Left
+				playerBtn.TextTruncate = Enum.TextTruncate.AtEnd
+				
+				local btnCorner = Instance.new("UICorner", playerBtn)
+				btnCorner.CornerRadius = UDim.new(0, 6)
+				
+				local btnPadding = Instance.new("UIPadding", playerBtn)
+				btnPadding.PaddingLeft = UDim.new(0, 10)
+				
+				playerBtn.MouseEnter:Connect(function()
+					playerBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 90)
+				end)
+				
+				playerBtn.MouseLeave:Connect(function()
+					playerBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 60)
+				end)
+				
+				playerBtn.MouseButton1Click:Connect(function()
+					playerBtn.Text = "⏳ Cloning..."
+					playerBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 0)
+					
+					local success, reason = changeAvatarByUsername(plr.Name)
+					
+					if success then
+						playerBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+						wait(1)
+						playerBtn.Text = displayText
+						playerBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 60)
+					else
+						playerBtn.Text = "❌ Failed"
+						playerBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+						wait(1)
+						playerBtn.Text = displayText
+						playerBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 60)
+					end
+				end)
+				
+				table.insert(playerButtons, playerBtn)
+				totalHeight = totalHeight + 37
+			end
 		end
 		
-		return true
+		PlayerListFrame.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
 	end
+
+	-- Initial player list
+	updatePlayerList()
+
+	-- Update list when players join/leave
+	game.Players.PlayerAdded:Connect(updatePlayerList)
+	game.Players.PlayerRemoving:Connect(updatePlayerList)
 
 	-- Search by Username
 	local UsernameLabel = Instance.new("TextLabel", ClonePage)
 	UsernameLabel.Size = UDim2.new(1, -10, 0, 25)
-	UsernameLabel.Position = UDim2.new(0, 5, 0, 100)
+	UsernameLabel.Position = UDim2.new(0, 5, 0, 345)
 	UsernameLabel.BackgroundTransparency = 1
-	UsernameLabel.Text = "🔹 Clone by Username (Advanced)"
+	UsernameLabel.Text = "🔍 Search by Username (Any Player)"
 	UsernameLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
 	UsernameLabel.Font = Enum.Font.GothamBold
 	UsernameLabel.TextSize = 15
 	UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 	local UsernameBox = Instance.new("TextBox", ClonePage)
-	UsernameBox.Size = UDim2.new(1, -10, 0, 40)
-	UsernameBox.Position = UDim2.new(0, 5, 0, 130)
+	UsernameBox.Size = UDim2.new(0.65, -10, 0, 40)
+	UsernameBox.Position = UDim2.new(0, 5, 0, 375)
 	UsernameBox.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
-	UsernameBox.PlaceholderText = "Type username (e.g., Roblox)"
+	UsernameBox.PlaceholderText = "Enter username..."
 	UsernameBox.Text = ""
 	UsernameBox.Font = Enum.Font.Gotham
 	UsernameBox.TextSize = 14
@@ -118,117 +221,62 @@ function CloneModule.Initialize(ClonePage, player, character)
 	UsernameStroke.Color = Color3.fromRGB(0, 160, 255)
 	UsernameStroke.Thickness = 2
 
-	-- Clone by Username Button
 	local CloneUsernameBtn = Instance.new("TextButton", ClonePage)
-	CloneUsernameBtn.Size = UDim2.new(1, -10, 0, 45)
-	CloneUsernameBtn.Position = UDim2.new(0, 5, 0, 180)
+	CloneUsernameBtn.Size = UDim2.new(0.35, -5, 0, 40)
+	CloneUsernameBtn.Position = UDim2.new(0.65, 5, 0, 375)
 	CloneUsernameBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-	CloneUsernameBtn.Text = "🎭 Clone Avatar (Advanced)"
+	CloneUsernameBtn.Text = "Clone"
 	CloneUsernameBtn.Font = Enum.Font.GothamBold
-	CloneUsernameBtn.TextSize = 16
+	CloneUsernameBtn.TextSize = 14
 	CloneUsernameBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	CloneUsernameBtn.BorderSizePixel = 0
 	local CloneUserCorner = Instance.new("UICorner", CloneUsernameBtn)
-	CloneUserCorner.CornerRadius = UDim.new(0, 10)
+	CloneUserCorner.CornerRadius = UDim.new(0, 8)
 	CloneUsernameBtn.MouseEnter:Connect(function() CloneUsernameBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 240) end)
 	CloneUsernameBtn.MouseLeave:Connect(function() CloneUsernameBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200) end)
 
 	CloneUsernameBtn.MouseButton1Click:Connect(function()
 		local username = UsernameBox.Text
 		if username ~= "" then
-			CloneUsernameBtn.Text = "⏳ Cloning..."
+			CloneUsernameBtn.Text = "⏳..."
 			CloneUsernameBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 0)
 			
 			local success, reason = changeAvatarByUsername(username)
 			
 			if success then
-				CloneUsernameBtn.Text = "✅ Cloned: " .. username
+				CloneUsernameBtn.Text = "✅ Done"
 				CloneUsernameBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
 			else
 				CloneUsernameBtn.Text = "❌ Failed"
 				CloneUsernameBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-				warn("Clone Error: " .. tostring(reason))
 			end
 			
-			wait(2)
-			CloneUsernameBtn.Text = "🎭 Clone Avatar (Advanced)"
+			wait(1.5)
+			CloneUsernameBtn.Text = "Clone"
 			CloneUsernameBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
 		end
 	end)
 
-	-- Search by DisplayName (In-Server Players)
-	local DisplayLabel = Instance.new("TextLabel", ClonePage)
-	DisplayLabel.Size = UDim2.new(1, -10, 0, 25)
-	DisplayLabel.Position = UDim2.new(0, 5, 0, 245)
-	DisplayLabel.BackgroundTransparency = 1
-	DisplayLabel.Text = "🔹 Clone by DisplayName (In-Server)"
-	DisplayLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-	DisplayLabel.Font = Enum.Font.GothamBold
-	DisplayLabel.TextSize = 15
-	DisplayLabel.TextXAlignment = Enum.TextXAlignment.Left
+	-- Refresh Button
+	local RefreshBtn = Instance.new("TextButton", ClonePage)
+	RefreshBtn.Size = UDim2.new(1, -10, 0, 35)
+	RefreshBtn.Position = UDim2.new(0, 5, 0, 430)
+	RefreshBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 150)
+	RefreshBtn.Text = "🔄 Refresh Player List"
+	RefreshBtn.Font = Enum.Font.GothamBold
+	RefreshBtn.TextSize = 14
+	RefreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	RefreshBtn.BorderSizePixel = 0
+	local RefreshCorner = Instance.new("UICorner", RefreshBtn)
+	RefreshCorner.CornerRadius = UDim.new(0, 8)
+	RefreshBtn.MouseEnter:Connect(function() RefreshBtn.BackgroundColor3 = Color3.fromRGB(70, 120, 180) end)
+	RefreshBtn.MouseLeave:Connect(function() RefreshBtn.BackgroundColor3 = Color3.fromRGB(50, 100, 150) end)
 
-	local DisplayBox = Instance.new("TextBox", ClonePage)
-	DisplayBox.Size = UDim2.new(1, -10, 0, 40)
-	DisplayBox.Position = UDim2.new(0, 5, 0, 275)
-	DisplayBox.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
-	DisplayBox.PlaceholderText = "Type display name"
-	DisplayBox.Text = ""
-	DisplayBox.Font = Enum.Font.Gotham
-	DisplayBox.TextSize = 14
-	DisplayBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-	DisplayBox.BorderSizePixel = 0
-	local DisplayCorner = Instance.new("UICorner", DisplayBox)
-	DisplayCorner.CornerRadius = UDim.new(0, 8)
-	local DisplayStroke = Instance.new("UIStroke", DisplayBox)
-	DisplayStroke.Color = Color3.fromRGB(0, 160, 255)
-	DisplayStroke.Thickness = 2
-
-	-- Clone by DisplayName Button
-	local CloneDisplayBtn = Instance.new("TextButton", ClonePage)
-	CloneDisplayBtn.Size = UDim2.new(1, -10, 0, 45)
-	CloneDisplayBtn.Position = UDim2.new(0, 5, 0, 325)
-	CloneDisplayBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 200)
-	CloneDisplayBtn.Text = "🎭 Clone by DisplayName"
-	CloneDisplayBtn.Font = Enum.Font.GothamBold
-	CloneDisplayBtn.TextSize = 16
-	CloneDisplayBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	CloneDisplayBtn.BorderSizePixel = 0
-	local CloneDispCorner = Instance.new("UICorner", CloneDisplayBtn)
-	CloneDispCorner.CornerRadius = UDim.new(0, 10)
-	CloneDisplayBtn.MouseEnter:Connect(function() CloneDisplayBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 240) end)
-	CloneDisplayBtn.MouseLeave:Connect(function() CloneDisplayBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 200) end)
-
-	CloneDisplayBtn.MouseButton1Click:Connect(function()
-		local displayname = DisplayBox.Text
-		if displayname ~= "" then
-			CloneDisplayBtn.Text = "⏳ Searching..."
-			CloneDisplayBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 0)
-			
-			local found = false
-			for _, v in pairs(game.Players:GetPlayers()) do
-				if v.DisplayName:lower():find(displayname:lower()) then
-					local success, reason = changeAvatarByUsername(v.Name)
-					if success then
-						CloneDisplayBtn.Text = "✅ Cloned: " .. v.DisplayName
-						CloneDisplayBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-					else
-						CloneDisplayBtn.Text = "❌ Failed"
-						CloneDisplayBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-					end
-					found = true
-					break
-				end
-			end
-			
-			if not found then
-				CloneDisplayBtn.Text = "❌ Player Not Found"
-				CloneDisplayBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-			end
-			
-			wait(2)
-			CloneDisplayBtn.Text = "🎭 Clone by DisplayName"
-			CloneDisplayBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 200)
-		end
+	RefreshBtn.MouseButton1Click:Connect(function()
+		RefreshBtn.Text = "⏳ Refreshing..."
+		updatePlayerList()
+		wait(0.5)
+		RefreshBtn.Text = "🔄 Refresh Player List"
 	end)
 end
 
