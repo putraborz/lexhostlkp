@@ -56,18 +56,18 @@ function ServerModule.Initialize(ServerPage, player)
 		PrivateBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 0)
 		
 		-- Check if game allows private servers
-		local success, result = pcall(function()
+		local success, accessCode = pcall(function()
 			return TeleportService:ReserveServer(placeId)
 		end)
 		
-		if success and result then
+		if success and accessCode then
 			PrivateBtn.Text = "✅ Teleporting..."
 			PrivateBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-			wait(0.5)
+			wait(1)
 			
 			-- Teleport to private server
 			local teleportSuccess, teleportError = pcall(function()
-				TeleportService:TeleportToPrivateServer(placeId, result, {player})
+				TeleportService:TeleportToPrivateServer(placeId, accessCode, {player})
 			end)
 			
 			if not teleportSuccess then
@@ -79,10 +79,10 @@ function ServerModule.Initialize(ServerPage, player)
 				PrivateBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
 			end
 		else
-			-- Game doesn't support private servers or other error
+			-- Game doesn't support private servers
 			PrivateBtn.Text = "❌ Not Supported"
 			PrivateBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-			warn("Private Server Error: " .. tostring(result))
+			warn("Private Server Error: Game doesn't allow private servers or failed to reserve")
 			wait(3)
 			PrivateBtn.Text = "🔒 Create Private Server"
 			PrivateBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
