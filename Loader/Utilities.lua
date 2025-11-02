@@ -1,4 +1,6 @@
 -- Utilities.lua
+-- Upload file ini ke GitHub repository kamu
+
 local UtilitiesModule = {}
 
 function UtilitiesModule.Initialize(UtilitiesPage, player, character)
@@ -82,6 +84,7 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 			if v.Name:lower():find(targetName:lower()) and v.Character then
 				local targetChar = v.Character
 				
+				-- Remove current appearance
 				for _, obj in pairs(character:GetChildren()) do
 					if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
 						obj:Destroy()
@@ -90,6 +93,7 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 					end
 				end
 				
+				-- Copy appearance from target
 				for _, obj in pairs(targetChar:GetChildren()) do
 					if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
 						obj:Clone().Parent = character
@@ -98,6 +102,7 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 					end
 				end
 				
+				-- Copy body colors
 				if targetChar:FindFirstChild("Body Colors") then
 					local bc = character:FindFirstChild("Body Colors") or Instance.new("BodyColors", character)
 					local tbc = targetChar["Body Colors"]
@@ -109,6 +114,7 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 					bc.RightLegColor = tbc.RightLegColor
 				end
 				
+				-- Copy face
 				local head = character:FindFirstChild("Head")
 				if head then
 					local face = head:FindFirstChildOfClass("Decal")
