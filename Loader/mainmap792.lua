@@ -88,7 +88,7 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0, 75, 0, 0)
 Title.Size = UDim2.new(0.5, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "LEX Host v3 - Vip Edition"
+Title.Text = "LEX Host v3 - Cyber Edition"
 Title.TextColor3 = Color3.fromRGB(0, 190, 255)
 Title.TextSize = 18
 Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -130,13 +130,13 @@ Side.BackgroundColor3 = Color3.fromRGB(8, 15, 35)
 Side.BackgroundTransparency = 0.3
 Side.BorderSizePixel = 0
 
-local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Info"}
+local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Server","Info"}
 local Buttons = {}
 for i, v in ipairs(Tabs) do
 	local B = Instance.new("TextButton", Side)
 	B.Text = v
-	B.Size = UDim2.new(1, -15, 0, 42)
-	B.Position = UDim2.new(0, 7.5, 0, (i - 1) * 48 + 12)
+	B.Size = UDim2.new(1, -15, 0, 40)
+	B.Position = UDim2.new(0, 7.5, 0, (i - 1) * 45 + 10)
 	B.BackgroundColor3 = Color3.fromRGB(15, 25, 50)
 	B.TextColor3 = Color3.fromRGB(0, 200, 255)
 	B.Font = Enum.Font.GothamBold
