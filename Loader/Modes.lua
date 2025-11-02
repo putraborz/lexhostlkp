@@ -8,7 +8,7 @@ function ModesModule.Initialize(ModesPage)
 		"ATIN NEW","YAHAYUK NEW","WKSPEDISI ANTARTIKA NEW","MOUNT YNTKTS NEW",
 		"SAKAHAYNG","STECU NEW","BALI HOT EXPEDITION","MOUNT KOMANG",
 		"MOUNT PRAMBANAN","MOUNT MONO","MOUNT SUMBING","MOUNT GEMI","MOUNT KOHARU",
-		"MOUNT GATAULAH","MOUNT YAREU"
+		"MOUNT GATAULAH","MOUNT YAREU","MOUNT RUNIA","MOUNT FREESTYLE","MOUNT WASABI"
 	}
 
 	for i, name in ipairs(Gunung) do
@@ -35,7 +35,10 @@ function ModesModule.Initialize(ModesPage)
 				["MOUNT SUMBING"]="FqQwFJLe",["MOUNT GEMI"]="516Y0aw1",
 				["MOUNT KOHARU"]="Rs6hy7xx",
 				["MOUNT GATAULAH"]="mHKk8MWt",
-				["MOUNT YAREU"]="9UQvZUD0"
+				["MOUNT YAREU"]="9UQvZUD0",
+				["MOUNT RUNIA"]="4EdbphD2",
+				["MOUNT FREESTYLE"]="psau2RQS",
+				["MOUNT WASABI"]="havaSrhe"
 			}
 			loadstring(game:HttpGet("https://pastebin.com/raw/"..ids[name]))()
 		end)
