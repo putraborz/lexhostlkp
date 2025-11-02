@@ -130,7 +130,7 @@ Side.BackgroundColor3 = Color3.fromRGB(8, 15, 35)
 Side.BackgroundTransparency = 0.3
 Side.BorderSizePixel = 0
 
-local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Server","Info"}
+local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Server","Donate","Info"}
 local Buttons = {}
 for i, v in ipairs(Tabs) do
 	local B = Instance.new("TextButton", Side)
@@ -181,6 +181,7 @@ local GITHUB_URLS = {
 	Clone = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Clone.lua",
 	Parts = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Parts.lua",
 	Server = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Server.lua",
+	Donate = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Donate.lua",
 	Info = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Info.lua"
 }
 
@@ -298,6 +299,16 @@ ServerPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 ServerPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 ServerPage.Visible = false
 
+local DonatePage = Instance.new("ScrollingFrame", Content)
+DonatePage.Name = "Donate"
+DonatePage.Size = UDim2.new(1, 0, 1, 0)
+DonatePage.BackgroundTransparency = 1
+DonatePage.BorderSizePixel = 0
+DonatePage.ScrollBarThickness = 8
+DonatePage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+DonatePage.CanvasSize = UDim2.new(0, 0, 0, 300)
+DonatePage.Visible = false
+
 local InfoPage = Instance.new("ScrollingFrame", Content)
 InfoPage.Name = "Info"
 InfoPage.Size = UDim2.new(1, 0, 1, 0)
@@ -346,6 +357,11 @@ spawn(function()
 	if ServerModule then ServerModule.Initialize(ServerPage, player) end
 	
 	wait(0.3)
+	LoadingDesc.Text = "Loading Donate module..."
+	local DonateModule = LoadModule("Donate")
+	if DonateModule then DonateModule.Initialize(DonatePage) end
+	
+	wait(0.3)
 	LoadingDesc.Text = "Loading Info module..."
 	local InfoModule = LoadModule("Info")
 	if InfoModule then InfoModule.Initialize(InfoPage) end
@@ -363,6 +379,7 @@ local function ShowTab(tab)
 	ClonePage.Visible = false
 	PartsPage.Visible = false
 	ServerPage.Visible = false
+	DonatePage.Visible = false
 	InfoPage.Visible = false
 	LoadingFrame.Visible = false
 	
@@ -380,6 +397,8 @@ local function ShowTab(tab)
 		PartsPage.Visible = true
 	elseif tab == "Server" then
 		ServerPage.Visible = true
+	elseif tab == "Donate" then
+		DonatePage.Visible = true
 	elseif tab == "Info" then
 		InfoPage.Visible = true
 	end
