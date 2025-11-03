@@ -1,12 +1,39 @@
+local UserInputService = game:GetService("UserInputService")
+local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+local UIConfig = {
+	Logo = isMobile and {
+		Size = UDim2.new(0, 50, 0, 50),
+		Position = UDim2.new(0.5, -25, 0.02, 0)
+	} or {
+		Size = UDim2.new(0, 80, 0, 80),
+		Position = UDim2.new(0.5, -40, 0.05, 0)
+	},
+	MainFrame = isMobile and {
+		Size = UDim2.new(0, 340, 0, 480),
+		SidebarWidth = 100
+	} or {
+		Size = UDim2.new(0, 680, 0, 450),
+		SidebarWidth = 160
+	},
+	TopBar = isMobile and 40 or 50,
+	ButtonSize = isMobile and 30 or 40,
+	TextSize = {
+		Title = isMobile and 14 or 18,
+		Button = isMobile and 11 or 14,
+		Normal = isMobile and 12 or 14
+	}
+}
+
 local LEXHost = Instance.new("ScreenGui", game.CoreGui)
 LEXHost.Name = "LEXHost"
 LEXHost.ResetOnSpawn = false
 
--- Logo Image Button (Draggable Toggle Button)
+
 local LogoButton = Instance.new("ImageButton", LEXHost)
 LogoButton.Image = "rbxassetid://93847535906931"
-LogoButton.Position = UDim2.new(0.5, -40, 0.05, 0)
-LogoButton.Size = UDim2.new(0, 80, 0, 80)
+LogoButton.Position = UIConfig.Logo.Position
+LogoButton.Size = UIConfig.Logo.Size
 LogoButton.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
 LogoButton.BackgroundTransparency = 0.3
 LogoButton.BorderSizePixel = 0
@@ -16,42 +43,42 @@ LogoButton.Active = true
 LogoButton.Draggable = true
 LogoButton.ScaleType = Enum.ScaleType.Fit
 local LogoCorner = Instance.new("UICorner", LogoButton)
-LogoCorner.CornerRadius = UDim.new(0, 12)
+LogoCorner.CornerRadius = UDim.new(0, isMobile and 8 or 12)
 local LogoStroke = Instance.new("UIStroke", LogoButton)
 LogoStroke.Color = Color3.fromRGB(0, 200, 255)
-LogoStroke.Thickness = 2.5
+LogoStroke.Thickness = isMobile and 2 or 2.5
 
 -- Glow effect untuk logo
 LogoButton.MouseEnter:Connect(function()
 	LogoButton.ImageColor3 = Color3.fromRGB(150, 255, 255)
-	LogoStroke.Thickness = 3.5
+	LogoStroke.Thickness = isMobile and 2.5 or 3.5
 end)
 LogoButton.MouseLeave:Connect(function()
 	LogoButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
-	LogoStroke.Thickness = 2.5
+	LogoStroke.Thickness = isMobile and 2 or 2.5
 end)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = LEXHost
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-MainFrame.Size = UDim2.new(0, 680, 0, 450)
+MainFrame.Size = UIConfig.MainFrame.Size
 MainFrame.BackgroundColor3 = Color3.fromRGB(5, 10, 25)
 MainFrame.BackgroundTransparency = 0.15
 MainFrame.Visible = true
 MainFrame.ClipsDescendants = true
 local MainCorner = Instance.new("UICorner", MainFrame)
-MainCorner.CornerRadius = UDim.new(0, 15)
+MainCorner.CornerRadius = UDim.new(0, isMobile and 10 or 15)
 local Stroke = Instance.new("UIStroke", MainFrame)
 Stroke.Color = Color3.fromRGB(0, 180, 255)
-Stroke.Thickness = 3
+Stroke.Thickness = isMobile and 2 or 3
 
 -- Shadow effect
 local Shadow = Instance.new("ImageLabel", MainFrame)
 Shadow.Name = "Shadow"
 Shadow.AnchorPoint = Vector2.new(0.5, 0.5)
 Shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-Shadow.Size = UDim2.new(1, 30, 1, 30)
+Shadow.Size = UDim2.new(1, isMobile and 20 or 30, 1, isMobile and 20 or 30)
 Shadow.BackgroundTransparency = 1
 Shadow.Image = "rbxassetid://6014261993"
 Shadow.ImageColor3 = Color3.fromRGB(0, 150, 255)
@@ -60,103 +87,107 @@ Shadow.ZIndex = -1
 
 -- Topbar
 local TopBar = Instance.new("Frame", MainFrame)
-TopBar.Size = UDim2.new(1, 0, 0, 50)
+TopBar.Size = UDim2.new(1, 0, 0, UIConfig.TopBar)
 TopBar.BackgroundColor3 = Color3.fromRGB(10, 15, 35)
 TopBar.BackgroundTransparency = 0.2
 local TopCorner = Instance.new("UICorner", TopBar)
-TopCorner.CornerRadius = UDim.new(0, 15)
+TopCorner.CornerRadius = UDim.new(0, isMobile and 10 or 15)
 
 -- Logo Image di TopBar
 local LX = Instance.new("ImageLabel", TopBar)
 LX.Image = "rbxassetid://93847535906931"
-LX.Position = UDim2.new(0, 10, 0, 5)
-LX.Size = UDim2.new(0, 40, 0, 40)
+LX.Position = UDim2.new(0, isMobile and 5 or 10, 0, isMobile and 5 or 5)
+LX.Size = UDim2.new(0, isMobile and 30 or 40, 0, isMobile and 30 or 40)
 LX.BackgroundTransparency = 1
 LX.ScaleType = Enum.ScaleType.Fit
 
 local Title = Instance.new("TextLabel", TopBar)
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 60, 0, 0)
+Title.Position = UDim2.new(0, isMobile and 40 or 60, 0, 0)
 Title.Size = UDim2.new(0.5, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "LEX Host v3 - Vip Edition"
+Title.Text = isMobile and "LEX Host v3" or "LEX Host v3 - Vip Edition"
 Title.TextColor3 = Color3.fromRGB(0, 190, 255)
-Title.TextSize = 18
+Title.TextSize = UIConfig.TextSize.Title
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
 -- Minimize & Close
+local btnSize = isMobile and 28 or 35
 local MinBtn = Instance.new("TextButton", TopBar)
 MinBtn.Text = "−"
-MinBtn.Size = UDim2.new(0, 35, 0, 35)
-MinBtn.Position = UDim2.new(1, -85, 0.5, -17.5)
+MinBtn.Size = UDim2.new(0, btnSize, 0, btnSize)
+MinBtn.Position = UDim2.new(1, isMobile and -65 or -85, 0.5, -btnSize/2)
 MinBtn.Font = Enum.Font.GothamBold
-MinBtn.TextSize = 20
+MinBtn.TextSize = isMobile and 16 or 20
 MinBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
 MinBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
 MinBtn.BorderSizePixel = 0
 local MinCorner = Instance.new("UICorner", MinBtn)
-MinCorner.CornerRadius = UDim.new(0, 8)
+MinCorner.CornerRadius = UDim.new(0, isMobile and 6 or 8)
 MinBtn.MouseEnter:Connect(function() MinBtn.BackgroundColor3 = Color3.fromRGB(30, 45, 70) end)
 MinBtn.MouseLeave:Connect(function() MinBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 50) end)
 
 local CloseBtn = Instance.new("TextButton", TopBar)
 CloseBtn.Text = "✕"
-CloseBtn.Size = UDim2.new(0, 35, 0, 35)
-CloseBtn.Position = UDim2.new(1, -40, 0.5, -17.5)
+CloseBtn.Size = UDim2.new(0, btnSize, 0, btnSize)
+CloseBtn.Position = UDim2.new(1, isMobile and -32 or -40, 0.5, -btnSize/2)
 CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 18
+CloseBtn.TextSize = isMobile and 14 or 18
 CloseBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 20)
 CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
 CloseBtn.BorderSizePixel = 0
 local CloseCorner = Instance.new("UICorner", CloseBtn)
-CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.CornerRadius = UDim.new(0, isMobile and 6 or 8)
 CloseBtn.MouseEnter:Connect(function() CloseBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30) end)
 CloseBtn.MouseLeave:Connect(function() CloseBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 20) end)
 
 -- Sidebar
 local Side = Instance.new("Frame", MainFrame)
-Side.Position = UDim2.new(0, 0, 0, 50)
-Side.Size = UDim2.new(0, 160, 1, -50)
+Side.Position = UDim2.new(0, 0, 0, UIConfig.TopBar)
+Side.Size = UDim2.new(0, UIConfig.MainFrame.SidebarWidth, 1, -UIConfig.TopBar)
 Side.BackgroundColor3 = Color3.fromRGB(8, 15, 35)
 Side.BackgroundTransparency = 0.3
 Side.BorderSizePixel = 0
 
 local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Server","Donate","Info"}
 local Buttons = {}
+local buttonHeight = isMobile and 32 or 40
+local buttonSpacing = isMobile and 36 or 45
 for i, v in ipairs(Tabs) do
 	local B = Instance.new("TextButton", Side)
 	B.Text = v
-	B.Size = UDim2.new(1, -15, 0, 40)
-	B.Position = UDim2.new(0, 7.5, 0, (i - 1) * 45 + 10)
+	B.Size = UDim2.new(1, isMobile and -10 or -15, 0, buttonHeight)
+	B.Position = UDim2.new(0, isMobile and 5 or 7.5, 0, (i - 1) * buttonSpacing + (isMobile and 5 or 10))
 	B.BackgroundColor3 = Color3.fromRGB(15, 25, 50)
 	B.TextColor3 = Color3.fromRGB(0, 200, 255)
 	B.Font = Enum.Font.GothamBold
-	B.TextSize = 14
+	B.TextSize = UIConfig.TextSize.Button
 	B.AutoButtonColor = false
 	B.BorderSizePixel = 0
 	local s = Instance.new("UIStroke", B)
 	s.Color = Color3.fromRGB(0, 190, 255)
-	s.Thickness = 2
+	s.Thickness = isMobile and 1.5 or 2
 	s.Transparency = 0.5
 	local c = Instance.new("UICorner", B)
-	c.CornerRadius = UDim.new(0, 10)
+	c.CornerRadius = UDim.new(0, isMobile and 6 or 10)
 	B.MouseEnter:Connect(function() 
 		B.BackgroundColor3 = Color3.fromRGB(25,40,80)
-		s.Thickness = 2.5
+		s.Thickness = isMobile and 2 or 2.5
 		s.Transparency = 0
 	end)
 	B.MouseLeave:Connect(function() 
 		B.BackgroundColor3 = Color3.fromRGB(15,25,50)
-		s.Thickness = 2
+		s.Thickness = isMobile and 1.5 or 2
 		s.Transparency = 0.5
 	end)
 	Buttons[v] = B
 end
 
 -- Content Area
+local contentMargin = isMobile and 5 or 10
 local Content = Instance.new("Frame", MainFrame)
-Content.Position = UDim2.new(0, 170, 0, 60)
-Content.Size = UDim2.new(1, -180, 1, -70)
+Content.Position = UDim2.new(0, UIConfig.MainFrame.SidebarWidth + contentMargin, 0, UIConfig.TopBar + contentMargin)
+Content.Size = UDim2.new(1, -(UIConfig.MainFrame.SidebarWidth + contentMargin*2), 1, -(UIConfig.TopBar + contentMargin*2))
 Content.BackgroundTransparency = 1
 
 -- Variables
@@ -205,27 +236,30 @@ local LoadingText = Instance.new("TextLabel", LoadingFrame)
 LoadingText.Size = UDim2.new(1, 0, 0.3, 0)
 LoadingText.Position = UDim2.new(0, 0, 0.35, 0)
 LoadingText.BackgroundTransparency = 1
-LoadingText.Text = "⚡ Loading LEX Host v3..."
+LoadingText.Text = isMobile and "⚡ Loading..." or "⚡ Loading LEX Host v3..."
 LoadingText.TextColor3 = Color3.fromRGB(0, 220, 255)
 LoadingText.Font = Enum.Font.GothamBold
-LoadingText.TextSize = 20
+LoadingText.TextSize = isMobile and 16 or 20
+LoadingText.TextWrapped = true
 
 local LoadingDesc = Instance.new("TextLabel", LoadingFrame)
 LoadingDesc.Size = UDim2.new(1, 0, 0.2, 0)
 LoadingDesc.Position = UDim2.new(0, 0, 0.5, 0)
 LoadingDesc.BackgroundTransparency = 1
-LoadingDesc.Text = "Connecting to GitHub servers..."
+LoadingDesc.Text = "Connecting..."
 LoadingDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
 LoadingDesc.Font = Enum.Font.Gotham
-LoadingDesc.TextSize = 14
+LoadingDesc.TextSize = UIConfig.TextSize.Normal
+LoadingDesc.TextWrapped = true
 
 -- Create Pages
+local scrollBarSize = isMobile and 6 or 8
 local HomePage = Instance.new("ScrollingFrame", Content)
 HomePage.Name = "Home"
 HomePage.Size = UDim2.new(1, 0, 1, 0)
 HomePage.BackgroundTransparency = 1
 HomePage.BorderSizePixel = 0
-HomePage.ScrollBarThickness = 8
+HomePage.ScrollBarThickness = scrollBarSize
 HomePage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 HomePage.CanvasSize = UDim2.new(0, 0, 0, 300)
 HomePage.Visible = false
@@ -234,7 +268,7 @@ local MountPage = Instance.new("ScrollingFrame", Content)
 MountPage.Name = "Mount"
 MountPage.Size = UDim2.new(1, 0, 1, 0)
 MountPage.CanvasSize = UDim2.new(0, 0, 2, 0)
-MountPage.ScrollBarThickness = 8
+MountPage.ScrollBarThickness = scrollBarSize
 MountPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 MountPage.BackgroundTransparency = 1
 MountPage.BorderSizePixel = 0
@@ -245,7 +279,7 @@ MovementPage.Name = "Movement"
 MovementPage.Size = UDim2.new(1, 0, 1, 0)
 MovementPage.BackgroundTransparency = 1
 MovementPage.BorderSizePixel = 0
-MovementPage.ScrollBarThickness = 8
+MovementPage.ScrollBarThickness = scrollBarSize
 MovementPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 MovementPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 MovementPage.Visible = false
@@ -255,7 +289,7 @@ UtilitiesPage.Name = "Utilities"
 UtilitiesPage.Size = UDim2.new(1, 0, 1, 0)
 UtilitiesPage.BackgroundTransparency = 1
 UtilitiesPage.BorderSizePixel = 0
-UtilitiesPage.ScrollBarThickness = 8
+UtilitiesPage.ScrollBarThickness = scrollBarSize
 UtilitiesPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 UtilitiesPage.CanvasSize = UDim2.new(0, 0, 0, 600)
 UtilitiesPage.Visible = false
@@ -265,7 +299,7 @@ ClonePage.Name = "Clone"
 ClonePage.Size = UDim2.new(1, 0, 1, 0)
 ClonePage.BackgroundTransparency = 1
 ClonePage.BorderSizePixel = 0
-ClonePage.ScrollBarThickness = 8
+ClonePage.ScrollBarThickness = scrollBarSize
 ClonePage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 ClonePage.CanvasSize = UDim2.new(0, 0, 0, 400)
 ClonePage.Visible = false
@@ -275,7 +309,7 @@ PartsPage.Name = "Parts"
 PartsPage.Size = UDim2.new(1, 0, 1, 0)
 PartsPage.BackgroundTransparency = 1
 PartsPage.BorderSizePixel = 0
-PartsPage.ScrollBarThickness = 8
+PartsPage.ScrollBarThickness = scrollBarSize
 PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 PartsPage.Visible = false
@@ -285,7 +319,7 @@ ServerPage.Name = "Server"
 ServerPage.Size = UDim2.new(1, 0, 1, 0)
 ServerPage.BackgroundTransparency = 1
 ServerPage.BorderSizePixel = 0
-ServerPage.ScrollBarThickness = 8
+ServerPage.ScrollBarThickness = scrollBarSize
 ServerPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 ServerPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 ServerPage.Visible = false
@@ -295,7 +329,7 @@ DonatePage.Name = "Donate"
 DonatePage.Size = UDim2.new(1, 0, 1, 0)
 DonatePage.BackgroundTransparency = 1
 DonatePage.BorderSizePixel = 0
-DonatePage.ScrollBarThickness = 8
+DonatePage.ScrollBarThickness = scrollBarSize
 DonatePage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 DonatePage.CanvasSize = UDim2.new(0, 0, 0, 300)
 DonatePage.Visible = false
@@ -305,7 +339,7 @@ InfoPage.Name = "Info"
 InfoPage.Size = UDim2.new(1, 0, 1, 0)
 InfoPage.BackgroundTransparency = 1
 InfoPage.BorderSizePixel = 0
-InfoPage.ScrollBarThickness = 8
+InfoPage.ScrollBarThickness = scrollBarSize
 InfoPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 InfoPage.CanvasSize = UDim2.new(0, 0, 0, 350)
 InfoPage.Visible = false
@@ -313,47 +347,47 @@ InfoPage.Visible = false
 -- Load Modules from GitHub
 spawn(function()
 	wait(0.5)
-	LoadingDesc.Text = "Loading Home module..."
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Home module..."
 	local HomeModule = LoadModule("Home")
 	if HomeModule then HomeModule.Initialize(HomePage) end
 	
 	wait(0.3)
-	LoadingDesc.Text = "Loading Mount module..."
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Mount module..."
 	local MountModule = LoadModule("Mount")
 	if MountModule then MountModule.Initialize(MountPage) end
 	
 	wait(0.3)
-	LoadingDesc.Text = "Loading Movement module..."
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Movement module..."
 	local MovementModule = LoadModule("Movement")
 	if MovementModule then MovementModule.Initialize(MovementPage, player, character) end
 	
 	wait(0.3)
-	LoadingDesc.Text = "Loading Utilities module..."
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Utilities module..."
 	local UtilitiesModule = LoadModule("Utilities")
 	if UtilitiesModule then UtilitiesModule.Initialize(UtilitiesPage, player, character) end
 	
 	wait(0.3)
-	LoadingDesc.Text = "Loading Clone module..."
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Clone module..."
 	local CloneModule = LoadModule("Clone")
 	if CloneModule then CloneModule.Initialize(ClonePage, player, character) end
 	
 	wait(0.3)
-	LoadingDesc.Text = "Loading Parts module..."
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Parts module..."
 	local PartsModule = LoadModule("Parts")
 	if PartsModule then PartsModule.Initialize(PartsPage, player, character) end
 	
 	wait(0.3)
-	LoadingDesc.Text = "Loading Server module..."
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Server module..."
 	local ServerModule = LoadModule("Server")
 	if ServerModule then ServerModule.Initialize(ServerPage, player) end
 	
 	wait(0.3)
-	LoadingDesc.Text = "Loading Donate module..."
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Donate module..."
 	local DonateModule = LoadModule("Donate")
 	if DonateModule then DonateModule.Initialize(DonatePage) end
 	
 	wait(0.3)
-	LoadingDesc.Text = "Loading Info module..."
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Info module..."
 	local InfoModule = LoadModule("Info")
 	if InfoModule then InfoModule.Initialize(InfoPage) end
 	
@@ -418,22 +452,22 @@ end)
 local UIS = game:GetService("UserInputService")
 local dragging, dragInput, startPos, startDrag
 TopBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		dragging = true
 		startDrag = input.Position
 		startPos = MainFrame.Position
 	end
 end)
 TopBar.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		dragging = false
 	end
 end)
 UIS.InputChanged:Connect(function(input)
-	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 		local delta = input.Position - startDrag
 		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 	end
 end)
 
-print("✅ LEX Host v3 loaded successfully!")
+print("✅ LEX Host v3 loaded successfully! (Mobile Optimized: " .. tostring(isMobile) .. ")")
