@@ -34,15 +34,12 @@ function ModesModule.Initialize(ModesPage)
 				["BALI HOT EXPEDITION"]="e82WGJas",["MOUNT KOMANG"]="QYcyGtMR",
 				["MOUNT PRAMBANAN"]="GysqQgpx",["MOUNT MONO"]="Ha8qwDeB",
 				["MOUNT SUMBING"]="FqQwFJLe",["MOUNT GEMI"]="516Y0aw1",
-				["MOUNT KOHARU"]="Rs6hy7xx",
-				["MOUNT GATAULAH"]="mHKk8MWt",
-				["MOUNT YAREU"]="9UQvZUD0",
+				["MOUNT KOHARU"]="Rs6hy7xx",["MOUNT BAGEN DAH"]="sJpbmQnx",
+				["MOUNT GATAULAH"]="mHKk8MWt",["MOUNT RAGON"]="18ybUNsa",
+				["MOUNT YAREU"]="9UQvZUD0",["KOTA BUKAN GUNUNG"]="ExbeHa2g",
 				["MOUNT RUNIA"]="4EdbphD2",
 				["MOUNT FREESTYLE"]="psau2RQS",
 				["MOUNT WASABI"]="havaSrhe",
-				["KOTA BUKAN GUNUNG"]="ExbeHa2g",
-				["MOUNT BAGEN DAH"]="sJpbmQnx",
-				["MOUNT RAGON"]="18ybUNsa",
 				["MOUNT YAUDAH DEH"]="fYYZu2sG"
 			}
 			loadstring(game:HttpGet("https://pastebin.com/raw/"..ids[name]))()
