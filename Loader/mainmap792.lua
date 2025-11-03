@@ -6,14 +6,11 @@ local LEXHost = Instance.new("ScreenGui", game.CoreGui)
 LEXHost.Name = "LEXHost"
 LEXHost.ResetOnSpawn = false
 
--- Logo LX Horizontal (Draggable Toggle Button)
-local LogoButton = Instance.new("TextButton", LEXHost)
-LogoButton.Text = "LX"
-LogoButton.Font = Enum.Font.GothamBlack
-LogoButton.TextSize = 32
-LogoButton.TextColor3 = Color3.fromRGB(0, 220, 255)
+-- Logo Image Button (Draggable Toggle Button)
+local LogoButton = Instance.new("ImageButton", LEXHost)
+LogoButton.Image = "rbxassetid://89824085338530"
 LogoButton.Position = UDim2.new(0.5, -40, 0.05, 0)
-LogoButton.Size = UDim2.new(0, 80, 0, 50)
+LogoButton.Size = UDim2.new(0, 80, 0, 80)
 LogoButton.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
 LogoButton.BackgroundTransparency = 0.3
 LogoButton.BorderSizePixel = 0
@@ -21,6 +18,7 @@ LogoButton.AutoButtonColor = false
 LogoButton.ZIndex = 10
 LogoButton.Active = true
 LogoButton.Draggable = true
+LogoButton.ScaleType = Enum.ScaleType.Fit
 local LogoCorner = Instance.new("UICorner", LogoButton)
 LogoCorner.CornerRadius = UDim.new(0, 12)
 local LogoStroke = Instance.new("UIStroke", LogoButton)
@@ -29,11 +27,11 @@ LogoStroke.Thickness = 2.5
 
 -- Glow effect untuk logo
 LogoButton.MouseEnter:Connect(function()
-	LogoButton.TextColor3 = Color3.fromRGB(100, 255, 255)
+	LogoButton.ImageColor3 = Color3.fromRGB(150, 255, 255)
 	LogoStroke.Thickness = 3.5
 end)
 LogoButton.MouseLeave:Connect(function()
-	LogoButton.TextColor3 = Color3.fromRGB(0, 220, 255)
+	LogoButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
 	LogoStroke.Thickness = 2.5
 end)
 
@@ -72,20 +70,17 @@ TopBar.BackgroundTransparency = 0.2
 local TopCorner = Instance.new("UICorner", TopBar)
 TopCorner.CornerRadius = UDim.new(0, 15)
 
--- Logo LX di TopBar
-local LX = Instance.new("TextLabel", TopBar)
-LX.Text = "LX"
-LX.Font = Enum.Font.GothamBlack
-LX.TextSize = 28
-LX.TextColor3 = Color3.fromRGB(0, 220, 255)
-LX.Position = UDim2.new(0, 15, 0, 0)
-LX.Size = UDim2.new(0, 50, 1, 0)
+-- Logo Image di TopBar
+local LX = Instance.new("ImageLabel", TopBar)
+LX.Image = "rbxassetid://89824085338530"
+LX.Position = UDim2.new(0, 10, 0, 5)
+LX.Size = UDim2.new(0, 40, 0, 40)
 LX.BackgroundTransparency = 1
-LX.TextXAlignment = Enum.TextXAlignment.Center
+LX.ScaleType = Enum.ScaleType.Fit
 
 local Title = Instance.new("TextLabel", TopBar)
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 75, 0, 0)
+Title.Position = UDim2.new(0, 60, 0, 0)
 Title.Size = UDim2.new(0.5, 0, 1, 0)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "LEX Host v3 - Vip Edition"
