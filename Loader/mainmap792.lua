@@ -1,7 +1,3 @@
---// LEX Host v3 - Cyber Neon Transparent Edition
---// Made by LEX Dev
---// Fully Functional & Enhanced Version
-
 local LEXHost = Instance.new("ScreenGui", game.CoreGui)
 LEXHost.Name = "LEXHost"
 LEXHost.ResetOnSpawn = false
