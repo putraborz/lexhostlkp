@@ -1,5 +1,3 @@
--- LEXHOST Loader (FINAL - perbaikan verifikasi + tombol X + judul)
--- Fitur: blur halus saat verifikasi, cinematic FX saat sukses, tombol close (X), judul "LEX HOST PROJECT"
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
 local TweenService = game:GetService("TweenService")
