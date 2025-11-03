@@ -8,7 +8,7 @@ LEXHost.ResetOnSpawn = false
 
 -- Logo Image Button (Draggable Toggle Button)
 local LogoButton = Instance.new("ImageButton", LEXHost)
-LogoButton.Image = "rbxassetid://89824085338530"
+LogoButton.Image = "rbxassetid://93847535906931"
 LogoButton.Position = UDim2.new(0.5, -40, 0.05, 0)
 LogoButton.Size = UDim2.new(0, 80, 0, 80)
 LogoButton.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
@@ -72,7 +72,7 @@ TopCorner.CornerRadius = UDim.new(0, 15)
 
 -- Logo Image di TopBar
 local LX = Instance.new("ImageLabel", TopBar)
-LX.Image = "rbxassetid://89824085338530"
+LX.Image = "rbxassetid://93847535906931"
 LX.Position = UDim2.new(0, 10, 0, 5)
 LX.Size = UDim2.new(0, 40, 0, 40)
 LX.BackgroundTransparency = 1
