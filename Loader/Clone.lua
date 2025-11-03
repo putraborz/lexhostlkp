@@ -1,4 +1,4 @@
--- Clone.lua - Full Clone Version (Fixed)
+-- Clone.lua - Full Clone Version (Fixed Loading Issue)
 local CloneModule = {}
 
 function CloneModule.Initialize(ClonePage, player, character)
@@ -7,7 +7,7 @@ function CloneModule.Initialize(ClonePage, player, character)
 	CloneTitle.Size = UDim2.new(1, -10, 0, 40)
 	CloneTitle.Position = UDim2.new(0, 5, 0, 10)
 	CloneTitle.BackgroundTransparency = 1
-	CloneTitle.Text = "🎭 Clone Player Avatar (Full)"
+	CloneTitle.Text = "🎭 Clone Player Avatar"
 	CloneTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
 	CloneTitle.Font = Enum.Font.GothamBold
 	CloneTitle.TextSize = 20
@@ -17,213 +17,137 @@ function CloneModule.Initialize(ClonePage, player, character)
 	CloneDesc.Size = UDim2.new(1, -10, 0, 30)
 	CloneDesc.Position = UDim2.new(0, 5, 0, 55)
 	CloneDesc.BackgroundTransparency = 1
-	CloneDesc.Text = "Clone SEMUA aspek avatar: Accessories, Clothing, Body Colors, Face, Scales & More"
+	CloneDesc.Text = "Clone SEMUA aspek: Accessories, Clothing, Colors, Face & More"
 	CloneDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
 	CloneDesc.Font = Enum.Font.Gotham
 	CloneDesc.TextSize = 14
 	CloneDesc.TextXAlignment = Enum.TextXAlignment.Left
 
-	-- FULL CLONE FUNCTION - Clone Everything!
+	-- FULL CLONE FUNCTION - FIXED!
 	local function clonePlayerAppearance(targetPlayer)
-		if not targetPlayer or not targetPlayer.Character then 
-			return false, "Target character not found"
+		if not targetPlayer then 
+			return false, "Player not found"
 		end
 		
 		if not player.Character then
 			return false, "Your character not found"
 		end
 		
+		-- Wait for target character to load
 		local targetChar = targetPlayer.Character
+		if not targetChar then
+			targetPlayer.CharacterAdded:Wait()
+			targetChar = targetPlayer.Character
+			wait(1) -- Extra wait for full load
+		end
+		
 		local myChar = player.Character
 		
-		-- PRIORITY METHOD: HumanoidDescription (Paling Lengkap & Akurat)
-		local success = pcall(function()
-			local targetHumanoid = targetChar:FindFirstChildOfClass("Humanoid")
-			local myHumanoid = myChar:FindFirstChildOfClass("Humanoid")
+		-- Wait for humanoids
+		local targetHumanoid = targetChar:WaitForChild("Humanoid", 5)
+		local myHumanoid = myChar:WaitForChild("Humanoid", 5)
+		
+		if not targetHumanoid or not myHumanoid then
+			return false, "Humanoid not found"
+		end
+		
+		-- METHOD 1: HumanoidDescription (Primary)
+		local success1 = pcall(function()
+			local desc = targetHumanoid:GetAppliedDescription()
+			myHumanoid:ApplyDescription(desc)
+		end)
+		
+		wait(0.3)
+		
+		-- METHOD 2: Manual Clone (Comprehensive Backup)
+		local success2 = pcall(function()
+			-- Remove old accessories
+			for _, obj in pairs(myChar:GetChildren()) do
+				if obj:IsA("Accessory") or obj:IsA("Hat") then
+					obj:Destroy()
+				end
+			end
 			
-			if targetHumanoid and myHumanoid then
-				-- Dapatkan description lengkap dari target
-				local desc = targetHumanoid:GetAppliedDescription()
-				
-				-- Clone SEMUA properti description
-				local newDesc = Instance.new("HumanoidDescription")
-				
-				-- Body Parts & Scales
-				newDesc.HeadScale = desc.HeadScale
-				newDesc.BodyTypeScale = desc.BodyTypeScale
-				newDesc.DepthScale = desc.DepthScale
-				newDesc.HeightScale = desc.HeightScale
-				newDesc.ProportionScale = desc.ProportionScale
-				newDesc.WidthScale = desc.WidthScale
-				
-				-- Body Colors
-				newDesc.HeadColor = desc.HeadColor
-				newDesc.TorsoColor = desc.TorsoColor
-				newDesc.LeftArmColor = desc.LeftArmColor
-				newDesc.RightArmColor = desc.RightArmColor
-				newDesc.LeftLegColor = desc.LeftLegColor
-				newDesc.RightLegColor = desc.RightLegColor
-				
-				-- Face & Head
-				newDesc.Face = desc.Face
-				newDesc.Head = desc.Head
-				
-				-- Clothing
-				newDesc.Shirt = desc.Shirt
-				newDesc.Pants = desc.Pants
-				newDesc.GraphicTShirt = desc.GraphicTShirt
-				
-				-- Body Parts (R15/R6)
-				newDesc.Torso = desc.Torso
-				newDesc.LeftArm = desc.LeftArm
-				newDesc.RightArm = desc.RightArm
-				newDesc.LeftLeg = desc.LeftLeg
-				newDesc.RightLeg = desc.RightLeg
-				
-				-- Accessories (SEMUA!)
-				newDesc.HatAccessory = desc.HatAccessory
-				newDesc.HairAccessory = desc.HairAccessory
-				newDesc.FaceAccessory = desc.FaceAccessory
-				newDesc.NeckAccessory = desc.NeckAccessory
-				newDesc.ShoulderAccessory = desc.ShoulderAccessory
-				newDesc.FrontAccessory = desc.FrontAccessory
-				newDesc.BackAccessory = desc.BackAccessory
-				newDesc.WaistAccessory = desc.WaistAccessory
-				
-				-- Emotes (jika ada)
-				pcall(function()
-					for i = 1, 8 do
-						local emote = desc:GetEmotes()[i]
-						if emote then
-							newDesc:SetEmotes({emote})
-						end
+			wait(0.1)
+			
+			-- Clone all accessories
+			for _, obj in pairs(targetChar:GetChildren()) do
+				if obj:IsA("Accessory") or obj:IsA("Hat") then
+					local clone = obj:Clone()
+					clone.Parent = myChar
+				end
+			end
+			
+			-- Remove old clothing
+			for _, obj in pairs(myChar:GetChildren()) do
+				if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+					obj:Destroy()
+				end
+			end
+			
+			wait(0.1)
+			
+			-- Clone clothing
+			for _, obj in pairs(targetChar:GetChildren()) do
+				if obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+					obj:Clone().Parent = myChar
+				end
+			end
+			
+			-- Clone body colors
+			local myBodyColors = myChar:FindFirstChild("Body Colors")
+			local targetBodyColors = targetChar:FindFirstChild("Body Colors")
+			
+			if targetBodyColors then
+				if not myBodyColors then
+					myBodyColors = Instance.new("BodyColors")
+					myBodyColors.Parent = myChar
+				end
+				myBodyColors.HeadColor = targetBodyColors.HeadColor
+				myBodyColors.TorsoColor = targetBodyColors.TorsoColor
+				myBodyColors.LeftArmColor = targetBodyColors.LeftArmColor
+				myBodyColors.RightArmColor = targetBodyColors.RightArmColor
+				myBodyColors.LeftLegColor = targetBodyColors.LeftLegColor
+				myBodyColors.RightLegColor = targetBodyColors.RightLegColor
+			end
+			
+			-- Clone face
+			local myHead = myChar:FindFirstChild("Head")
+			local targetHead = targetChar:FindFirstChild("Head")
+			
+			if myHead and targetHead then
+				-- Remove old face
+				for _, decal in pairs(myHead:GetChildren()) do
+					if decal:IsA("Decal") then
+						decal:Destroy()
 					end
-				end)
+				end
 				
-				-- Equipped Emotes
-				pcall(function()
-					for i = 1, 8 do
-						local equipped = desc:GetEquippedEmotes()[i]
-						if equipped then
-							newDesc:SetEquippedEmotes({equipped})
-						end
+				-- Clone new face
+				for _, decal in pairs(targetHead:GetChildren()) do
+					if decal:IsA("Decal") then
+						decal:Clone().Parent = myHead
 					end
-				end)
-				
-				-- Animation IDs
-				newDesc.ClimbAnimation = desc.ClimbAnimation
-				newDesc.FallAnimation = desc.FallAnimation
-				newDesc.IdleAnimation = desc.IdleAnimation
-				newDesc.JumpAnimation = desc.JumpAnimation
-				newDesc.RunAnimation = desc.RunAnimation
-				newDesc.SwimAnimation = desc.SwimAnimation
-				newDesc.WalkAnimation = desc.WalkAnimation
-				
-				-- Apply ke character kita
-				myHumanoid:ApplyDescription(newDesc)
-				
-				-- Tunggu sedikit agar apply sempurna
-				wait(0.5)
+				end
+			end
+			
+			-- Clone body part colors
+			for _, part in pairs(targetChar:GetChildren()) do
+				if part:IsA("BasePart") then
+					local myPart = myChar:FindFirstChild(part.Name)
+					if myPart and myPart:IsA("BasePart") then
+						pcall(function()
+							myPart.BrickColor = part.BrickColor
+						end)
+					end
+				end
 			end
 		end)
 		
-		if success then
-			-- TAMBAHAN: Clone manual untuk item yang mungkin terlewat
-			pcall(function()
-				-- Clone accessories yang mungkin belum ter-clone
-				local existingAccessories = {}
-				for _, acc in pairs(myChar:GetChildren()) do
-					if acc:IsA("Accessory") then
-						existingAccessories[acc.Name] = true
-					end
-				end
-				
-				for _, acc in pairs(targetChar:GetChildren()) do
-					if acc:IsA("Accessory") and not existingAccessories[acc.Name] then
-						local cloned = acc:Clone()
-						cloned.Parent = myChar
-					end
-				end
-				
-				-- Clone BodyColors jika ada perbedaan
-				local myBodyColors = myChar:FindFirstChild("Body Colors")
-				local targetBodyColors = targetChar:FindFirstChild("Body Colors")
-				
-				if targetBodyColors then
-					if not myBodyColors then
-						myBodyColors = Instance.new("BodyColors", myChar)
-					end
-					myBodyColors.HeadColor = targetBodyColors.HeadColor
-					myBodyColors.TorsoColor = targetBodyColors.TorsoColor
-					myBodyColors.LeftArmColor = targetBodyColors.LeftArmColor
-					myBodyColors.RightArmColor = targetBodyColors.RightArmColor
-					myBodyColors.LeftLegColor = targetBodyColors.LeftLegColor
-					myBodyColors.RightLegColor = targetBodyColors.RightLegColor
-				end
-				
-				-- Clone shirt & pants ekstra
-				for _, clothing in pairs(targetChar:GetChildren()) do
-					if clothing:IsA("Shirt") or clothing:IsA("Pants") or clothing:IsA("ShirtGraphic") then
-						-- Hapus yang lama
-						for _, old in pairs(myChar:GetChildren()) do
-							if old.ClassName == clothing.ClassName then
-								old:Destroy()
-							end
-						end
-						-- Clone yang baru
-						clothing:Clone().Parent = myChar
-					end
-				end
-				
-				-- Clone face texture
-				local myHead = myChar:FindFirstChild("Head")
-				local targetHead = targetChar:FindFirstChild("Head")
-				
-				if myHead and targetHead then
-					for _, decal in pairs(targetHead:GetChildren()) do
-						if decal:IsA("Decal") then
-							local myDecal = myHead:FindFirstChildOfClass("Decal")
-							if myDecal then
-								myDecal.Texture = decal.Texture
-							else
-								decal:Clone().Parent = myHead
-							end
-						end
-					end
-				end
-				
-				-- Clone body part meshes/special meshes
-				for _, part in pairs(targetChar:GetChildren()) do
-					if part:IsA("BasePart") then
-						local myPart = myChar:FindFirstChild(part.Name)
-						if myPart and myPart:IsA("BasePart") then
-							-- Copy mesh jika ada
-							for _, mesh in pairs(part:GetChildren()) do
-								if mesh:IsA("SpecialMesh") or mesh:IsA("BlockMesh") then
-									local myMesh = myPart:FindFirstChildOfClass(mesh.ClassName)
-									if myMesh then
-										myMesh.MeshId = mesh.MeshId
-										myMesh.TextureId = mesh.TextureId
-										myMesh.Scale = mesh.Scale
-									end
-								end
-							end
-							
-							-- Copy warna body part
-							pcall(function()
-								myPart.Color = part.Color
-								myPart.Material = part.Material
-								myPart.Reflectance = part.Reflectance
-								myPart.Transparency = part.Transparency
-							end)
-						end
-					end
-				end
-			end)
-			
-			return true, "Full Clone Success!"
+		if success1 or success2 then
+			return true, "Clone Success!"
 		else
-			return false, "Clone failed - target may not be loaded"
+			return false, "Clone failed"
 		end
 	end
 
@@ -302,23 +226,25 @@ function CloneModule.Initialize(ClonePage, player, character)
 				end)
 				
 				playerBtn.MouseButton1Click:Connect(function()
-					playerBtn.Text = "⏳ Cloning Full Avatar..."
+					playerBtn.Text = "⏳ Cloning..."
 					playerBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 0)
 					
-					wait(0.3)
-					local success, reason = clonePlayerAppearance(plr)
-					
-					if success then
-						playerBtn.Text = "✅ Full Clone Success!"
-						playerBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-					else
-						playerBtn.Text = "❌ " .. tostring(reason)
-						playerBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-					end
-					
-					wait(2)
-					playerBtn.Text = displayText
-					playerBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 60)
+					spawn(function()
+						wait(0.2)
+						local success, reason = clonePlayerAppearance(plr)
+						
+						if success then
+							playerBtn.Text = "✅ Cloned!"
+							playerBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+						else
+							playerBtn.Text = "❌ " .. tostring(reason)
+							playerBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+						end
+						
+						wait(1.5)
+						playerBtn.Text = displayText
+						playerBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 60)
+					end)
 				end)
 				
 				table.insert(playerButtons, playerBtn)
@@ -375,7 +301,7 @@ function CloneModule.Initialize(ClonePage, player, character)
 	InfoLabel.Size = UDim2.new(1, -10, 0, 50)
 	InfoLabel.Position = UDim2.new(0, 5, 0, 450)
 	InfoLabel.BackgroundTransparency = 1
-	InfoLabel.Text = "💡 Full Clone: Accessories, Clothing, Colors, Face, Scales, Animations & More!\nJika gagal, tunggu character target fully loaded."
+	InfoLabel.Text = "💡 Tip: Clone akan meng-copy SEMUA accessories, clothing, colors & face dari target player."
 	InfoLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
 	InfoLabel.Font = Enum.Font.Gotham
 	InfoLabel.TextSize = 12
