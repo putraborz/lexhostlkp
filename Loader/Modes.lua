@@ -1,8 +1,6 @@
 -- Modes.lua
 -- Upload file ini ke GitHub repository kamu
-
 local ModesModule = {}
-
 function ModesModule.Initialize(ModesPage)
 	local Gunung = {
 		"ATIN NEW","YAHAYUK NEW","WKSPEDISI ANTARTIKA NEW","MOUNT YNTKTS NEW",
@@ -11,7 +9,6 @@ function ModesModule.Initialize(ModesPage)
 		"MOUNT GATAULAH","MOUNT YAREU","MOUNT RUNIA","MOUNT FREESTYLE","MOUNT WASABI",
 		"KOTA BUKAN GUNUNG","MOUNT BAGEN DAH","MOUNT RAGON","MOUNT YAUDAH DEH"
 	}
-
 	for i, name in ipairs(Gunung) do
 		local btn = Instance.new("TextButton", ModesPage)
 		btn.Size = UDim2.new(1, -10, 0, 35)
@@ -34,17 +31,16 @@ function ModesModule.Initialize(ModesPage)
 				["BALI HOT EXPEDITION"]="e82WGJas",["MOUNT KOMANG"]="QYcyGtMR",
 				["MOUNT PRAMBANAN"]="GysqQgpx",["MOUNT MONO"]="Ha8qwDeB",
 				["MOUNT SUMBING"]="FqQwFJLe",["MOUNT GEMI"]="516Y0aw1",
-				["MOUNT KOHARU"]="Rs6hy7xx",["MOUNT BAGEN DAH"]="sJpbmQnx",
-				["MOUNT GATAULAH"]="mHKk8MWt",["MOUNT RAGON"]="18ybUNsa",
-				["MOUNT YAREU"]="9UQvZUD0",["KOTA BUKAN GUNUNG"]="ExbeHa2g",
-				["MOUNT RUNIA"]="4EdbphD2",
-				["MOUNT FREESTYLE"]="psau2RQS",
-				["MOUNT WASABI"]="havaSrhe",
+				["MOUNT KOHARU"]="Rs6hy7xx",["MOUNT GATAULAH"]="mHKk8MWt",
+				["MOUNT YAREU"]="9UQvZUD0",["MOUNT RUNIA"]="4EdbphD2",
+				["MOUNT FREESTYLE"]="psau2RQS",["MOUNT WASABI"]="havaSrhe",
+				["KOTA BUKAN GUNUNG"]="ExbeHa2g",
+				["MOUNT BAGEN DAH"]="sJpbmQnx",
+				["MOUNT RAGON"]="18ybUNsa",
 				["MOUNT YAUDAH DEH"]="fYYZu2sG"
 			}
 			loadstring(game:HttpGet("https://pastebin.com/raw/"..ids[name]))()
 		end)
 	end
 end
-
 return ModesModule
