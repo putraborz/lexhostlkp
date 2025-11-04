@@ -1,410 +1,395 @@
 --[[
-    Fisch Auto Farm Script - AUTO RUNNING VERSION
-    Version: 1.0.1
-    Author: putraborz
-    Repository: https://github.com/putraborz/lexhostlkp
-    
-    ⚠️ WARNING: Use at your own risk!
+    Fisch Auto Farm - FIXED VERSION
+    Version: 2.0.0
+    Fully Working Auto Cast & Auto Reel
 ]]
 
--- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local VirtualUser = game:GetService("VirtualUser")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
--- Variables
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 
--- Configuration dengan status running
-_G.FischConfig = {
+-- Configuration
+_G.FischSettings = {
     AutoCast = true,
     AutoReel = true,
     AutoShake = true,
-    AutoSell = false,
-    CastPower = 100,
-    AntiAFK = true,
-    Delay = 0.5
+    ShakeIntensity = 20,  -- Jumlah shake
+    CastDelay = 0.5,
+    ReelDelay = 0.05,
+    Debug = true
 }
 
--- Running Status (untuk kontrol loop)
-local Running = {
-    AutoCast = false,
-    AutoReel = false,
-    AutoSell = false
+local isRunning = {
+    cast = false,
+    reel = false
 }
 
--- Anti AFK
-if _G.FischConfig.AntiAFK then
-    player.Idled:Connect(function()
-        VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-        wait(1)
-        VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    end)
-end
-
--- Notification Function
-local function notify(title, text, duration)
+-- Notification
+local function notify(text)
     game.StarterGui:SetCore("SendNotification", {
-        Title = title;
-        Text = text;
-        Duration = duration or 3;
+        Title = "🎣 Fisch Auto",
+        Text = text,
+        Duration = 3
     })
 end
 
--- Get Fishing Tool
-local function getTool()
-    return character:FindFirstChildOfClass("Tool") or player.Backpack:FindFirstChildOfClass("Tool")
+-- Debug Print
+local function debug(...)
+    if _G.FischSettings.Debug then
+        print("[FISCH DEBUG]", ...)
+    end
 end
 
--- Equip Tool
-local function equipTool()
-    local tool = player.Backpack:FindFirstChildOfClass("Tool")
-    if tool then
-        character.Humanoid:EquipTool(tool)
-        wait(0.3)
+-- Get Current Rod
+local function getRod()
+    local rod = character:FindFirstChildOfClass("Tool")
+    if not rod then
+        rod = player.Backpack:FindFirstChildOfClass("Tool")
+    end
+    return rod
+end
+
+-- Equip Rod
+local function equipRod()
+    local rod = player.Backpack:FindFirstChildOfClass("Tool")
+    if rod and not character:FindFirstChildOfClass("Tool") then
+        humanoid:EquipTool(rod)
+        task.wait(0.3)
+        debug("Rod equipped:", rod.Name)
         return true
     end
     return false
 end
 
--- AUTO CAST FUNCTION (dengan kontrol loop)
-local function startAutoCast()
-    if Running.AutoCast then return end -- Cegah multiple loop
-    Running.AutoCast = true
+-- Check if PlayerGui has active fishing UI
+local function isFishing()
+    local playerGui = player:WaitForChild("PlayerGui")
     
-    notify("Auto Cast", "Started!", 2)
+    -- Cek shake UI
+    local shakeUI = playerGui:FindFirstChild("shakeui")
+    if shakeUI and shakeUI.Enabled then
+        return true, "shake"
+    end
     
+    -- Cek reel UI
+    local reelUI = playerGui:FindFirstChild("reel")
+    if reelUI and reelUI.Enabled then
+        return true, "reel"
+    end
+    
+    return false, nil
+end
+
+-- AUTO CAST (Lempar Kail)
+local function AutoCast()
     spawn(function()
-        while Running.AutoCast and _G.FischConfig.AutoCast do
-            local success, err = pcall(function()
-                local tool = getTool()
-                
-                if not tool then
-                    wait(1)
+        while task.wait(_G.FischSettings.CastDelay) do
+            if not _G.FischSettings.AutoCast then break end
+            
+            pcall(function()
+                -- Cek jika sedang fishing, skip cast
+                local fishing, state = isFishing()
+                if fishing then
+                    debug("Already fishing, state:", state)
                     return
                 end
                 
-                -- Equip jika belum di-equip
+                -- Equip rod jika belum
                 if not character:FindFirstChildOfClass("Tool") then
-                    equipTool()
-                    wait(0.5)
+                    equipRod()
+                    task.wait(0.5)
                 end
                 
-                tool = character:FindFirstChildOfClass("Tool")
-                if tool and tool:FindFirstChild("events") then
-                    local castEvent = tool.events:FindFirstChild("cast")
+                local rod = character:FindFirstChildOfClass("Tool")
+                if not rod then
+                    debug("No rod found!")
+                    return
+                end
+                
+                -- Cari cast event
+                local events = rod:FindFirstChild("events")
+                if events then
+                    local castEvent = events:FindFirstChild("cast")
                     if castEvent then
-                        castEvent:FireServer(_G.FischConfig.CastPower, 1)
-                        print("🎣 Casting rod...")
-                        wait(3) -- Wait setelah cast
+                        -- Fire cast event
+                        castEvent:FireServer(100, 1)
+                        debug("✅ Cast executed!")
+                        task.wait(2.5) -- Wait setelah cast
                     end
                 end
             end)
-            
-            if not success then
-                warn("Cast Error:", err)
-            end
-            
-            wait(_G.FischConfig.Delay)
         end
-        
-        Running.AutoCast = false
-        notify("Auto Cast", "Stopped!", 2)
+        debug("Auto Cast stopped")
     end)
 end
 
-local function stopAutoCast()
-    Running.AutoCast = false
-    _G.FischConfig.AutoCast = false
-end
-
--- AUTO REEL FUNCTION (dengan kontrol loop)
-local function startAutoReel()
-    if Running.AutoReel then return end
-    Running.AutoReel = true
+-- AUTO SHAKE (Untuk minigame)
+local function performShake()
+    local rod = character:FindFirstChildOfClass("Tool")
+    if not rod then return false end
     
-    notify("Auto Reel", "Started!", 2)
+    local events = rod:FindFirstChild("events")
+    if not events then return false end
     
-    spawn(function()
-        while Running.AutoReel and _G.FischConfig.AutoReel do
-            local success, err = pcall(function()
-                local playerGui = player:WaitForChild("PlayerGui")
-                local shakeUI = playerGui:FindFirstChild("shakeui")
-                
-                if shakeUI and shakeUI.Enabled then
-                    local tool = character:FindFirstChildOfClass("Tool")
-                    
-                    if tool and tool:FindFirstChild("events") then
-                        -- Auto Shake (spam shake untuk menang minigame)
-                        if _G.FischConfig.AutoShake then
-                            local shakeEvent = tool.events:FindFirstChild("shake")
-                            if shakeEvent then
-                                for i = 1, 15 do
-                                    shakeEvent:FireServer()
-                                    wait(0.03)
-                                end
-                                print("🔄 Shaking...")
-                            end
-                        end
-                        
-                        -- Auto Reel (tarik ikan)
-                        wait(0.1)
-                        local reelEvent = tool.events:FindFirstChild("reel")
-                        if reelEvent then
-                            reelEvent:FireServer(100, true)
-                            print("✅ Reeling fish!")
-                            wait(1)
-                        end
-                    end
-                end
-            end)
-            
-            if not success then
-                warn("Reel Error:", err)
-            end
-            
-            wait(0.1)
-        end
-        
-        Running.AutoReel = false
-        notify("Auto Reel", "Stopped!", 2)
-    end)
-end
-
-local function stopAutoReel()
-    Running.AutoReel = false
-    _G.FischConfig.AutoReel = false
-end
-
--- AUTO SELL FUNCTION (dengan kontrol loop)
-local function startAutoSell()
-    if Running.AutoSell then return end
-    Running.AutoSell = true
+    local shakeEvent = events:FindFirstChild("shake")
+    if not shakeEvent then return false end
     
-    notify("Auto Sell", "Started!", 2)
-    
-    spawn(function()
-        while Running.AutoSell and _G.FischConfig.AutoSell do
-            local success, err = pcall(function()
-                -- Cari NPC Merchant
-                local merchant = workspace:FindFirstChild("world")
-                if merchant then
-                    merchant = merchant:FindFirstChild("npcs")
-                    if merchant then
-                        merchant = merchant:FindFirstChild("Marc Merchant")
-                    end
-                end
-                
-                if merchant and merchant:FindFirstChild("HumanoidRootPart") then
-                    local originalPos = character.HumanoidRootPart.CFrame
-                    
-                    -- Teleport ke merchant
-                    character.HumanoidRootPart.CFrame = merchant.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-                    wait(0.5)
-                    
-                    -- Trigger sell
-                    local sellEvent = ReplicatedStorage:FindFirstChild("events")
-                    if sellEvent then
-                        sellEvent = sellEvent:FindFirstChild("sell")
-                        if sellEvent then
-                            sellEvent:FireServer()
-                            print("💰 Selling fish...")
-                        end
-                    end
-                    
-                    wait(1)
-                    
-                    -- Kembali ke posisi awal
-                    character.HumanoidRootPart.CFrame = originalPos
-                    print("↩️ Returned to fishing spot")
-                end
-            end)
-            
-            if not success then
-                warn("Sell Error:", err)
-            end
-            
-            wait(120) -- Sell setiap 2 menit
-        end
-        
-        Running.AutoSell = false
-        notify("Auto Sell", "Stopped!", 2)
-    end)
-end
-
-local function stopAutoSell()
-    Running.AutoSell = false
-    _G.FischConfig.AutoSell = false
-end
-
--- GUI Creation
-local function createGUI()
-    -- Hapus GUI lama jika ada
-    if game.CoreGui:FindFirstChild("FischAutoFarm") then
-        game.CoreGui.FischAutoFarm:Destroy()
+    -- Spam shake dengan cepat
+    for i = 1, _G.FischSettings.ShakeIntensity do
+        shakeEvent:FireServer()
+        task.wait(0.02)
     end
     
+    debug("🔄 Shake performed:", _G.FischSettings.ShakeIntensity, "times")
+    return true
+end
+
+-- AUTO REEL (Tarik Ikan)
+local function AutoReel()
+    spawn(function()
+        while task.wait(_G.FischSettings.ReelDelay) do
+            if not _G.FischSettings.AutoReel then break end
+            
+            pcall(function()
+                local playerGui = player:WaitForChild("PlayerGui")
+                
+                -- Deteksi Shake UI (minigame)
+                local shakeUI = playerGui:FindFirstChild("shakeui")
+                if shakeUI and shakeUI.Enabled then
+                    if _G.FischSettings.AutoShake then
+                        performShake()
+                        task.wait(0.1)
+                    end
+                end
+                
+                -- Deteksi Reel UI atau game progress
+                local reelUI = playerGui:FindFirstChild("reel")
+                if reelUI and reelUI.Enabled then
+                    local rod = character:FindFirstChildOfClass("Tool")
+                    if rod then
+                        local events = rod:FindFirstChild("events")
+                        if events then
+                            local reelEvent = events:FindFirstChild("reel")
+                            if reelEvent then
+                                -- Fire reel event
+                                reelEvent:FireServer(100, true)
+                                debug("✅ Reel executed!")
+                            end
+                        end
+                    end
+                end
+                
+                -- Deteksi progress bar (alternative method)
+                local fishingBar = playerGui:FindFirstChild("bar")
+                if fishingBar and fishingBar.Enabled then
+                    performShake()
+                end
+            end)
+        end
+        debug("Auto Reel stopped")
+    end)
+end
+
+-- METODE ALTERNATIF: Monitor RemoteEvents
+local function MonitorRemotes()
+    spawn(function()
+        local rod = getRod()
+        if not rod then return end
+        
+        local events = rod:FindFirstChild("events")
+        if not events then return end
+        
+        -- Monitor semua remote events
+        for _, v in pairs(events:GetChildren()) do
+            if v:IsA("RemoteEvent") then
+                debug("Found event:", v.Name)
+            end
+        end
+    end)
+end
+
+-- CREATE GUI
+local function CreateGUI()
     local ScreenGui = Instance.new("ScreenGui")
     local MainFrame = Instance.new("Frame")
-    local Title = Instance.new("TextLabel")
-    local StatusLabel = Instance.new("TextLabel")
     local UICorner = Instance.new("UICorner")
-
-    ScreenGui.Name = "FischAutoFarm"
+    local Title = Instance.new("TextLabel")
+    local StatusText = Instance.new("TextLabel")
+    
+    ScreenGui.Name = "FischGUI"
     ScreenGui.Parent = game.CoreGui
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
+    ScreenGui.ResetOnSpawn = false
+    
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ScreenGui
-    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     MainFrame.BorderSizePixel = 0
-    MainFrame.Position = UDim2.new(0.35, 0, 0.25, 0)
-    MainFrame.Size = UDim2.new(0, 320, 0, 280)
+    MainFrame.Position = UDim2.new(0.4, 0, 0.3, 0)
+    MainFrame.Size = UDim2.new(0, 300, 0, 320)
     MainFrame.Active = true
     MainFrame.Draggable = true
-
-    UICorner.CornerRadius = UDim.new(0, 12)
+    
+    UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = MainFrame
-
+    
     Title.Name = "Title"
     Title.Parent = MainFrame
-    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Title.BorderSizePixel = 0
-    Title.Size = UDim2.new(1, 0, 0, 45)
+    Title.Size = UDim2.new(1, 0, 0, 40)
     Title.Font = Enum.Font.GothamBold
-    Title.Text = "🎣 Fisch Auto Farm v1.0.1"
+    Title.Text = "🎣 FISCH AUTO FARM"
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 17
+    Title.TextSize = 16
     
     local titleCorner = Instance.new("UICorner")
-    titleCorner.CornerRadius = UDim.new(0, 12)
+    titleCorner.CornerRadius = UDim.new(0, 10)
     titleCorner.Parent = Title
-
-    StatusLabel.Name = "StatusLabel"
-    StatusLabel.Parent = MainFrame
-    StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Position = UDim2.new(0, 0, 0, 45)
-    StatusLabel.Size = UDim2.new(1, 0, 0, 25)
-    StatusLabel.Font = Enum.Font.Gotham
-    StatusLabel.Text = "Status: Ready"
-    StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-    StatusLabel.TextSize = 12
-
-    -- Button Creation Function
-    local function createButton(name, text, position, isEnabled)
+    
+    StatusText.Name = "Status"
+    StatusText.Parent = MainFrame
+    StatusText.BackgroundTransparency = 1
+    StatusText.Position = UDim2.new(0, 10, 0, 45)
+    StatusText.Size = UDim2.new(1, -20, 0, 30)
+    StatusText.Font = Enum.Font.Gotham
+    StatusText.Text = "🟢 Status: Active & Running"
+    StatusText.TextColor3 = Color3.fromRGB(0, 255, 0)
+    StatusText.TextSize = 13
+    StatusText.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Button function
+    local function createButton(name, text, position, defaultState, callback)
         local btn = Instance.new("TextButton")
+        local corner = Instance.new("UICorner")
+        
         btn.Name = name
         btn.Parent = MainFrame
-        btn.BackgroundColor3 = isEnabled and Color3.fromRGB(0, 180, 0) or Color3.fromRGB(180, 0, 0)
+        btn.BackgroundColor3 = defaultState and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
         btn.BorderSizePixel = 0
         btn.Position = position
-        btn.Size = UDim2.new(0, 280, 0, 38)
+        btn.Size = UDim2.new(0, 270, 0, 40)
         btn.Font = Enum.Font.GothamBold
-        btn.Text = text .. ": " .. (isEnabled and "✅ ON" or "❌ OFF")
+        btn.Text = text .. (defaultState and " ✅" or " ❌")
         btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         btn.TextSize = 14
         
-        local corner = Instance.new("UICorner")
         corner.CornerRadius = UDim.new(0, 8)
         corner.Parent = btn
         
+        local isEnabled = defaultState
+        btn.MouseButton1Click:Connect(function()
+            isEnabled = not isEnabled
+            btn.BackgroundColor3 = isEnabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+            btn.Text = text .. (isEnabled and " ✅" or " ❌")
+            callback(isEnabled)
+        end)
+        
         return btn
     end
-
-    -- Auto Cast Button
-    local AutoCastBtn = createButton("AutoCast", "Auto Cast", UDim2.new(0, 20, 0, 80), true)
-    AutoCastBtn.MouseButton1Click:Connect(function()
-        if _G.FischConfig.AutoCast then
-            stopAutoCast()
-            AutoCastBtn.Text = "Auto Cast: ❌ OFF"
-            AutoCastBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+    
+    -- Buttons
+    createButton("AutoCast", "Auto Cast", UDim2.new(0, 15, 0, 85), true, function(state)
+        _G.FischSettings.AutoCast = state
+        if state then
+            AutoCast()
+            notify("Auto Cast: ON")
         else
-            _G.FischConfig.AutoCast = true
-            startAutoCast()
-            AutoCastBtn.Text = "Auto Cast: ✅ ON"
-            AutoCastBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+            notify("Auto Cast: OFF")
         end
-    end)
-
-    -- Auto Reel Button
-    local AutoReelBtn = createButton("AutoReel", "Auto Reel", UDim2.new(0, 20, 0, 128), true)
-    AutoReelBtn.MouseButton1Click:Connect(function()
-        if _G.FischConfig.AutoReel then
-            stopAutoReel()
-            AutoReelBtn.Text = "Auto Reel: ❌ OFF"
-            AutoReelBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
-        else
-            _G.FischConfig.AutoReel = true
-            startAutoReel()
-            AutoReelBtn.Text = "Auto Reel: ✅ ON"
-            AutoReelBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        end
-    end)
-
-    -- Auto Sell Button
-    local AutoSellBtn = createButton("AutoSell", "Auto Sell", UDim2.new(0, 20, 0, 176), false)
-    AutoSellBtn.MouseButton1Click:Connect(function()
-        if _G.FischConfig.AutoSell then
-            stopAutoSell()
-            AutoSellBtn.Text = "Auto Sell: ❌ OFF"
-            AutoSellBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
-        else
-            _G.FischConfig.AutoSell = true
-            startAutoSell()
-            AutoSellBtn.Text = "Auto Sell: ✅ ON"
-            AutoSellBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-        end
-    end)
-
-    -- Close Button
-    local CloseBtn = createButton("Close", "❌ Close", UDim2.new(0, 20, 0, 224), false)
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-    CloseBtn.MouseButton1Click:Connect(function()
-        stopAutoCast()
-        stopAutoReel()
-        stopAutoSell()
-        ScreenGui:Destroy()
-        notify("Fisch Auto Farm", "Script stopped!", 3)
     end)
     
-    -- Update Status Label setiap detik
+    createButton("AutoReel", "Auto Reel", UDim2.new(0, 15, 0, 135), true, function(state)
+        _G.FischSettings.AutoReel = state
+        if state then
+            AutoReel()
+            notify("Auto Reel: ON")
+        else
+            notify("Auto Reel: OFF")
+        end
+    end)
+    
+    createButton("AutoShake", "Auto Shake", UDim2.new(0, 15, 0, 185), true, function(state)
+        _G.FischSettings.AutoShake = state
+        notify("Auto Shake: " .. (state and "ON" or "OFF"))
+    end)
+    
+    local closeBtn = createButton("Close", "❌ CLOSE SCRIPT", UDim2.new(0, 15, 0, 235), false, function()
+        _G.FischSettings.AutoCast = false
+        _G.FischSettings.AutoReel = false
+        _G.FischSettings.AutoShake = false
+        ScreenGui:Destroy()
+        notify("Script Stopped!")
+    end)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    
+    -- Info Text
+    local infoText = Instance.new("TextLabel")
+    infoText.Parent = MainFrame
+    infoText.BackgroundTransparency = 1
+    infoText.Position = UDim2.new(0, 10, 0, 285)
+    infoText.Size = UDim2.new(1, -20, 0, 25)
+    infoText.Font = Enum.Font.Gotham
+    infoText.Text = "by @putraborz | v2.0"
+    infoText.TextColor3 = Color3.fromRGB(150, 150, 150)
+    infoText.TextSize = 11
+    
+    -- Real-time status update
     spawn(function()
         while ScreenGui.Parent do
-            local activeCount = 0
-            if Running.AutoCast then activeCount = activeCount + 1 end
-            if Running.AutoReel then activeCount = activeCount + 1 end
-            if Running.AutoSell then activeCount = activeCount + 1 end
-            
-            StatusLabel.Text = "Status: " .. activeCount .. " feature(s) active"
-            StatusLabel.TextColor3 = activeCount > 0 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 165, 0)
-            wait(1)
+            local fishing, state = isFishing()
+            if fishing then
+                StatusText.Text = "🎣 Fishing... (" .. (state or "active") .. ")"
+                StatusText.TextColor3 = Color3.fromRGB(255, 255, 0)
+            else
+                StatusText.Text = "🟢 Status: Waiting for fish..."
+                StatusText.TextColor3 = Color3.fromRGB(0, 255, 0)
+            end
+            task.wait(0.5)
         end
     end)
 end
 
--- Initialize Script
-notify("Fisch Auto Farm", "Loading...", 2)
-wait(0.5)
-createGUI()
+-- Anti-AFK
+local vu = game:GetService("VirtualUser")
+player.Idled:Connect(function()
+    vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
 
--- AUTO START fitur yang enabled
-if _G.FischConfig.AutoCast then
-    startAutoCast()
+-- INITIALIZE
+task.wait(1)
+notify("Loading Fisch Auto Farm...")
+
+-- Equip rod at start
+equipRod()
+task.wait(0.5)
+
+-- Create GUI
+CreateGUI()
+MonitorRemotes()
+
+-- Auto start features
+if _G.FischSettings.AutoCast then
+    AutoCast()
+    debug("Auto Cast: Started")
 end
 
-if _G.FischConfig.AutoReel then
-    startAutoReel()
+if _G.FischSettings.AutoReel then
+    AutoReel()
+    debug("Auto Reel: Started")
 end
 
-if _G.FischConfig.AutoSell then
-    startAutoSell()
-end
+notify("✅ Script Ready & Running!")
 
-notify("Fisch Auto Farm", "✅ Loaded & Running!", 3)
-
-print("╔═══════════════════════════════╗")
-print("║   Fisch Auto Farm v1.0.1     ║")
-print("║   AUTO RUNNING ENABLED!      ║")
-print("║   By: putraborz              ║")
-print("╚═══════════════════════════════╝")
+print("╔════════════════════════════╗")
+print("║  FISCH AUTO FARM v2.0      ║")
+print("║  Status: RUNNING           ║")
+print("║  Auto Cast: ON             ║")
+print("║  Auto Reel: ON             ║")
+print("╚════════════════════════════╝")
