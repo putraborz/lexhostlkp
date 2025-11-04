@@ -1,7 +1,17 @@
 -- Modes.lua
 -- Upload file ini ke GitHub repository kamu
 local ModesModule = {}
+
 function ModesModule.Initialize(ModesPage)
+	-- Tambahkan ScrollingFrame
+	local ScrollFrame = Instance.new("ScrollingFrame", ModesPage)
+	ScrollFrame.Size = UDim2.new(1, 0, 1, 0)
+	ScrollFrame.Position = UDim2.new(0, 0, 0, 0)
+	ScrollFrame.BackgroundTransparency = 1
+	ScrollFrame.BorderSizePixel = 0
+	ScrollFrame.ScrollBarThickness = 6
+	ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 190, 255)
+	
 	local Gunung = {
 		"ATIN NEW","YAHAYUK NEW","WKSPEDISI ANTARTIKA NEW","MOUNT YNTKTS NEW",
 		"SAKAHAYNG","STECU NEW","BALI HOT EXPEDITION","MOUNT KOMANG",
@@ -9,8 +19,13 @@ function ModesModule.Initialize(ModesPage)
 		"MOUNT GATAULAH","MOUNT YAREU","MOUNT RUNIA","MOUNT FREESTYLE","MOUNT WASABI",
 		"KOTA BUKAN GUNUNG","MOUNT BAGEN DAH","MOUNT RAGON","MOUNT YAUDAH DEH"
 	}
+	
+	-- Hitung ukuran konten
+	local contentHeight = #Gunung * 40
+	ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
+	
 	for i, name in ipairs(Gunung) do
-		local btn = Instance.new("TextButton", ModesPage)
+		local btn = Instance.new("TextButton", ScrollFrame)
 		btn.Size = UDim2.new(1, -10, 0, 35)
 		btn.Position = UDim2.new(0, 5, 0, (i - 1) * 40)
 		btn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
@@ -18,6 +33,7 @@ function ModesModule.Initialize(ModesPage)
 		btn.Font = Enum.Font.GothamBold
 		btn.TextSize = 14
 		btn.TextColor3 = Color3.fromRGB(0, 190, 255)
+		
 		local s = Instance.new("UIStroke", btn)
 		s.Color = Color3.fromRGB(0, 160, 255)
 		s.Thickness = 1
@@ -43,4 +59,5 @@ function ModesModule.Initialize(ModesPage)
 		end)
 	end
 end
+
 return ModesModule
