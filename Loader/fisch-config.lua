@@ -1,29 +1,24 @@
 --[[
     Fisch Auto Farm Configuration
-    Edit settings here
+    AUTO RUNNING VERSION
 ]]
 
 _G.FischConfig = {
-    -- Main Settings
-    AutoFish = true,
-    AutoCast = true,
-    AutoReel = true,
-    AutoShake = true,
-    AutoSell = false,
+    -- Main Features (true = AUTO START saat script load)
+    AutoCast = true,        -- ✅ Langsung jalan saat load
+    AutoReel = true,        -- ✅ Langsung jalan saat load
+    AutoShake = true,       -- ✅ Auto shake saat reel
+    AutoSell = false,       -- ❌ Disabled by default (bahaya kalo teleport)
     
     -- Performance Settings
-    CastPower = 100,        -- 0-100
-    Delay = 0.5,            -- Delay between actions (seconds)
-    SafeMode = true,        -- Reduces detection risk
+    CastPower = 100,        -- Power lempar (0-100)
+    Delay = 0.5,            -- Delay antar aksi
     
-    -- Extra Settings
-    AntiAFK = true,
-    AutoEquip = true,
-    Notifications = true,
+    -- Extra Features
+    AntiAFK = true,         -- Anti kick AFK
     
-    -- Advanced (Don't change unless you know what you're doing)
+    -- Advanced
     Debug = false,
-    WebhookURL = "",        -- Discord webhook for notifications
 }
 
 return _G.FischConfig
