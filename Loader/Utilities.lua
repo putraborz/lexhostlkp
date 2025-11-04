@@ -25,8 +25,56 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 	TeleportBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 	Instance.new("UICorner", TeleportBox)
 
+	-- Player List Container
+	local PlayerListContainer = Instance.new("ScrollingFrame", UtilitiesPage)
+	PlayerListContainer.Position = UDim2.new(0, 5, 0, 85)
+	PlayerListContainer.Size = UDim2.new(1, -10, 0, 120)
+	PlayerListContainer.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
+	PlayerListContainer.BorderSizePixel = 0
+	PlayerListContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+	PlayerListContainer.ScrollBarThickness = 8
+	PlayerListContainer.ScrollBarImageColor3 = Color3.fromRGB(0, 160, 255)
+	Instance.new("UICorner", PlayerListContainer)
+	Instance.new("UIListLayout", PlayerListContainer).Padding = UDim.new(0, 5)
+
+	local function UpdatePlayerList()
+		PlayerListContainer:ClearAllChildren()
+		local uiListLayout = Instance.new("UIListLayout", PlayerListContainer)
+		uiListLayout.Padding = UDim.new(0, 5)
+
+		for _, v in pairs(game.Players:GetPlayers()) do
+			if v ~= player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+				local PlayerButton = Instance.new("TextButton", PlayerListContainer)
+				PlayerButton.Size = UDim2.new(1, -10, 0, 30)
+				PlayerButton.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
+				PlayerButton.Text = v.Name
+				PlayerButton.Font = Enum.Font.Gotham
+				PlayerButton.TextSize = 13
+				PlayerButton.TextColor3 = Color3.fromRGB(0, 190, 255)
+				Instance.new("UICorner", PlayerButton)
+				Instance.new("UIStroke", PlayerButton).Color = Color3.fromRGB(0, 140, 220)
+
+				PlayerButton.MouseButton1Click:Connect(function()
+					TeleportBox.Text = v.Name
+					if v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+						character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame
+					end
+				end)
+			end
+		end
+
+		PlayerListContainer.CanvasSize = UDim2.new(0, 0, 0, uiListLayout.AbsoluteContentSize.Y + 10)
+	end
+
+	-- Update player list when players join/leave
+	game.Players.PlayerAdded:Connect(UpdatePlayerList)
+	game.Players.PlayerRemoving:Connect(UpdatePlayerList)
+
+	-- Initial update
+	UpdatePlayerList()
+
 	local TeleportBtn = Instance.new("TextButton", UtilitiesPage)
-	TeleportBtn.Position = UDim2.new(0, 5, 0, 85)
+	TeleportBtn.Position = UDim2.new(0, 5, 0, 210)
 	TeleportBtn.Size = UDim2.new(1, -10, 0, 40)
 	TeleportBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 	TeleportBtn.Text = "Teleport"
@@ -48,7 +96,7 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 
 	-- Copy Avatar Section
 	local AvatarLabel = Instance.new("TextLabel", UtilitiesPage)
-	AvatarLabel.Position = UDim2.new(0, 5, 0, 140)
+	AvatarLabel.Position = UDim2.new(0, 5, 0, 260)
 	AvatarLabel.Size = UDim2.new(1, -10, 0, 30)
 	AvatarLabel.BackgroundTransparency = 1
 	AvatarLabel.Text = "Copy Avatar"
@@ -57,7 +105,7 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 	AvatarLabel.TextSize = 16
 
 	local AvatarBox = Instance.new("TextBox", UtilitiesPage)
-	AvatarBox.Position = UDim2.new(0, 5, 0, 175)
+	AvatarBox.Position = UDim2.new(0, 5, 0, 295)
 	AvatarBox.Size = UDim2.new(1, -10, 0, 35)
 	AvatarBox.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 	AvatarBox.PlaceholderText = "Enter player name to copy..."
@@ -68,7 +116,7 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 	Instance.new("UICorner", AvatarBox)
 
 	local CopyAvatarBtn = Instance.new("TextButton", UtilitiesPage)
-	CopyAvatarBtn.Position = UDim2.new(0, 5, 0, 215)
+	CopyAvatarBtn.Position = UDim2.new(0, 5, 0, 335)
 	CopyAvatarBtn.Size = UDim2.new(1, -10, 0, 40)
 	CopyAvatarBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 	CopyAvatarBtn.Text = "Copy Avatar"
@@ -133,7 +181,7 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 
 	-- ESP Button
 	local ESPBtn = Instance.new("TextButton", UtilitiesPage)
-	ESPBtn.Position = UDim2.new(0, 5, 0, 270)
+	ESPBtn.Position = UDim2.new(0, 5, 0, 390)
 	ESPBtn.Size = UDim2.new(1, -10, 0, 40)
 	ESPBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 	ESPBtn.Text = "ESP: OFF"
@@ -166,7 +214,7 @@ function UtilitiesModule.Initialize(UtilitiesPage, player, character)
 
 	-- FullBright Button
 	local BrightBtn = Instance.new("TextButton", UtilitiesPage)
-	BrightBtn.Position = UDim2.new(0, 5, 0, 320)
+	BrightBtn.Position = UDim2.new(0, 5, 0, 440)
 	BrightBtn.Size = UDim2.new(1, -10, 0, 40)
 	BrightBtn.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
 	BrightBtn.Text = "FullBright: OFF"
