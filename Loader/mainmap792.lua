@@ -200,7 +200,7 @@ Side.BackgroundTransparency = 0.3
 Side.BorderSizePixel = 0
 Side.ScrollBarThickness = isMobile and 4 or 6
 Side.ScrollBarImageColor3 = Color3.fromRGB(0, 200, 255)
-Side.CanvasSize = UDim2.new(0, 0, 0, 0) -- Will be calculated
+Side.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 -- Gradient untuk sidebar
 local SideGradient = Instance.new("UIGradient", Side)
@@ -210,7 +210,7 @@ SideGradient.Color = ColorSequence.new{
 }
 SideGradient.Rotation = 90
 
-local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Parts2","Server","Donate","Info"}
+local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Part2","Parts2","Server","Donate","Info"}
 local Buttons = {}
 local buttonHeight = isMobile and 35 or 42
 local buttonSpacing = isMobile and 5 or 8
@@ -228,7 +228,6 @@ for i, v in ipairs(Tabs) do
 	B.AutoButtonColor = false
 	B.BorderSizePixel = 0
 	
-	-- Stroke dengan gradient
 	local s = Instance.new("UIStroke", B)
 	s.Color = Color3.fromRGB(0, 190, 255)
 	s.Thickness = isMobile and 1.5 or 2
@@ -243,7 +242,6 @@ for i, v in ipairs(Tabs) do
 	local c = Instance.new("UICorner", B)
 	c.CornerRadius = UDim.new(0, isMobile and 8 or 10)
 	
-	-- Gradient background
 	local bGradient = Instance.new("UIGradient", B)
 	bGradient.Color = ColorSequence.new{
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 25, 50)),
@@ -266,7 +264,6 @@ for i, v in ipairs(Tabs) do
 	totalHeight = totalHeight + buttonHeight + buttonSpacing
 end
 
--- Set CanvasSize untuk sidebar
 Side.CanvasSize = UDim2.new(0, 0, 0, totalHeight + (isMobile and 15 or 20))
 
 -- Content Area
@@ -288,7 +285,7 @@ local GITHUB_URLS = {
 	Utilities = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Utilities.lua",
 	Clone = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Clone.lua",
 	Parts = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Parts.lua",
-	Parts2 = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Part2.lua",
+	Part2 = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/part2.lua",
 	Server = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Server.lua",
 	Donate = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Donate.lua",
 	Info = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Info.lua"
@@ -313,7 +310,7 @@ local function LoadModule(moduleName)
 	end
 end
 
--- Loading Screen dengan animasi
+-- Loading Screen
 local LoadingFrame = Instance.new("Frame", Content)
 LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
 LoadingFrame.BackgroundTransparency = 1
@@ -326,7 +323,6 @@ LoadingSpinner.BackgroundTransparency = 1
 LoadingSpinner.Image = "rbxassetid://106296997072730"
 LoadingSpinner.ImageColor3 = Color3.fromRGB(0, 220, 255)
 
--- Animasi spinner
 spawn(function()
 	while LoadingFrame.Visible do
 		LoadingSpinner.Rotation = (LoadingSpinner.Rotation + 5) % 360
@@ -416,15 +412,143 @@ PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 PartsPage.Visible = false
 
-local PartsPage = Instance.new("ScrollingFrame", Content)
-PartsPage.Name = "Parts2"
-PartsPage.Size = UDim2.new(1, 0, 1, 0)
-PartsPage.BackgroundTransparency = 1
-PartsPage.BorderSizePixel = 0
-PartsPage.ScrollBarThickness = scrollBarSize
-PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
-PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
-PartsPage.Visible = false
+local Part2Page = Instance.new("ScrollingFrame", Content)
+Part2Page.Name = "Part2"
+Part2Page.Size = UDim2.new(1, 0, 1, 0)
+Part2Page.BackgroundTransparency = 1
+Part2Page.BorderSizePixel = 0
+Part2Page.ScrollBarThickness = scrollBarSize
+Part2Page.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+Part2Page.CanvasSize = UDim2.new(0, 0, 0, 500)
+Part2Page.Visible = false
+
+-- Parts2 Page dengan Launch Button
+local Parts2Page = Instance.new("Frame", Content)
+Parts2Page.Name = "Parts2"
+Parts2Page.Size = UDim2.new(1, 0, 1, 0)
+Parts2Page.BackgroundTransparency = 1
+Parts2Page.BorderSizePixel = 0
+Parts2Page.Visible = false
+
+-- Parts2 Content
+local Parts2Title = Instance.new("TextLabel", Parts2Page)
+Parts2Title.Size = UDim2.new(1, -20, 0, isMobile and 40 or 50)
+Parts2Title.Position = UDim2.new(0, 10, 0, 10)
+Parts2Title.BackgroundColor3 = Color3.fromRGB(15, 25, 50)
+Parts2Title.Text = "🎮 FE Trolling GUI - Sky Hub"
+Parts2Title.TextColor3 = Color3.fromRGB(0, 220, 255)
+Parts2Title.Font = Enum.Font.GothamBold
+Parts2Title.TextSize = isMobile and 16 or 20
+Parts2Title.BorderSizePixel = 0
+
+local Parts2TitleCorner = Instance.new("UICorner", Parts2Title)
+Parts2TitleCorner.CornerRadius = UDim.new(0, isMobile and 8 or 10)
+
+local Parts2TitleStroke = Instance.new("UIStroke", Parts2Title)
+Parts2TitleStroke.Color = Color3.fromRGB(0, 200, 255)
+Parts2TitleStroke.Thickness = 2
+
+local Parts2Desc = Instance.new("TextLabel", Parts2Page)
+Parts2Desc.Size = UDim2.new(1, -20, 0, isMobile and 80 or 100)
+Parts2Desc.Position = UDim2.new(0, 10, 0, isMobile and 60 or 70)
+Parts2Desc.BackgroundColor3 = Color3.fromRGB(15, 25, 50)
+Parts2Desc.BackgroundTransparency = 0.3
+Parts2Desc.Text = "Advanced FE Trolling GUI with multiple features.\n\n⚠️ Click Launch to activate the GUI"
+Parts2Desc.TextColor3 = Color3.fromRGB(200, 200, 200)
+Parts2Desc.Font = Enum.Font.Gotham
+Parts2Desc.TextSize = UIConfig.TextSize.Normal
+Parts2Desc.TextWrapped = true
+Parts2Desc.TextYAlignment = Enum.TextYAlignment.Top
+Parts2Desc.BorderSizePixel = 0
+
+local Parts2DescCorner = Instance.new("UICorner", Parts2Desc)
+Parts2DescCorner.CornerRadius = UDim.new(0, isMobile and 8 or 10)
+
+-- Launch Button untuk Parts2
+local LaunchButton = Instance.new("TextButton", Parts2Page)
+LaunchButton.Size = UDim2.new(0, isMobile and 200 or 250, 0, isMobile and 50 or 60)
+LaunchButton.Position = UDim2.new(0.5, isMobile and -100 or -125, 0, isMobile and 160 or 190)
+LaunchButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+LaunchButton.Text = "🚀 Launch FE Trolling GUI"
+LaunchButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LaunchButton.Font = Enum.Font.GothamBold
+LaunchButton.TextSize = isMobile and 14 or 16
+LaunchButton.BorderSizePixel = 0
+LaunchButton.AutoButtonColor = false
+
+local LaunchCorner = Instance.new("UICorner", LaunchButton)
+LaunchCorner.CornerRadius = UDim.new(0, isMobile and 10 or 12)
+
+local LaunchStroke = Instance.new("UIStroke", LaunchButton)
+LaunchStroke.Color = Color3.fromRGB(0, 255, 255)
+LaunchStroke.Thickness = 3
+
+local LaunchGradient = Instance.new("UIGradient", LaunchButton)
+LaunchGradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 150, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 200, 255))
+}
+LaunchGradient.Rotation = 45
+
+-- Status Label
+local StatusLabel = Instance.new("TextLabel", Parts2Page)
+StatusLabel.Size = UDim2.new(1, -20, 0, isMobile and 30 or 40)
+StatusLabel.Position = UDim2.new(0, 10, 0, isMobile and 220 or 265)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "Status: Ready to launch"
+StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+StatusLabel.Font = Enum.Font.GothamBold
+StatusLabel.TextSize = UIConfig.TextSize.Normal
+StatusLabel.TextWrapped = true
+
+-- Launch Button Actions
+LaunchButton.MouseEnter:Connect(function()
+	TweenService:Create(LaunchButton, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 180, 255)}):Play()
+	TweenService:Create(LaunchStroke, TweenInfo.new(0.3), {Thickness = 4}):Play()
+	LaunchButton.TextSize = (isMobile and 14 or 16) + 1
+end)
+
+LaunchButton.MouseLeave:Connect(function()
+	TweenService:Create(LaunchButton, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 150, 255)}):Play()
+	TweenService:Create(LaunchStroke, TweenInfo.new(0.3), {Thickness = 3}):Play()
+	LaunchButton.TextSize = isMobile and 14 or 16
+end)
+
+LaunchButton.MouseButton1Click:Connect(function()
+	StatusLabel.Text = "Status: Loading FE Trolling GUI..."
+	StatusLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+	LaunchButton.Text = "⏳ Loading..."
+	LaunchButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+	
+	spawn(function()
+		wait(0.5)
+		local success, err = pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
+		end)
+		
+		wait(1)
+		if success then
+			StatusLabel.Text = "Status: ✅ FE Trolling GUI Launched Successfully!"
+			StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+			LaunchButton.Text = "✅ Launched!"
+			LaunchButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+			wait(2)
+			LaunchButton.Text = "🚀 Launch FE Trolling GUI"
+			LaunchButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+			StatusLabel.Text = "Status: Ready to launch"
+		else
+			StatusLabel.Text = "Status: ❌ Failed to load GUI - " .. tostring(err)
+			StatusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+			LaunchButton.Text = "❌ Failed"
+			LaunchButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+			wait(3)
+			LaunchButton.Text = "🚀 Launch FE Trolling GUI"
+			LaunchButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+			StatusLabel.Text = "Status: Ready to launch"
+			StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+		end
+	end)
+end)
 
 local ServerPage = Instance.new("ScrollingFrame", Content)
 ServerPage.Name = "Server"
@@ -487,11 +611,11 @@ spawn(function()
 	LoadingDesc.Text = isMobile and "Loading..." or "Loading Parts module..."
 	local PartsModule = LoadModule("Parts")
 	if PartsModule then PartsModule.Initialize(PartsPage, player, character) end
-
+	
 	wait(0.3)
-	LoadingDesc.Text = isMobile and "Loading..." or "Loading Parts module..."
-	local PartsModule = LoadModule("Parts2")
-	if PartsModule then PartsModule.Initialize(PartsPage, player, character) end
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Part2 module..."
+	local Part2Module = LoadModule("Part2")
+	if Part2Module then Part2Module.Initialize(Part2Page, player, character) end
 	
 	wait(0.3)
 	LoadingDesc.Text = isMobile and "Loading..." or "Loading Server module..."
@@ -515,7 +639,6 @@ end)
 -- Tab System dengan animasi
 local currentTab = nil
 local function ShowTab(tab)
-	-- Fade out current
 	if currentTab then
 		TweenService:Create(currentTab, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
 		wait(0.1)
@@ -528,6 +651,8 @@ local function ShowTab(tab)
 	UtilitiesPage.Visible = false
 	ClonePage.Visible = false
 	PartsPage.Visible = false
+	Part2Page.Visible = false
+	Parts2Page.Visible = false
 	ServerPage.Visible = false
 	DonatePage.Visible = false
 	InfoPage.Visible = false
@@ -546,7 +671,9 @@ local function ShowTab(tab)
 		newTab = ClonePage
 	elseif tab == "Parts" then
 		newTab = PartsPage
-		elseif tab == "Parts2" then
+	elseif tab == "Part2" then
+		newTab = Part2Page
+	elseif tab == "Parts2" then
 		newTab = Parts2Page
 	elseif tab == "Server" then
 		newTab = ServerPage
