@@ -210,7 +210,7 @@ SideGradient.Color = ColorSequence.new{
 }
 SideGradient.Rotation = 90
 
-local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Server","Donate","Info"}
+local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Parts2","Server","Donate","Info"}
 local Buttons = {}
 local buttonHeight = isMobile and 35 or 42
 local buttonSpacing = isMobile and 5 or 8
@@ -416,6 +416,16 @@ PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 PartsPage.Visible = false
 
+local PartsPage = Instance.new("ScrollingFrame", Content)
+PartsPage.Name = "Parts2"
+PartsPage.Size = UDim2.new(1, 0, 1, 0)
+PartsPage.BackgroundTransparency = 1
+PartsPage.BorderSizePixel = 0
+PartsPage.ScrollBarThickness = scrollBarSize
+PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
+PartsPage.Visible = false
+
 local ServerPage = Instance.new("ScrollingFrame", Content)
 ServerPage.Name = "Server"
 ServerPage.Size = UDim2.new(1, 0, 1, 0)
@@ -476,6 +486,11 @@ spawn(function()
 	wait(0.3)
 	LoadingDesc.Text = isMobile and "Loading..." or "Loading Parts module..."
 	local PartsModule = LoadModule("Parts")
+	if PartsModule then PartsModule.Initialize(PartsPage, player, character) end
+
+	wait(0.3)
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Parts module..."
+	local PartsModule = LoadModule("Parts2")
 	if PartsModule then PartsModule.Initialize(PartsPage, player, character) end
 	
 	wait(0.3)
