@@ -1,55 +1,44 @@
--- Part 2 Loader dengan Tombol Launch dan Deskripsi
+-- Script untuk bagian (Part) tombol Launch
+local part = Instance.new("Part")
+part.Name = "LaunchButton"
+part.Size = Vector3.new(4, 1, 4) -- Ukuran tombol
+part.Position = Vector3.new(0, 5, 0) -- Posisi tombol di workspace
+part.Anchored = true
+part.CanCollide = false
+part.BrickColor = BrickColor.new("Bright green") -- Warna hijau
+part.Parent = workspace
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("Loader Menu", "DarkTheme")
+-- Menambahkan ClickDetector ke tombol
+local clickDetector = Instance.new("ClickDetector")
+clickDetector.Parent = part
 
--- Main Tab
-local MainTab = Window:NewTab("Main")
-local MainSection = MainTab:NewSection("Controls")
+-- Script untuk menangani klik tombol
+local script = Instance.new("Script")
+script.Source = [[
+local part = script.Parent
+local clickDetector = part:FindFirstChild("ClickDetector")
 
--- Deskripsi/Info
-MainSection:NewLabel("Welcome")
-MainSection:NewLabel("Version")
-MainSection:NewLabel("Created")
-
--- Tombol Launch
-MainSection:NewButton("Launch Script", "Click to launch the main script", function()
-    print("Launching script...")
+clickDetector.MouseClick:Connect(function(player)
+    -- URL yang akan dimuat
+    local url = "https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"
     
-    -- Masukkan script utama Anda di sini
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/putraborz/lexhostlkp/main/main.lua"))()
+    -- Menggunakan pcall untuk menangani error
+    local success, code = pcall(function()
+        return game:HttpGet(url)
+    end)
     
-    -- Atau gunakan kode custom Anda
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Script Loaded";
-        Text = "Script berhasil dijalankan!";
-        Duration = 3;
-    })
+    if success and code then
+        -- Memuat dan menjalankan kode dari URL
+        local success2, result = pcall(function()
+            loadstring(code)()
+        end)
+        
+        if not success2 then
+            warn("Error executing loaded code: " .. result)
+        end
+    else
+        warn("Failed to fetch code from URL: " .. (code or "unknown error"))
+    end
 end)
-
--- Tombol Dex Explorer (untuk debugging)
-MainSection:NewButton("Open Dex Explorer", "Buka Dex untuk explore game", function()
-    print("Opening Dex Explorer...")
-    
-    -- Load Dex Explorer
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua", true))()
-    
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Dex Opened";
-        Text = "Dex Explorer telah dibuka!";
-        Duration = 3;
-    })
-end)
-
--- Credits Section
-local CreditsTab = Window:NewTab("Credits")
-local CreditsSection = CreditsTab:NewSection("Information")
-
-CreditsSection:NewLabel("Script")
-CreditsSection:NewLabel("UII")
-CreditsSection:NewLabel("Thanks for using!")
-
--- Close Button
-MainSection:NewButton("Close Menu", "Tutup UI", function()
-    Library:ToggleUI()
-end)
+]]
+script.Parent = part
