@@ -531,6 +531,8 @@ local function ShowTab(tab)
 		newTab = ClonePage
 	elseif tab == "Parts" then
 		newTab = PartsPage
+		elseif tab == "Parts2" then
+		newTab = Parts2Page
 	elseif tab == "Server" then
 		newTab = ServerPage
 	elseif tab == "Donate" then
