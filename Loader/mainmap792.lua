@@ -210,7 +210,7 @@ SideGradient.Color = ColorSequence.new{
 }
 SideGradient.Rotation = 90
 
-local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Server","Donate","Info"}
+local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Part2","Server","Donate","Info"}
 local Buttons = {}
 local buttonHeight = isMobile and 35 or 42
 local buttonSpacing = isMobile and 5 or 8
@@ -288,6 +288,7 @@ local GITHUB_URLS = {
 	Utilities = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Utilities.lua",
 	Clone = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Clone.lua",
 	Parts = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Parts.lua",
+	Part2 = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/part2.lua",
 	Server = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Server.lua",
 	Donate = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Donate.lua",
 	Info = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Info.lua"
@@ -415,6 +416,13 @@ PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 PartsPage.Visible = false
 
+local Part2Page = Instance.new("Frame", Content)
+Part2Page.Name = "Part2"
+Part2Page.Size = UDim2.new(1, 0, 1, 0)
+Part2Page.BackgroundTransparency = 1
+Part2Page.BorderSizePixel = 0
+Part2Page.Visible = false
+
 local ServerPage = Instance.new("ScrollingFrame", Content)
 ServerPage.Name = "Server"
 ServerPage.Size = UDim2.new(1, 0, 1, 0)
@@ -478,6 +486,13 @@ spawn(function()
 	if PartsModule then PartsModule.Initialize(PartsPage, player, character) end
 	
 	wait(0.3)
+	LoadingDesc.Text = isMobile and "Loading..." or "Loading Part2 module..."
+	-- Load Part2 (FE Trolling GUI) directly
+	pcall(function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
+	end)
+	
+	wait(0.3)
 	LoadingDesc.Text = isMobile and "Loading..." or "Loading Server module..."
 	local ServerModule = LoadModule("Server")
 	if ServerModule then ServerModule.Initialize(ServerPage, player) end
@@ -512,6 +527,7 @@ local function ShowTab(tab)
 	UtilitiesPage.Visible = false
 	ClonePage.Visible = false
 	PartsPage.Visible = false
+	Part2Page.Visible = false
 	ServerPage.Visible = false
 	DonatePage.Visible = false
 	InfoPage.Visible = false
@@ -530,76 +546,7 @@ local function ShowTab(tab)
 		newTab = ClonePage
 	elseif tab == "Parts" then
 		newTab = PartsPage
-	elseif tab == "Server" then
-		newTab = ServerPage
-	elseif tab == "Donate" then
-		newTab = DonatePage
-	elseif tab == "Info" then
-		newTab = InfoPage
-	end
-	
-	if newTab then
-		newTab.Visible = true
-		currentTab = newTab
-	end
-end
-
-for n, b in pairs(Buttons) do
-	b.MouseButton1Click:Connect(function() 
-		ShowTab(n)
-	end)
-end
-
--- Logo Button Toggle
-LogoButton.MouseButton1Click:Connect(function()
-	if MainFrame.Visible then
-		TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-		wait(0.3)
-		MainFrame.Visible = false
-		MainFrame.Size = UIConfig.MainFrame.Size
-	else
-		MainFrame.Size = UDim2.new(0, 0, 0, 0)
-		MainFrame.Visible = true
-		TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UIConfig.MainFrame.Size}):Play()
-	end
-end)
-
--- Minimize
-MinBtn.MouseButton1Click:Connect(function()
-	TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-	wait(0.3)
-	MainFrame.Visible = false
-	MainFrame.Size = UIConfig.MainFrame.Size
-end)
-
--- Close
-CloseBtn.MouseButton1Click:Connect(function()
-	TweenService:Create(MainFrame, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-	TweenService:Create(LogoButton, TweenInfo.new(0.3), {BackgroundTransparency = 1, ImageTransparency = 1}):Play()
-	wait(0.3)
-	LEXHost:Destroy()
-end)
-
--- Draggable MainFrame
-local UIS = game:GetService("UserInputService")
-local dragging, dragInput, startPos, startDrag
-TopBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		startDrag = input.Position
-		startPos = MainFrame.Position
-	end
-end)
-TopBar.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = false
-	end
-end)
-UIS.InputChanged:Connect(function(input)
-	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-		local delta = input.Position - startDrag
-		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-end)
-
-print("✅ LEX Host v3 loaded successfully! (Mobile Optimized: " .. tostring(isMobile) .. ")")
+	elseif tab == "Part2" then
+		newTab = Part2Page
+		-- Execute Part2 GUI when tab is opened
+		pcall(function
