@@ -187,7 +187,7 @@ CloseCorner.CornerRadius = UDim.new(0, isMobile and 6 or 8)
 CloseBtn.MouseEnter:Connect(function() 
 	TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 30, 30)}):Play()
 end)
-CloseBtn.MouseLeave:Connect(function) 
+CloseBtn.MouseLeave:Connect(function() 
 	TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 20, 20)}):Play()
 end)
 
@@ -200,7 +200,7 @@ Side.BackgroundTransparency = 0.3
 Side.BorderSizePixel = 0
 Side.ScrollBarThickness = isMobile and 4 or 6
 Side.ScrollBarImageColor3 = Color3.fromRGB(0, 200, 255)
-Side.CanvasSize = UDim2.new(0, 0, 0, 0)
+Side.CanvasSize = UDim2.new(0, 0, 0, 0) -- Will be calculated
 
 -- Gradient untuk sidebar
 local SideGradient = Instance.new("UIGradient", Side)
@@ -210,7 +210,7 @@ SideGradient.Color = ColorSequence.new{
 }
 SideGradient.Rotation = 90
 
-local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Part2","Server","Donate","Info"}
+local Tabs = {"Home","Mount","Movement","Utilities","Clone","Parts","Server","Donate","Info"}
 local Buttons = {}
 local buttonHeight = isMobile and 35 or 42
 local buttonSpacing = isMobile and 5 or 8
@@ -228,6 +228,7 @@ for i, v in ipairs(Tabs) do
 	B.AutoButtonColor = false
 	B.BorderSizePixel = 0
 	
+	-- Stroke dengan gradient
 	local s = Instance.new("UIStroke", B)
 	s.Color = Color3.fromRGB(0, 190, 255)
 	s.Thickness = isMobile and 1.5 or 2
@@ -242,6 +243,7 @@ for i, v in ipairs(Tabs) do
 	local c = Instance.new("UICorner", B)
 	c.CornerRadius = UDim.new(0, isMobile and 8 or 10)
 	
+	-- Gradient background
 	local bGradient = Instance.new("UIGradient", B)
 	bGradient.Color = ColorSequence.new{
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 25, 50)),
@@ -264,6 +266,7 @@ for i, v in ipairs(Tabs) do
 	totalHeight = totalHeight + buttonHeight + buttonSpacing
 end
 
+-- Set CanvasSize untuk sidebar
 Side.CanvasSize = UDim2.new(0, 0, 0, totalHeight + (isMobile and 15 or 20))
 
 -- Content Area
@@ -285,7 +288,6 @@ local GITHUB_URLS = {
 	Utilities = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Utilities.lua",
 	Clone = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Clone.lua",
 	Parts = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Parts.lua",
-	Part2 = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/part2.lua",
 	Server = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Server.lua",
 	Donate = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Donate.lua",
 	Info = "https://raw.githubusercontent.com/putraborz/lexhostlkp/refs/heads/main/Loader/Info.lua"
@@ -413,16 +415,6 @@ PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 PartsPage.Visible = false
 
-local Part2Page = Instance.new("ScrollingFrame", Content)
-Part2Page.Name = "Part2"
-Part2Page.Size = UDim2.new(1, 0, 1, 0)
-Part2Page.BackgroundTransparency = 1
-Part2Page.BorderSizePixel = 0
-Part2Page.ScrollBarThickness = scrollBarSize
-Part2Page.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
-Part2Page.CanvasSize = UDim2.new(0, 0, 0, 300)
-Part2Page.Visible = false
-
 local ServerPage = Instance.new("ScrollingFrame", Content)
 ServerPage.Name = "Server"
 ServerPage.Size = UDim2.new(1, 0, 1, 0)
@@ -486,13 +478,6 @@ spawn(function()
 	if PartsModule then PartsModule.Initialize(PartsPage, player, character) end
 	
 	wait(0.3)
-	LoadingDesc.Text = isMobile and "Loading..." or "Loading Part2 module..."
-	local Part2Module = LoadModule("Part2")
-	if Part2Module then 
-		Part2Module.Initialize(Part2Page, player, character) 
-	end
-	
-	wait(0.3)
 	LoadingDesc.Text = isMobile and "Loading..." or "Loading Server module..."
 	local ServerModule = LoadModule("Server")
 	if ServerModule then ServerModule.Initialize(ServerPage, player) end
@@ -514,6 +499,7 @@ end)
 -- Tab System dengan animasi
 local currentTab = nil
 local function ShowTab(tab)
+	-- Fade out current
 	if currentTab then
 		TweenService:Create(currentTab, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
 		wait(0.1)
@@ -526,7 +512,6 @@ local function ShowTab(tab)
 	UtilitiesPage.Visible = false
 	ClonePage.Visible = false
 	PartsPage.Visible = false
-	Part2Page.Visible = false
 	ServerPage.Visible = false
 	DonatePage.Visible = false
 	InfoPage.Visible = false
@@ -545,8 +530,6 @@ local function ShowTab(tab)
 		newTab = ClonePage
 	elseif tab == "Parts" then
 		newTab = PartsPage
-	elseif tab == "Part2" then
-		newTab = Part2Page
 	elseif tab == "Server" then
 		newTab = ServerPage
 	elseif tab == "Donate" then
@@ -561,28 +544,62 @@ local function ShowTab(tab)
 	end
 end
 
--- Connect Tab Buttons
-for name, button in pairs(Buttons) do
-	button.MouseButton1Click:Connect(function()
-		ShowTab(name)
+for n, b in pairs(Buttons) do
+	b.MouseButton1Click:Connect(function() 
+		ShowTab(n)
 	end)
 end
 
--- Logo Button Click
+-- Logo Button Toggle
 LogoButton.MouseButton1Click:Connect(function()
-	MainFrame.Visible = not MainFrame.Visible
+	if MainFrame.Visible then
+		TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+		wait(0.3)
+		MainFrame.Visible = false
+		MainFrame.Size = UIConfig.MainFrame.Size
+	else
+		MainFrame.Size = UDim2.new(0, 0, 0, 0)
+		MainFrame.Visible = true
+		TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UIConfig.MainFrame.Size}):Play()
+	end
 end)
 
--- Minimize Button
+-- Minimize
 MinBtn.MouseButton1Click:Connect(function()
+	TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+	wait(0.3)
 	MainFrame.Visible = false
+	MainFrame.Size = UIConfig.MainFrame.Size
 end)
 
--- Close Button
+-- Close
 CloseBtn.MouseButton1Click:Connect(function()
+	TweenService:Create(MainFrame, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+	TweenService:Create(LogoButton, TweenInfo.new(0.3), {BackgroundTransparency = 1, ImageTransparency = 1}):Play()
+	wait(0.3)
 	LEXHost:Destroy()
 end)
 
--- Show Home Tab by default
-wait(2)
-ShowTab("Home")
+-- Draggable MainFrame
+local UIS = game:GetService("UserInputService")
+local dragging, dragInput, startPos, startDrag
+TopBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		startDrag = input.Position
+		startPos = MainFrame.Position
+	end
+end)
+TopBar.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
+end)
+UIS.InputChanged:Connect(function(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - startDrag
+		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+print("✅ LEX Host v3 loaded successfully! (Mobile Optimized: " .. tostring(isMobile) .. ")")
