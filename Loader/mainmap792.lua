@@ -187,7 +187,7 @@ CloseCorner.CornerRadius = UDim.new(0, isMobile and 6 or 8)
 CloseBtn.MouseEnter:Connect(function() 
 	TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 30, 30)}):Play()
 end)
-CloseBtn.MouseLeave:Connect(function() 
+CloseBtn.MouseLeave:Connect(function) 
 	TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 20, 20)}):Play()
 end)
 
@@ -200,7 +200,7 @@ Side.BackgroundTransparency = 0.3
 Side.BorderSizePixel = 0
 Side.ScrollBarThickness = isMobile and 4 or 6
 Side.ScrollBarImageColor3 = Color3.fromRGB(0, 200, 255)
-Side.CanvasSize = UDim2.new(0, 0, 0, 0) -- Will be calculated
+Side.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 -- Gradient untuk sidebar
 local SideGradient = Instance.new("UIGradient", Side)
@@ -228,7 +228,6 @@ for i, v in ipairs(Tabs) do
 	B.AutoButtonColor = false
 	B.BorderSizePixel = 0
 	
-	-- Stroke dengan gradient
 	local s = Instance.new("UIStroke", B)
 	s.Color = Color3.fromRGB(0, 190, 255)
 	s.Thickness = isMobile and 1.5 or 2
@@ -243,7 +242,6 @@ for i, v in ipairs(Tabs) do
 	local c = Instance.new("UICorner", B)
 	c.CornerRadius = UDim.new(0, isMobile and 8 or 10)
 	
-	-- Gradient background
 	local bGradient = Instance.new("UIGradient", B)
 	bGradient.Color = ColorSequence.new{
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 25, 50)),
@@ -266,7 +264,6 @@ for i, v in ipairs(Tabs) do
 	totalHeight = totalHeight + buttonHeight + buttonSpacing
 end
 
--- Set CanvasSize untuk sidebar
 Side.CanvasSize = UDim2.new(0, 0, 0, totalHeight + (isMobile and 15 or 20))
 
 -- Content Area
@@ -416,11 +413,14 @@ PartsPage.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
 PartsPage.CanvasSize = UDim2.new(0, 0, 0, 500)
 PartsPage.Visible = false
 
-local Part2Page = Instance.new("Frame", Content)
+local Part2Page = Instance.new("ScrollingFrame", Content)
 Part2Page.Name = "Part2"
 Part2Page.Size = UDim2.new(1, 0, 1, 0)
 Part2Page.BackgroundTransparency = 1
 Part2Page.BorderSizePixel = 0
+Part2Page.ScrollBarThickness = scrollBarSize
+Part2Page.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+Part2Page.CanvasSize = UDim2.new(0, 0, 0, 300)
 Part2Page.Visible = false
 
 local ServerPage = Instance.new("ScrollingFrame", Content)
@@ -487,10 +487,10 @@ spawn(function()
 	
 	wait(0.3)
 	LoadingDesc.Text = isMobile and "Loading..." or "Loading Part2 module..."
-	-- Load Part2 (FE Trolling GUI) directly
-	pcall(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/Sky-Hub/main/FE%20Trolling%20GUI.luau"))()
-	end)
+	local Part2Module = LoadModule("Part2")
+	if Part2Module then 
+		Part2Module.Initialize(Part2Page, player, character) 
+	end
 	
 	wait(0.3)
 	LoadingDesc.Text = isMobile and "Loading..." or "Loading Server module..."
@@ -514,7 +514,6 @@ end)
 -- Tab System dengan animasi
 local currentTab = nil
 local function ShowTab(tab)
-	-- Fade out current
 	if currentTab then
 		TweenService:Create(currentTab, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
 		wait(0.1)
@@ -548,5 +547,42 @@ local function ShowTab(tab)
 		newTab = PartsPage
 	elseif tab == "Part2" then
 		newTab = Part2Page
-		-- Execute Part2 GUI when tab is opened
-		pcall(function
+	elseif tab == "Server" then
+		newTab = ServerPage
+	elseif tab == "Donate" then
+		newTab = DonatePage
+	elseif tab == "Info" then
+		newTab = InfoPage
+	end
+	
+	if newTab then
+		newTab.Visible = true
+		currentTab = newTab
+	end
+end
+
+-- Connect Tab Buttons
+for name, button in pairs(Buttons) do
+	button.MouseButton1Click:Connect(function()
+		ShowTab(name)
+	end)
+end
+
+-- Logo Button Click
+LogoButton.MouseButton1Click:Connect(function()
+	MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- Minimize Button
+MinBtn.MouseButton1Click:Connect(function()
+	MainFrame.Visible = false
+end)
+
+-- Close Button
+CloseBtn.MouseButton1Click:Connect(function()
+	LEXHost:Destroy()
+end)
+
+-- Show Home Tab by default
+wait(2)
+ShowTab("Home")
